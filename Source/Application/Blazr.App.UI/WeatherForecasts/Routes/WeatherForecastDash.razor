@@ -1,0 +1,10 @@
+﻿@page "/Weather"
+@page "/WeatherForecast"
+@page "/WeatherForecasts"
+@inherits BlazrControlBase
+
+<WeatherForecastGridList GridContextId="RouteId" />
+
+@code {
+    private static Guid RouteId = Guid.NewGuid();
+}

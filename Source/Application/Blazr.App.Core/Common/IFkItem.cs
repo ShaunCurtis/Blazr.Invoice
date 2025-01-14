@@ -13,12 +13,12 @@ namespace Blazr.App.Core;
 /// </summary>
 public interface IFkItem
 {
-    public long Id { get; }
+    public Guid Id { get; }
     public string Name { get; }
 }
 
 public abstract record FkItem
 {
-    public long Id { get; init; }
+    public Guid Id { get; init; }
     public string Name { get; init; } = "[NOT SET]";
 }

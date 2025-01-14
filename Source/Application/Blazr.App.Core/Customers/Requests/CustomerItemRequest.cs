@@ -6,8 +6,6 @@
 
 namespace Blazr.App.Core;
 
-public record WeatherForecastListRequest
-    : BaseListRequest, IRequest<Result<ListResult<DmoWeatherForecast>>>
-{
-    public string? Summary { get; init; }
-}
+public readonly record struct CustomerItemRequest(
+        CustomerId Id) 
+    : IRequest<Result<DmoCustomer>>;

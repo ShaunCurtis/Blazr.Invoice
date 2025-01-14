@@ -6,7 +6,6 @@
 
 namespace Blazr.App.Core;
 
-public readonly record struct WeatherForecastCommandRequest(
-        DmoWeatherForecast Item,
-        CommandState State)
-    : IRequest<Result<WeatherForecastId>>;
+public record CustomerListRequest
+    : BaseListRequest, IRequest<Result<ListResult<DmoCustomer>>>
+{}

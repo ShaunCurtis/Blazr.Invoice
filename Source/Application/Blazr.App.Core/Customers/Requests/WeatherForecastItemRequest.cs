@@ -6,6 +6,6 @@
 
 namespace Blazr.App.Core;
 
-public record CustomerLookUpItem
-    : BaseGuidLookUpItem
-{ }
+public readonly record struct WeatherForecastItemRequest(
+        WeatherForecastId Id) 
+    : IRequest<Result<DmoWeatherForecast>>;

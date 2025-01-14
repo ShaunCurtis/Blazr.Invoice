@@ -5,36 +5,22 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public class CustomerEditContext : IRecordEditContext<DmoCustomer>
+public class CustomerEditContext : BaseRecordEditContext<DmoCustomer, CustomerId>, IRecordEditContext<DmoCustomer>
 {
-    public DmoCustomer BaseRecord { get; private set; }
- 
     [TrackState] public string CustomerName { get; set; } = string.Empty;
 
-    public DmoCustomer AsRecord => this.BaseRecord with
+    public override DmoCustomer AsRecord => this.BaseRecord with
     {
         CustomerName = this.CustomerName
     };
 
-    public CustomerEditContext()
+    public CustomerEditContext() : base() { }
+
+    public CustomerEditContext(DmoCustomer record) : base(record) { }
+
+    public override IDataResult Load(DmoCustomer record)
     {
-        this.BaseRecord = new();
-        this.Load(this.BaseRecord);
-    }
-
-    public CustomerEditContext(DmoCustomer record)
-    {
-        this.BaseRecord = record;
-        this.Load(record);
-    }
-
-    public bool IsDirty => this.BaseRecord != this.AsRecord;
-
-    public IDataResult Load(DmoCustomer record)
-    {
-        var alreadyLoaded = this.BaseRecord.CustomerId != CustomerId.NewEntity;
-
-        if (alreadyLoaded)
+        if (!this.BaseRecord.Id.IsDefault)
             return DataResult.Failure("A record has already been loaded.  You can't overload it.");
 
         this.BaseRecord = record;

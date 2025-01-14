@@ -5,10 +5,8 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public class NewCustomerProvider : INewRecordProvider<DmoCustomer>
+public sealed record DmoCustomer : ICommandEntity
 {
-    public DmoCustomer NewRecord()
-    {
-        return new DmoCustomer() { CustomerId = new(UUIDProvider.GetGuid()) };
-    }
+    public CustomerId Id { get; init; } = CustomerId.Default;
+    public string CustomerName { get; init; } = string.Empty;
 }

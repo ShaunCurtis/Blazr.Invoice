@@ -16,3 +16,9 @@ public interface IFkItem
     public long Id { get; }
     public string Name { get; }
 }
+
+public abstract record FkItem
+{
+    public long Id { get; init; }
+    public string Name { get; init; } = "[NOT SET]";
+}

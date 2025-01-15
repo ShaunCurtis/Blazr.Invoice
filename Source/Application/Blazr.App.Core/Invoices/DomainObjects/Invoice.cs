@@ -12,6 +12,9 @@ public sealed class Invoice
 
     public bool IsDirty 
         => _isDirty ? true : this.Items.Any(item => item.IsDirty) ;
+    
+    public decimal TotalAmount 
+        => this.InvoiceRecord.TotalAmount;
 
     internal List<InvoiceItem> Items { get; private set; } 
         = new List<InvoiceItem>();
@@ -23,7 +26,7 @@ public sealed class Invoice
 
         foreach (var item in items)
         {
-            Items.Add(new InvoiceItem(item));
+            Items.Add(new InvoiceItem(item,this.ItemUpdated));
         }
     }
 
@@ -31,5 +34,23 @@ public sealed class Invoice
     {
         this.InvoiceRecord = invoice;
         _isDirty = true;
+    }
+
+    private void ItemUpdated(InvoiceItem item)
+    {
+        this.Process();
+    }
+
+    internal void Process()
+    {
+        decimal total = 0m;
+        foreach (var item in Items)
+            total += item.Amount;
+
+        if(total != this.TotalAmount)
+        {
+            this.InvoiceRecord = this.InvoiceRecord with { TotalAmount = total };
+            _isDirty = true;
+        }
     }
 }

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Customer\Components\CustomerViewForm.razor~RF385c99fc.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
@@ -27,6 +31,10 @@
 	  <ProjectReference Include="..\..\Libraries\Blazr.UI\Blazr.UI.csproj" />
 	  <ProjectReference Include="..\Blazr.App.Core\Blazr.App.Core.csproj" />
 	  <ProjectReference Include="..\Blazr.App.Presentation\Blazr.App.Presentation.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Customer\" />
 	</ItemGroup>
 
 

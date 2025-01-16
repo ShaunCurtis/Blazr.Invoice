@@ -15,6 +15,7 @@ public static class AppPresentationServices
 
         services.AddQuickGridEntityFrameworkAdapter();
 
-        services.AddGroupPresentationServices();
+        services.AddWeatherForecastPresentationServices();
+        services.AddCustomerPresentationServices();
     }
 }

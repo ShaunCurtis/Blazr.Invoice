@@ -16,13 +16,14 @@ public class DvoInvoiceMap : IDboEntityMap<DvoInvoice, DmoInvoice>
     public static DmoInvoice Map(DvoInvoice item)
         => new()
         {
-            InvoiceId = new(item.InvoiceID),
+            Id = new(item.InvoiceID),
             CustomerId = new(item.CustomerID),
             CustomerName = item.CustomerName,
             TotalAmount = item.TotalAmount,
             Date = DateOnly.FromDateTime(item.Date)
         };
 
+    // This is illegal, so we throw a specific exception
     public static DvoInvoice Map(DmoInvoice item)
         => throw new DvoMappingException();
 }

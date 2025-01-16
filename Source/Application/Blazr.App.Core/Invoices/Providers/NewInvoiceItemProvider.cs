@@ -7,13 +7,25 @@ namespace Blazr.App.Core;
 
 public class NewInvoiceItemProvider : INewRecordProvider<DmoInvoiceItem>
 {
-    public InvoiceId InvoiceId { get; private set; } = new(UUIDProvider.GetGuid());
+    public InvoiceId InvoiceId { get; private set; } = new(Guid.Empty);
 
     public void SetInvoiceContext(InvoiceId invoiceId)
         => this.InvoiceId = invoiceId;
 
     public DmoInvoiceItem NewRecord()
     {
-        return new DmoInvoiceItem() {InvoiceId = this.InvoiceId };
+        return new DmoInvoiceItem() 
+        {
+            Id = new InvoiceItemId(Guid.CreateVersion7()),
+            InvoiceId = this.InvoiceId 
+        };
+    }
+
+    public DmoInvoiceItem DefaultRecord()
+    {
+        return new DmoInvoiceItem
+        {
+            Id = InvoiceItemId.Default
+        };
     }
 }

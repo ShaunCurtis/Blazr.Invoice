@@ -6,6 +6,23 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="InvoiceItems\DboInvoiceItemCommandHandler.cs" />
+    <Compile Remove="InvoiceItems\InvoiceItemFilterByInvoiceSpecification.cs" />
+    <Compile Remove="InvoiceItems\InvoiceItemFilterHandler.cs" />
+    <Compile Remove="InvoiceItems\InvoiceItemInfrastructureServices.cs" />
+    <Compile Remove="InvoiceItems\InvoiceItemSortHandler.cs" />
+    <Compile Remove="Invoices\DboInvoiceCommandHandler.cs" />
+    <Compile Remove="Invoices\InvoiceCompositeCommandHandler.cs" />
+    <Compile Remove="Invoices\InvoiceCompositeInfrastructureServices.cs" />
+    <Compile Remove="Invoices\InvoiceCompositeItemRequestHandler.cs" />
+    <Compile Remove="Invoices\InvoiceFilterByCustomerSpecification.cs" />
+    <Compile Remove="Invoices\InvoiceFilterHandler.cs" />
+    <Compile Remove="Invoices\InvoiceInfrastructureServices.cs" />
+    <Compile Remove="Invoices\InvoiceRequestServerHandler.cs" />
+    <Compile Remove="Invoices\InvoiceSortHandler.cs" />
+  </ItemGroup>
+
 	<ItemGroup>
 			  <PackageReference Include="MediatR" Version="12.4.1" />
 				<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />

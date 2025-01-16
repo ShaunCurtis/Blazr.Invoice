@@ -7,22 +7,26 @@ namespace Blazr.App.Core;
 public sealed class InvoiceItem : IDisposable
 {
     private Action<InvoiceItem>? UpdateCallback;
+    public CommandState State { get; internal set; } = CommandState.None;
 
     public DmoInvoiceItem InvoiceItemRecord { get; private set; }
-    public bool IsDirty { get; private set; }
+    public bool IsDirty => this.State != CommandState.None;
 
-    public InvoiceItem(DmoInvoiceItem item, Action<InvoiceItem> callback)
+    public InvoiceItem(DmoInvoiceItem item, Action<InvoiceItem> callback, bool isNew = false)
     {
         InvoiceItemRecord = item;
         this.UpdateCallback = callback;
+
+        if (isNew)
+            this.State = CommandState.Add;
     }
 
     public decimal Amount => this.InvoiceItemRecord.Amount;
 
-    internal void UpdateInvoice(DmoInvoiceItem invoiceItem)
+    internal void UpdateInvoiceItem(DmoInvoiceItem invoiceItem)
     {
         this.InvoiceItemRecord = invoiceItem;
-        this.IsDirty = true;
+        this.State = this.State.AsDirty;
         UpdateCallback?.Invoke(this);
     }
 

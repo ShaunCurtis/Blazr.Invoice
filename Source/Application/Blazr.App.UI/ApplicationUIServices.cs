@@ -10,5 +10,6 @@ public static class ApplicationUIServices
     public static void AddAppUIServices(this IServiceCollection services)
     {
         services.AddSingleton<IUIEntityService<DmoWeatherForecast>, WeatherForecastUIEntityService>();
+        services.AddSingleton<IUIEntityService<DmoCustomer>, CustomerUIEntityService>();
     }
 }

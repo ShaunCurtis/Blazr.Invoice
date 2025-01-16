@@ -5,13 +5,11 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public record DvoInvoice : IKeyedEntity
+public record DvoInvoice
 {
     [Key] public Guid InvoiceID { get; init; }
     public Guid CustomerID { get; init; }
     public string CustomerName { get; init; } = string.Empty;
     public decimal TotalAmount { get; init; }
     public DateTime Date { get; init; }
-
-    public object KeyValue => InvoiceID;
 }

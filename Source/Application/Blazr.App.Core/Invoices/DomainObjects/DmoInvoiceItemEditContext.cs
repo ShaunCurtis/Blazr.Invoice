@@ -8,7 +8,7 @@ namespace Blazr.App.Core;
 public class DmoInvoiceItemEditContext
 {
     private DmoInvoiceItem _baseRecord;
-    public InvoiceItemId Id => _baseRecord.InvoiceItemId;
+    public InvoiceItemId Id => _baseRecord.Id;
 
     [TrackState] public string Description { get; set; }
     [TrackState] public decimal Amount { get; set; }

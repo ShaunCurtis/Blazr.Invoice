@@ -3,12 +3,10 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-namespace Blazr.App.Infrastructure;
+namespace Blazr.App.Core;
 
-public sealed record DboInvoiceItem
+public class ActionException : Exception
 {
-    [Key] public Guid InvoiceItemID { get; init; }
-    public Guid InvoiceID { get; init; }
-    public string Description { get; init; } = string.Empty;
-    public decimal Amount { get; init; }
+    public ActionException() : base("The requested action failed to execute correctly.") { }
+    public ActionException(string message) : base(message) { }
 }

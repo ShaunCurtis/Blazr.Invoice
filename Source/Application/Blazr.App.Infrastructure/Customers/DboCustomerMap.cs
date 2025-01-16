@@ -16,14 +16,14 @@ public class DboCustomerMap : IDboEntityMap<DboCustomer, DmoCustomer>
     public static DmoCustomer Map(DboCustomer item)
         => new()
         {
-            CustomerId = new(item.CustomerID),
+            Id = new(item.CustomerID),
             CustomerName = new(item.CustomerName),
         };
 
     public static DboCustomer Map(DmoCustomer item)
         => new()
         {
-            CustomerID = item.CustomerId.Value,
+            CustomerID = item.Id.Value,
             CustomerName = item.CustomerName
         };
 }

@@ -12,6 +12,43 @@ namespace Blazr.Antimony.Core;
 /// My Result implementation
 /// </summary>
 /// <typeparam name="T"></typeparam>
+public readonly record struct Result
+{
+    private Exception? _error { get; init; }
+    
+    private Result(Exception error)
+    {
+        IsSuccess = false;
+        _error = error;
+    }
+
+    private bool IsSuccess { get; }
+    private bool IsFailure => !IsSuccess;
+
+    /// <summary>
+    /// Returns true is failure and sets the out item to the exception
+    /// </summary>
+    /// <param name="exception"></param>
+    /// <returns></returns>
+    public bool HasFailed([NotNullWhen(true)] out Exception? exception)
+    {
+        if (this.IsFailure)
+            exception = _error;
+        else
+            exception = default;
+
+        return this.IsFailure;
+    }
+
+    /// <summary>
+    /// Converts the Result to a UI DataResult
+    /// </summary>
+    public IDataResult ToDataResult => new DataResult() { Message = _error?.Message, Successful = this.IsSuccess };
+
+    public static Result Success() => new();
+    public static Result Fail(Exception error) => new(error);
+}
+
 public readonly record struct Result<T>
 {
     // Hidden
@@ -105,3 +142,4 @@ public readonly record struct Result<T>
 
     public static implicit operator Result<T>(T value) => Success(value);
 }
+

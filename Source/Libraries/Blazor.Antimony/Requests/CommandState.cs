@@ -18,6 +18,9 @@ public readonly record struct CommandState
         Value = value;
     }
 
+    public CommandState AsDirty
+        => this.Index == 0 ? CommandState.Update : this;
+
     public static CommandState None = new CommandState(0, "None");
     public static CommandState Add = new CommandState(1, "Add");
     public static CommandState Update = new CommandState(2, "Update");

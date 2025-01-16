@@ -1,4 +1,5 @@
-using Blazr.Weather.Server.Components;
+using Blazr.App.Server.Components;
+using Blazr.App.Infrastructure;
 using Blazr.App.Infrastructure.Server;
 using Blazr.App.Presentation;
 using Blazr.App.UI;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
+//builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -19,7 +20,7 @@ builder.Services.AddAppPresentationServices();
 
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
+//app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -30,9 +31,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 // get the DbContext factory and add the test data
-var factory = app.Services.GetService<IDbContextFactory<InMemoryTestDbContext>>();
+var factory = app.Services.GetService<IDbContextFactory<InMemoryInvoiceTestDbContext>>();
 if (factory is not null)
-    TestDataProvider.Instance().LoadDbContext<InMemoryTestDbContext>(factory);
+    InvoiceTestDataProvider.Instance().LoadDbContext<InMemoryInvoiceTestDbContext>(factory);
 
 app.UseHttpsRedirection();
 

@@ -1,0 +1,9 @@
+﻿@page "/Customer"
+@page "/Customers"
+@inherits BlazrControlBase
+
+<CustomerGridList GridContextId="RouteId" />
+
+@code {
+    private static Guid RouteId = Guid.NewGuid();
+}

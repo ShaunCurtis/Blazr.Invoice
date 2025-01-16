@@ -9,29 +9,31 @@ public static class ApplicationInfrastructureServices
 {
     public static void AddAppServerInfrastructureServices(this IServiceCollection services)
     {
-        services.AddDbContextFactory<InMemoryTestDbContext>(options
+        services.AddDbContextFactory<InMemoryInvoiceTestDbContext>(options
             => options.UseInMemoryDatabase($"TestDatabase-{Guid.NewGuid().ToString()}"));
 
-        services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssemblies(typeof(DmoWeatherForecast).Assembly, typeof(DboWeatherForecast).Assembly)
-        );
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
+                typeof(DmoCustomer).Assembly, 
+                typeof(DboCustomer).Assembly, 
+                typeof(CustomerCommandHandler).Assembly
+                ));
 
         services.AddScoped<IMessageBus, MessageBus>();
 
         // Add the standard handlers
-        services.AddScoped<IListRequestHandler, ListRequestServerHandler<InMemoryTestDbContext>>();
-        services.AddScoped<IItemRequestHandler, ItemRequestServerHandler<InMemoryTestDbContext>>();
-        services.AddScoped<ICommandHandler, CommandServerHandler<InMemoryTestDbContext>>();
+        services.AddScoped<IListRequestHandler, ListRequestServerHandler<InMemoryInvoiceTestDbContext>>();
+        services.AddScoped<IItemRequestHandler, ItemRequestServerHandler<InMemoryInvoiceTestDbContext>>();
+        services.AddScoped<ICommandHandler, CommandServerHandler<InMemoryInvoiceTestDbContext>>();
 
         // Add any individual entity services
-        services.AddWeatherForecastServerInfrastructureServices();
+        services.AddCustomerInfrastructureServices();
     }
 
     public static void AddTestData(IServiceProvider provider)
     {
-        var factory = provider.GetService<IDbContextFactory<InMemoryTestDbContext>>();
+        var factory = provider.GetService<IDbContextFactory<InMemoryInvoiceTestDbContext>>();
 
         if (factory is not null)
-            TestDataProvider.Instance().LoadDbContext<InMemoryTestDbContext>(factory);
+            InvoiceTestDataProvider.Instance().LoadDbContext<InMemoryInvoiceTestDbContext>(factory);
     }
 }

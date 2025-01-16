@@ -1,23 +1,29 @@
 ﻿namespace Blazr.App.Core;
 
-public sealed class Invoice
+public sealed partial class Invoice
 {
-    private bool _isDirty;
+    private bool _isDirty => this.State != CommandState.None;
+
+    public CommandState State { get; private set; } = CommandState.None;
+
     public DmoInvoice InvoiceRecord { get; private set; }
 
     public DmoCustomer Customer { get; private set; }
 
-    public IEnumerable<InvoiceItem> InvoiceItems 
+    public IEnumerable<InvoiceItem> InvoiceItems
         => this.Items.AsEnumerable();
 
-    public bool IsDirty 
-        => _isDirty ? true : this.Items.Any(item => item.IsDirty) ;
-    
-    public decimal TotalAmount 
+    public bool IsDirty
+        => _isDirty ? true : this.Items.Any(item => item.IsDirty);
+
+    public decimal TotalAmount
         => this.InvoiceRecord.TotalAmount;
 
-    internal List<InvoiceItem> Items { get; private set; } 
+    private List<InvoiceItem> Items { get; set; }
         = new List<InvoiceItem>();
+
+    private List<InvoiceItem> ItemsBin { get; set; }
+    = new List<InvoiceItem>();
 
     public Invoice(DmoInvoice invoice, DmoCustomer customer, IEnumerable<DmoInvoiceItem> items)
     {
@@ -26,14 +32,14 @@ public sealed class Invoice
 
         foreach (var item in items)
         {
-            Items.Add(new InvoiceItem(item,this.ItemUpdated));
+            Items.Add(new InvoiceItem(item, this.ItemUpdated));
         }
     }
 
-    internal void UpdateInvoice(DmoInvoice invoice)
+    private void UpdateInvoice(DmoInvoice invoice)
     {
         this.InvoiceRecord = invoice;
-        _isDirty = true;
+        this.State = State.AsDirty;
     }
 
     private void ItemUpdated(InvoiceItem item)
@@ -41,16 +47,16 @@ public sealed class Invoice
         this.Process();
     }
 
-    internal void Process()
+    private void Process()
     {
         decimal total = 0m;
         foreach (var item in Items)
             total += item.Amount;
 
-        if(total != this.TotalAmount)
+        if (total != this.TotalAmount)
         {
             this.InvoiceRecord = this.InvoiceRecord with { TotalAmount = total };
-            _isDirty = true;
+            this.State = State.AsDirty;
         }
     }
 }

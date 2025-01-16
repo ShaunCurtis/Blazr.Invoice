@@ -16,7 +16,7 @@ public class DboInvoiceItemMap : IDboEntityMap<DboInvoiceItem, DmoInvoiceItem>
     public static DmoInvoiceItem Map(DboInvoiceItem item)
         => new()
         {
-            InvoiceItemId = new(item.InvoiceItemID),
+            Id = new(item.InvoiceItemID),
             InvoiceId = new(item.InvoiceID),
             Amount = item.Amount,
             Description = item.Description,
@@ -25,7 +25,7 @@ public class DboInvoiceItemMap : IDboEntityMap<DboInvoiceItem, DmoInvoiceItem>
     public static DboInvoiceItem Map(DmoInvoiceItem item)
         => new()
         {
-            InvoiceItemID = item.InvoiceItemId.Value,
+            InvoiceItemID = item.Id.Value,
             InvoiceID = item.InvoiceId.Value,
             Amount = item.Amount,
             Description = item.Description

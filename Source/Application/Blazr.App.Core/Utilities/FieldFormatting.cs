@@ -14,11 +14,6 @@ namespace Blazr.App.Core;
 /// </summary>
 public static class FieldFormatting
 {
-    public static string AsGlobalDateFormat(this Date Date)
-    {
-        return Date.Value.ToString("dd-MMM-yyyy");
-    }
-
     public static string AsGlobalDateFormat(this DateTime Date)
     {
         return Date.ToString("dd-MMM-yyyy");

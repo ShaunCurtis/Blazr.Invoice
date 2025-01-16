@@ -16,7 +16,7 @@ public class DboInvoiceMap : IDboEntityMap<DboInvoice, DmoInvoice>
     public static DmoInvoice Map(DboInvoice item)
         => new()
         {
-            InvoiceId = new(item.InvoiceID),
+            Id = new(item.InvoiceID),
             CustomerId = new(item.CustomerID),
             TotalAmount = item.TotalAmount,
             Date = DateOnly.FromDateTime(item.Date)
@@ -25,7 +25,7 @@ public class DboInvoiceMap : IDboEntityMap<DboInvoice, DmoInvoice>
     public static DboInvoice Map(DmoInvoice item)
         => new()
         {
-            InvoiceID = item.InvoiceId.Value,
+            InvoiceID = item.Id.Value,
             CustomerID = item.CustomerId.Value,
             TotalAmount = item.TotalAmount,
             Date = item.Date.ToDateTime( TimeOnly.MinValue)

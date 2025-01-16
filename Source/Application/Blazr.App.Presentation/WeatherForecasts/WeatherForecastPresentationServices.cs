@@ -7,7 +7,7 @@ namespace Blazr.App.Presentation;
 
 public static class WeatherForecastPresentationServices
 {
-    public static void AddGroupPresentationServices(this IServiceCollection services)
+    public static void AddWeatherForecastPresentationServices(this IServiceCollection services)
     {
         services.AddTransient<IGridPresenter<DmoWeatherForecast>, WeatherForecastGridPresenter>();
         services.AddTransient<IEditPresenterFactory<WeatherForecastEditContext, WeatherForecastId>, WeatherForecastEditPresenterFactory>();

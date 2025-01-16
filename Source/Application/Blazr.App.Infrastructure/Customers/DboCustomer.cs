@@ -5,10 +5,8 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure;
 
-public record DboCustomer : ICommandEntity, IKeyedEntity
+public record DboCustomer : ICommandEntity
 {
     [Key] public Guid CustomerID { get; init; }
     public string CustomerName { get; init; } = string.Empty;
-
-    public object KeyValue => CustomerID;
 }

@@ -34,5 +34,4 @@ public sealed class InvoiceItem : IDisposable
     {
         this.UpdateCallback = null;
     }
-
 }

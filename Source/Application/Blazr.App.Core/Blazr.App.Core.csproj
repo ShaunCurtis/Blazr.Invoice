@@ -18,4 +18,8 @@
 	  <ProjectReference Include="..\..\Libraries\Blazr.FluentValidation\Blazr.FluentValidation.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Invoices\Handlers\" />
+	</ItemGroup>
+
 </Project>

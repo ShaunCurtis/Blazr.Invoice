@@ -8,8 +8,6 @@ public sealed partial class Invoice
 
     public DmoInvoice InvoiceRecord { get; private set; }
 
-    public DmoCustomer Customer { get; private set; }
-
     public IEnumerable<InvoiceItem> InvoiceItems
         => this.Items.AsEnumerable();
 
@@ -25,10 +23,9 @@ public sealed partial class Invoice
     private List<InvoiceItem> ItemsBin { get; set; }
     = new List<InvoiceItem>();
 
-    public Invoice(DmoInvoice invoice, DmoCustomer customer, IEnumerable<DmoInvoiceItem> items)
+    public Invoice(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> items)
     {
         InvoiceRecord = invoice;
-        Customer = customer;
 
         foreach (var item in items)
         {

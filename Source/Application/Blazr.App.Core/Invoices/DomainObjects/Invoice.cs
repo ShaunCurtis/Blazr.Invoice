@@ -11,6 +11,9 @@ public sealed partial class Invoice
     public IEnumerable<InvoiceItem> InvoiceItems
         => this.Items.AsEnumerable();
 
+    public IEnumerable<InvoiceItem> InvoiceItemsBin
+    => this.ItemsBin.AsEnumerable();
+
     public bool IsDirty
         => _isDirty ? true : this.Items.Any(item => item.IsDirty);
 

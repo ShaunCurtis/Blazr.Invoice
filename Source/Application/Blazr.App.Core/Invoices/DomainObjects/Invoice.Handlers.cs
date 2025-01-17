@@ -26,7 +26,9 @@ public sealed partial class Invoice
         if (invoiceItem is null)
             return ValueTask.FromResult(Result.Fail(new ActionException($"No Invoice Item with Id: {action.Item.Id} exists in the Invoice")));
 
-        invoiceItem.State = CommandState.Delete;
+        // we don#t set the Command State to delete because the handler needs to know
+        // if the deleted item is New and therefore not in the data store
+        // The fact that the item is in the Bin is enough to delete it.
         this.ItemsBin.Add(invoiceItem);
         this.Items.Remove(invoiceItem);
         this.Process();
@@ -47,7 +49,6 @@ public sealed partial class Invoice
 
         return ValueTask.FromResult(Result.Success());
     }
-
 
     public ValueTask<Result> DispatchAsync(AddInvoiceItemAction action, CancellationToken cancellationToken)
     {

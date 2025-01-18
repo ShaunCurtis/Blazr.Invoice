@@ -3,11 +3,11 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-namespace Blazr.App.Presentation;
+namespace Blazr.App.Presentation.Bootstrap;
 
-public static class CustomerPresentationServices
+public static class CustomerBootstrapPresentationServices
 {
-    public static void AddCustomerPresentationServices(this IServiceCollection services)
+    public static void AddCustomerBootstrapPresentationServices(this IServiceCollection services)
     {
         services.AddTransient<IGridPresenter<DmoCustomer>, CustomerGridPresenter>();
         services.AddTransient<IEditPresenterFactory<CustomerEditContext, CustomerId>, CustomerEditPresenterFactory>();

@@ -10,8 +10,10 @@
     <ProjectReference Include="..\..\Application\Blazr.App.Infrastructure.Server\Blazr.App.Infrastructure.Server.csproj" />
     <ProjectReference Include="..\..\Application\Blazr.App.Core\Blazr.App.Core.csproj" />
     <ProjectReference Include="..\..\Application\Blazr.App.Infrastructure\Blazr.App.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Application\Blazr.App.Presentation.Bootstrap\Blazr.App.Presentation.Bootstrap.csproj" />
     <ProjectReference Include="..\..\application\Blazr.App.Presentation\Blazr.App.Presentation.csproj" />
     <ProjectReference Include="..\..\Application\Blazr.App.UI\Blazr.App.UI.csproj" />
+    <ProjectReference Include="..\..\Aspire\Blazr.Invoice.ServiceDefaults\Blazr.Invoice.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

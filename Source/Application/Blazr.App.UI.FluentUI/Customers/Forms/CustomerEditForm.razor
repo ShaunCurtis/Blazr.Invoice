@@ -1,13 +1,13 @@
 ﻿@namespace Blazr.App.UI.FluentUI
 @implements IDialogContentComponent<CustomerId>
 @implements IDisposable
-@inject PresenterFactory PresenterFactory
+@inject IEditPresenterFactory<CustomerEditContext, CustomerId> PresenterFactory
  @inject IToastService ToastService
 
 <!-- Header -->
 <FluentDialogHeader ShowDismiss="_isClean">
     <FluentStack VerticalAlignment="VerticalAlignment.Center">
-        @if (this.Presenter.IsNew)
+        @if (_isNew)
         {
             <FluentIcon Value="@(new Icons.Regular.Size24.Add())" />
         }
@@ -24,10 +24,10 @@
 <!-- Body -->
 <FluentDialogBody>
 
-    @if (!this.Presenter.LastDataResult.Successful)
+    @if (!this.Presenter.LastResult.Successful)
     {
         <FluentMessageBar Title="Save Failed" Intent="@MessageIntent.Error">
-            @this.Presenter.LastDataResult.Message
+            @this.Presenter.LastResult.Message
         </FluentMessageBar>
 
     }
@@ -36,13 +36,13 @@
     {
         <EditForm EditContext="Presenter.EditContext">
             <BlazrEditStateTracker LockNavigation="true" />
-            <BlazrFluentValidator TRecord="CustomerEditContext" TValidator="DmoCustomerEditContextValidator" />
+            <BlazrFluentValidator TRecord="CustomerEditContext" TValidator="CustomerEditContextValidator" />
             <FluentGridItem sm="12">
                 <FluentTextField Style="width: 100%;"
-                                 @bind-Value="@this.Presenter.RecordEditContext.CustomerName"
-                                 Placeholder="Enter the Customer Name"
-                                 Immediate
-                                 Label="Customer Name" />
+                @bind-Value="@this.Presenter.EditMutator.CustomerName"
+                Placeholder="Enter the Customer Name"
+                Immediate
+                Label="Customer Name" />
             </FluentGridItem>
             <div style="color: var(--error);">
                 <FluentValidationSummary />
@@ -56,7 +56,7 @@
 <FluentDialogFooter>
 
     <FluentButton Appearance=" _isDirty ? Appearance.Accent : Appearance.Neutral" Disabled="_isClean" OnClick="@OnSaveAsync">
-        @(this.Presenter.IsNew ? "Add" : "Save")
+        @(_isNew ? "Add" : "Save")
     </FluentButton>
 
     <FluentButton Appearance="@( _isClean ? Appearance.Accent : Appearance.Neutral)" hidden="@_isDirty" OnClick="@OnExitAsync">
@@ -75,12 +75,13 @@
     [Parameter] public CustomerId Content { get; set; } = default!;
 
     // Set to default as initialized in SetParameterProperties before the first Render
-    private IEditPresenter<DmoCustomer, CustomerId, CustomerEditContext> Presenter = default!;
+    private IEditPresenter<CustomerEditContext, CustomerId> Presenter = default!;
 
     private bool _isDirty;
     private bool _isClean => !_isDirty;
     private bool _stateStoreAttached;
     private bool _isNotInitialized = true;
+    private bool _isNew => this.Presenter.CommandState == CommandState.Add;
     private BlazrEditStateStore? _store;
 
     public override async Task SetParametersAsync(ParameterView parameters)
@@ -90,8 +91,7 @@
         // Get the presenter
         if(_isNotInitialized)
         {
-            var isNew = this.Content == CustomerId.NewEntity;
-            this.Presenter = await this.PresenterFactory.CreateEditPresenterAsync<DmoCustomer, CustomerId, CustomerEditContext>(this.Content, isNew);
+            this.Presenter = await this.PresenterFactory.GetPresenterAsync(this.Content);
             _isNotInitialized = false;
         }
 
@@ -128,7 +128,7 @@
 
         await this.Presenter.SaveItemAsync();
 
-        if (this.Presenter.LastDataResult.Successful)
+        if (this.Presenter.LastResult.Successful)
             await Dialog.CloseAsync(Content);
     }
 

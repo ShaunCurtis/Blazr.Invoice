@@ -149,6 +149,4 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
             await GetRecordItemAsync();
         }
     }
-
-
 }

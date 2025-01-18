@@ -7,10 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Components\Markdown\**" />
-    <Content Remove="Components\Markdown\**" />
-    <EmbeddedResource Remove="Components\Markdown\**" />
-    <None Remove="Components\Markdown\**" />
+    <Compile Remove="InvoiceItems\**" />
+    <Compile Remove="Invoices\**" />
+    <Content Remove="InvoiceItems\**" />
+    <Content Remove="Invoices\**" />
+    <EmbeddedResource Remove="InvoiceItems\**" />
+    <EmbeddedResource Remove="Invoices\**" />
+    <None Remove="InvoiceItems\**" />
+    <None Remove="Invoices\**" />
   </ItemGroup>
 
 
@@ -28,11 +32,11 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Libraries\Blazr.FluentUI\Blazr.FluentUI.csproj" />
 		<ProjectReference Include="..\Blazr.App.Core\Blazr.App.Core.csproj" />
+		<ProjectReference Include="..\Blazr.App.Presentation.FluentUI\Blazr.App.Presentation.FluentUI.csproj" />
 		<ProjectReference Include="..\Blazr.App.Presentation\Blazr.App.Presentation.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Components\" />
 	  <Folder Include="Customers\Pages\" />
 	</ItemGroup>
 

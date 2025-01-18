@@ -3,11 +3,11 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-namespace Blazr.App.Presentation;
+namespace Blazr.App.Presentation.FluentUI;
 
-public static class AppPresentationServices
+public static class AppFluentUIPresentationServices
 {
-    public static void AddAppPresentationServices(this IServiceCollection services)
+    public static void AddAppFluentUIPresentationServices(this IServiceCollection services)
     {
         // GridState inMemory Store 
         services.AddScoped<KeyedFluxGateStore<GridState, Guid>>();
@@ -15,7 +15,6 @@ public static class AppPresentationServices
 
         services.AddQuickGridEntityFrameworkAdapter();
 
-        services.AddWeatherForecastPresentationServices();
-        services.AddCustomerPresentationServices();
+        services.AddCustomerFluentUIPresentationServices();
     }
 }

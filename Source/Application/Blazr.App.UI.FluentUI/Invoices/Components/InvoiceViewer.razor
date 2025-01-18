@@ -28,7 +28,7 @@
 </FluentGrid>
 
 @code {
-    [CascadingParameter] private InvoiceComposite? Composite { get; set; }
+    [CascadingParameter] private Invoice? Composite { get; set; }
     [Parameter] public DmoInvoice? Invoice { get; set; }
 
     private DmoInvoice _invoice = default!;
@@ -39,7 +39,7 @@
             ArgumentNullException.ThrowIfNull(this.Composite);
 
         _invoice = this.Composite is not null
-            ? this.Composite.Invoice
+            ? this.Composite.InvoiceRecord
             : this.Invoice!;
 
         if (this.Composite is not null)

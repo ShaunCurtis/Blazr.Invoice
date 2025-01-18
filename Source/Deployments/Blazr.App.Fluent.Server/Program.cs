@@ -3,10 +3,14 @@ global using Blazr.App.Presentation;
 using Blazr.App.Fluent.Server.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Blazr.App.Infrastructure.Server;
+using Blazr.App.Presentation.FluentUI;
+;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.AddServiceDefaults();
+builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -15,18 +19,17 @@ builder.Services.AddRazorComponents()
 builder.Services.AddLogging(builder => builder.AddConsole());
 
 builder.Services.AddFluentUIComponents();
-builder.Services.AddAppServerMappedInfrastructureServices();
-builder.Services.AddAppServerPresentationServices();
+builder.Services.AddAppServerInfrastructureServices();
+builder.Services.AddAppFluentUIPresentationServices();
 
 var app = builder.Build();
 
-//app.MapDefaultEndpoints();
-
+app.MapDefaultEndpoints();
 
 // get the DbContext factory and add the test data
-var factory = app.Services.GetService<IDbContextFactory<InMemoryTestDbContext>>();
+var factory = app.Services.GetService<IDbContextFactory<InMemoryInvoiceTestDbContext>>();
 if (factory is not null)
-    TestDataProvider.Instance().LoadDbContext<InMemoryTestDbContext>(factory);
+    InvoiceTestDataProvider.Instance().LoadDbContext<InMemoryInvoiceTestDbContext>(factory);
 
 
 // Configure the HTTP request pipeline.
@@ -44,7 +47,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddAdditionalAssemblies([typeof(Blazr.App.UI.FluentUI.CustomerListForm).Assembly]);
+    .AddAdditionalAssemblies([typeof(Blazr.App.UI.FluentUI.CustomerListPage).Assembly]);
 
 app.Run();
 

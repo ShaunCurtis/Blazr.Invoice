@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure.Server;
 
-public static class ApplicationInfrastructureServices
+public static class ApplicationServerInfrastructureServices
 {
     public static void AddAppServerInfrastructureServices(this IServiceCollection services)
     {
@@ -13,8 +13,8 @@ public static class ApplicationInfrastructureServices
             => options.UseInMemoryDatabase($"TestDatabase-{Guid.NewGuid().ToString()}"));
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
-                typeof(DmoCustomer).Assembly, 
-                typeof(DboCustomer).Assembly, 
+                typeof(DmoCustomer).Assembly,
+                typeof(DboCustomer).Assembly,
                 typeof(CustomerCommandHandler).Assembly
                 ));
 
@@ -25,9 +25,14 @@ public static class ApplicationInfrastructureServices
         services.AddScoped<IItemRequestHandler, ItemRequestServerHandler<InMemoryInvoiceTestDbContext>>();
         services.AddScoped<ICommandHandler, CommandServerHandler<InMemoryInvoiceTestDbContext>>();
 
+        // Add Custom Handlers
+        services.AddScoped<ICommandHandler<Invoice>, InvoiceCommandServerHandler<InMemoryInvoiceTestDbContext>>();
+
         // Add any individual entity services
         services.AddCustomerInfrastructureServices();
-    }
+        services.AddInvoiceInfrastructureServices();
+        services.AddInvoiceItemInfrastructureServices();
+   }
 
     public static void AddTestData(IServiceProvider provider)
     {

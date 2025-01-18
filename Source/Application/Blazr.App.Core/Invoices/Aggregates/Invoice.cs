@@ -22,6 +22,8 @@ public sealed partial class Invoice
     public decimal TotalAmount
         => this.InvoiceRecord.TotalAmount;
 
+    public event EventHandler<InvoiceId>? StateHasChanged;
+
     private List<InvoiceItem> Items { get; set; }
         = new List<InvoiceItem>();
 
@@ -60,5 +62,6 @@ public sealed partial class Invoice
             this.InvoiceRecord = this.InvoiceRecord with { TotalAmount = total };
             this.State = State.AsDirty;
         }
+        this.StateHasChanged?.Invoke(this, this.InvoiceRecord.Id);
     }
 }

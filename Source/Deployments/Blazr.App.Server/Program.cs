@@ -2,13 +2,14 @@ using Blazr.App.Server.Components;
 using Blazr.App.Infrastructure;
 using Blazr.App.Infrastructure.Server;
 using Blazr.App.Presentation;
+using Blazr.App.Presentation.Bootstrap;
 using Blazr.App.UI;
 using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.AddServiceDefaults();
+builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -16,11 +17,11 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddAppServerInfrastructureServices();
 builder.Services.AddAppUIServices();
-builder.Services.AddAppPresentationServices();
+builder.Services.AddAppBootstrapPresentationServices();
 
 var app = builder.Build();
 
-//app.MapDefaultEndpoints();
+app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

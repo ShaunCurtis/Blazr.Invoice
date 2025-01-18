@@ -3,7 +3,7 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-namespace Blazr.App.Presentation;
+namespace Blazr.App.Presentation.Bootstrap;
 
 public class CustomerGridPresenter : GridPresenter<DmoCustomer>
 {

@@ -6,15 +6,21 @@ using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//builder.AddServiceDefaults();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddLogging(builder => builder.AddConsole());
 
 builder.Services.AddFluentUIComponents();
 builder.Services.AddAppServerMappedInfrastructureServices();
 builder.Services.AddAppServerPresentationServices();
 
 var app = builder.Build();
+
+//app.MapDefaultEndpoints();
 
 
 // get the DbContext factory and add the test data
@@ -38,7 +44,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddAdditionalAssemblies([typeof(Blazr.App.FluentUI.CustomerListForm).Assembly]);
+    .AddAdditionalAssemblies([typeof(Blazr.App.UI.FluentUI.CustomerListForm).Assembly]);
 
 app.Run();
 

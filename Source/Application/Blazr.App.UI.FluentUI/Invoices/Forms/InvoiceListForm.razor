@@ -1,0 +1,84 @@
+﻿@namespace Blazr.App.UI.FluentUI
+@inject PresenterFactory PresenterFactory
+@inject IDialogService DialogService
+@inject NavigationManager NavManager
+<PageTitle>Invoices</PageTitle>
+
+<h1>Invoices</h1>
+<FluentStack Style="margin-bottom: 24px;" HorizontalAlignment="HorizontalAlignment.Right" VerticalAlignment="VerticalAlignment.Center">
+
+    <FluentButton Color="var(--info)" IconStart="@(new Icons.Regular.Size16.AddCircle())"
+                  OnClick="@OnAddAsync">
+        Add An Invoice
+    </FluentButton>
+
+</FluentStack>
+
+<FluentDataGrid Id="invoicegrid" ItemsProvider="this.Presenter.GetItemsAsync<DmoInvoice>" GridTemplateColumns="1fr 3fr" TGridItem=DmoInvoice>
+
+    <PropertyColumn Title="Id" Property="@(c => c!.InvoiceId.Value.ToDisplayId())" Align=Align.Start />
+
+    <PropertyColumn Title="Date" Property="@(c => c!.Date)" Sortable="true" Align=Align.Start />
+
+    <PropertyColumn Title="Customer" Property="@(c => c!.CustomerName)" Sortable="true" Align=Align.Start />
+
+    <PropertyColumn Title="Amount" Property="@(c => c!.TotalAmount)" Sortable="true" Align=Align.Start />
+
+    <TemplateColumn Title="Actions" Align="@Align.End">
+
+        <FluentButton aria-label="View item" IconEnd="@(new Icons.Regular.Size16.ContentView())" OnClick="() => OnViewAsync(context.InvoiceId)" />
+        <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())" OnClick="() => OnEditAsync(context.InvoiceId)" />
+    
+        </TemplateColumn>
+
+</FluentDataGrid>
+
+@code {
+    private IListPresenter<DmoInvoice> Presenter = default!;
+    private bool _isNotInitialized = true;
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        parameters.SetParameterProperties(this);
+
+        // Get the presenter
+        if (_isNotInitialized)
+        {
+            this.Presenter = await this.PresenterFactory.CreateListPresenterAsync<DmoInvoice>();
+            _isNotInitialized = false;
+        }
+
+        await base.SetParametersAsync(ParameterView.Empty);
+    }
+
+    private GridSort<Guid> _rankSort = GridSort<Guid>
+        .ByDescending(x => x);
+
+    private Task OnEditAsync(InvoiceId id)
+    {
+        // we need to go to the Inoice dashboard to manage editing
+        this.NavManager.NavigateTo($"/invoice/{id.Value}");
+        return Task.CompletedTask;
+    }
+
+    private async Task OnViewAsync(InvoiceId id)
+    {
+        var dialog = await DialogService.ShowDialogAsync<InvoiceViewForm>(id, new DialogParameters()
+            {
+                Title = $"View Invoice",
+                Width = "80%",
+                PreventDismissOnOverlayClick = true,
+                PreventScroll = true,
+            });
+
+        var result = await dialog.Result;
+    }
+
+    private Task OnAddAsync()
+    {
+        var id = new InvoiceId(Guid.Empty);
+
+        this.NavManager.NavigateTo($"/invoice/{id.Value}");
+        return Task.CompletedTask;
+    }
+}

@@ -1,0 +1,94 @@
+﻿@namespace Blazr.App.UI.FluentUI
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@implements IDialogContentComponent<InvoiceId>
+@inject IToastService ToastService
+@inject PresenterFactory PresenterFactory
+
+@if (_isDialog)
+{
+    <FluentDialogHeader Visible="false" />
+
+    <FluentDialogBody>
+        <FluentStack VerticalAlignment="VerticalAlignment.Center">
+            <FluentIcon Value="@(new Icons.Regular.Size24.DocumentBorder())" />
+            <FluentLabel Typo="Typography.PaneHeader">
+                Invoice View
+            </FluentLabel>
+        </FluentStack>
+
+        <InvoiceViewer Invoice="this.Presenter.Item"/>
+
+        <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Right">
+            <FluentButton Appearance="Appearance.Neutral"
+                          OnClick="@ExitAsync">
+                Exit
+            </FluentButton>
+        </FluentStack>
+
+        <FluentDialogFooter Visible="false" />
+
+    </FluentDialogBody>
+
+    return;
+}
+
+<InvoiceViewer Invoice="this.Presenter.Item" />
+
+@code
+{
+    [CascadingParameter] private FluentDialog Dialog { get; set; } = default!;
+    [CascadingParameter] private InvoiceComposite Composite { get; set; } = default!;
+    [Parameter] public InvoiceId Content { get; set; } = new(Guid.Empty);
+
+    private IViewPresenter<DmoInvoice, InvoiceId> Presenter = default!;
+    private bool _isDialog => this.Dialog is not null;
+
+    private bool _isNotInitialized = true;
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        parameters.SetParameterProperties(this);
+
+        // Get the presenter
+        if (_isNotInitialized)
+        {
+            this.Presenter = await PresenterFactory.CreateViewPresenterAsync<DmoInvoice, InvoiceId>(this.Content);
+
+            if (this.Composite is not null)
+                this.Composite.StateHasChanged += this.OnCompositeStateChanged;
+
+            _isNotInitialized = false;
+        }
+
+        await base.SetParametersAsync(ParameterView.Empty);
+    }
+
+    protected override void OnParametersSet()
+    {
+        this.CheckForToasts();
+    }
+
+    private void CheckForToasts()
+    {
+        if (!this.Presenter.LastDataResult.Successful)
+            this.ToastService.ShowError(this.Presenter.LastDataResult.Message ?? "An Error occured retrieving the record.");
+    }
+
+    private void OnCompositeStateChanged(object? sender, EventArgs e)
+    {
+        this.CheckForToasts();
+        this.StateHasChanged();
+    }
+
+    private async Task ExitAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+
+    public void Dispose()
+    {
+        if (this.Composite is not null)
+            this.Composite.StateHasChanged -= this.OnCompositeStateChanged;
+    }
+}

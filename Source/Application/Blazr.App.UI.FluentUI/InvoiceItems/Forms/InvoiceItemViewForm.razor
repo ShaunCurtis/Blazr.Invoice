@@ -1,0 +1,71 @@
+﻿@namespace Blazr.App.UI.FluentUI
+@implements IDialogContentComponent<InvoiceItemId>
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@inject PresenterFactory PresenterFactory
+@inject IToastService ToastService
+
+@if (_isDialog)
+{
+    <FluentDialogHeader Visible="false" />
+
+    <FluentDialogBody>
+
+        <FluentStack VerticalAlignment="VerticalAlignment.Center">
+            <FluentIcon Value="@(new Icons.Regular.Size24.DocumentBorder())" />
+            <FluentLabel Typo="Typography.PaneHeader">
+                Invoice Item View
+            </FluentLabel>
+        </FluentStack>
+
+        <InvoiceItemViewer Item="_item" />
+
+    </FluentDialogBody>
+
+    <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Right">
+        <FluentButton Appearance="Appearance.Neutral"
+                      OnClick="@ExitAsync">
+            Exit
+        </FluentButton>
+    </FluentStack>
+
+    <FluentDialogFooter Visible="false" />
+
+    return;
+}
+
+<InvoiceItemViewer Item="_item" />
+
+@code {
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
+    [Parameter] public InvoiceItemId Content { get; set; } = default!;
+    [CascadingParameter] private InvoiceComposite Composite { get; set; } = default!;
+
+    private IViewPresenter<DmoInvoiceItem, InvoiceItemId> Presenter = default!;
+    private bool _isDialog => this.Dialog is not null;
+    private DmoInvoiceItem _item = default!;
+
+    protected async override Task OnInitializedAsync()
+    {
+        DmoInvoiceItem? item = null;
+
+        if (this.Composite is not null)
+            item = this.Composite.GetInvoiceItem(this.Content).Item ?? null;
+
+        if (item is null)
+        {
+            this.Presenter = await this.PresenterFactory.CreateViewPresenterAsync<DmoInvoiceItem, InvoiceItemId>(this.Content);
+            item = this.Presenter.Item;
+        }
+
+        _item = item;
+
+        if (!this.Presenter.LastDataResult.Successful)
+            this.ToastService.ShowError(this.Presenter.LastDataResult.Message ?? "An Error occured retriving the record.");
+    }
+
+    private async Task ExitAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+}

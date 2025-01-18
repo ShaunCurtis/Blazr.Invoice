@@ -75,6 +75,12 @@ public readonly record struct Result<T>
     private bool IsFailure => !IsSuccess;
 
     /// <summary>
+    /// Converts Result<T> to Result
+    /// </summary>
+    public Result ToResult
+        => this.IsSuccess ? Result.Success() : Result.Fail(_error);
+
+    /// <summary>
     /// Returns true is success and sets the out item to T
     /// </summary>
     /// <param name="item"></param>

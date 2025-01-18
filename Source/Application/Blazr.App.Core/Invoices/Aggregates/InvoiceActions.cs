@@ -16,4 +16,4 @@ public readonly record struct UpdateInvoiceItemAction(DmoInvoiceItem Item);
 
 public readonly record struct AddInvoiceItemAction(DmoInvoiceItem Item, bool IsNew = true);
 
-public readonly record struct SetAsPersistedAction(DmoInvoiceItem Item);
+public readonly record struct SetAsPersistedAction();

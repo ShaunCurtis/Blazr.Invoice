@@ -2,9 +2,11 @@
 
 public sealed partial class Invoice
 {
-    private bool _isDirty => this.State != CommandState.None;
+    private bool _isDirty 
+        => this.State != CommandState.None;
 
-    public CommandState State { get; private set; } = CommandState.None;
+    public CommandState State { get; private set; } 
+        = CommandState.None;
 
     public DmoInvoice InvoiceRecord { get; private set; }
 
@@ -12,7 +14,7 @@ public sealed partial class Invoice
         => this.Items.AsEnumerable();
 
     public IEnumerable<InvoiceItem> InvoiceItemsBin
-    => this.ItemsBin.AsEnumerable();
+        => this.ItemsBin.AsEnumerable();
 
     public bool IsDirty
         => _isDirty ? true : this.Items.Any(item => item.IsDirty);
@@ -24,7 +26,7 @@ public sealed partial class Invoice
         = new List<InvoiceItem>();
 
     private List<InvoiceItem> ItemsBin { get; set; }
-    = new List<InvoiceItem>();
+        = new List<InvoiceItem>();
 
     public Invoice(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> items)
     {

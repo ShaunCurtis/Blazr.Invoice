@@ -11,7 +11,7 @@ namespace Blazr.App.Presentation;
 /// </summary>
 public class CustomerEditPresenter : EditPresenter<DmoCustomer, CustomerEditContext, CustomerId>
 {
-    public CustomerEditPresenter(IMediator mediator, IRecordIdProvider<DmoCustomer, CustomerId> keyProvider, INewRecordProvider<DmoCustomer> newRecordProvider)
+    public CustomerEditPresenter(IMediator mediator, IRecordIdProvider<DmoCustomer, CustomerId> keyProvider, IRecordFactory<DmoCustomer> newRecordProvider)
         : base(mediator, keyProvider, newRecordProvider) { }
 
     protected override Task<Result<DmoCustomer>> GetItemAsync()

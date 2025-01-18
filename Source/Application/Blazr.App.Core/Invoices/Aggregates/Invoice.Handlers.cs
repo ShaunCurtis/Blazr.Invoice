@@ -14,6 +14,13 @@ public sealed partial class Invoice
         return ValueTask.FromResult(Result.Success());
     }
 
+    /// <summary>
+    /// Marks the invoice for deletion
+    /// You still need to persist the change to the data store
+    /// </summary>
+    /// <param name="action"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public ValueTask<Result> DispatchAsync(DeleteInvoiceAction action, CancellationToken cancellationToken)
     {
         this.State = CommandState.Delete;
@@ -58,6 +65,23 @@ public sealed partial class Invoice
         var invoiceItem = new InvoiceItem(action.Item, this.ItemUpdated, action.IsNew);
         this.Items.Add(invoiceItem);
         this.Process();
+
+        return ValueTask.FromResult(Result.Success());
+    }
+
+    /// <summary>
+    /// Sets the aggregate as saved.
+    /// i.e. it sets the CommandState on the invoice and invoice items as none. 
+    /// </summary>
+    /// <param name="action"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public ValueTask<Result> DispatchAsync(SetAsPersistedAction action, CancellationToken cancellationToken)
+    {
+        this.State = CommandState.None;
+
+        foreach (var item in this.Items)
+            item.State = CommandState.None;
 
         return ValueTask.FromResult(Result.Success());
     }

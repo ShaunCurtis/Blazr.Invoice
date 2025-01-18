@@ -11,7 +11,7 @@ namespace Blazr.App.Presentation;
 /// </summary>
 public class CustomerReadPresenter : ReadPresenter<DmoCustomer, CustomerId>
 {
-    public CustomerReadPresenter(IMediator dataBroker, INewRecordProvider<DmoCustomer> newRecordProvider) : base(dataBroker, newRecordProvider)  { }
+    public CustomerReadPresenter(IMediator dataBroker, IRecordFactory<DmoCustomer> newRecordProvider) : base(dataBroker, newRecordProvider)  { }
 
     protected override Task<Result<DmoCustomer>> GetItemAsync(CustomerId id)
     {

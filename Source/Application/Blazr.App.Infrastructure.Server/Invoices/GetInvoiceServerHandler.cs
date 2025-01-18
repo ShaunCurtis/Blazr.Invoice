@@ -5,13 +5,17 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure.Server;
 
-public record GetInvoiceHandler : IRequestHandler<GetInvoiceRequest, Result<Invoice>>
+/// <summary>
+/// Mediatr Server Handler that builds a Invoice Aggregate
+/// It uses the Antimony Database Handlers to interface with the database
+/// </summary>
+public record GetInvoiceServerHandler : IRequestHandler<GetInvoiceRequest, Result<Invoice>>
 {
     private IListRequestHandler _listHandler;
     private IItemRequestHandler _itemHhandler;
     private IMessageBus _messageBus;
 
-    public GetInvoiceHandler(IItemRequestHandler itemRequestHandler, IListRequestHandler listRequestHandler, IMessageBus messageBus)
+    public GetInvoiceServerHandler(IItemRequestHandler itemRequestHandler, IListRequestHandler listRequestHandler, IMessageBus messageBus)
     {
         _messageBus = messageBus;
         _listHandler = listRequestHandler;

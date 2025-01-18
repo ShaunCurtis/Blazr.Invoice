@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public class NewCustomerProvider : INewRecordProvider<DmoCustomer>
+public class CustomerRecordFactory : IRecordFactory<DmoCustomer>
 {
     public DmoCustomer NewRecord()
     {

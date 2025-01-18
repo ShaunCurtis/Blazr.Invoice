@@ -3,20 +3,20 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-namespace Blazr.App.Infrastructure;
+namespace Blazr.App.Core;
 
 public record NewInvoiceHandler : IRequestHandler<NewInvoiceRequest, Result<Invoice>>
 {
-    private INewRecordProvider<DmoInvoice> _recordProvider;
+    private IRecordFactory<DmoInvoice> _recordFactory;
 
-    public NewInvoiceHandler(INewRecordProvider<DmoInvoice> newRecordProvider)
+    public NewInvoiceHandler(IRecordFactory<DmoInvoice> newRecordProvider)
     {
-         _recordProvider = newRecordProvider;
+         _recordFactory = newRecordProvider;
     }
 
     public Task<Result<Invoice>> Handle(NewInvoiceRequest request, CancellationToken cancellationToken)
     {
-        var invoiceRecord = _recordProvider.NewRecord();
+        var invoiceRecord = _recordFactory.NewRecord();
 
         var invoiceComposite = new Invoice(invoiceRecord, Enumerable.Empty<DmoInvoiceItem>());
 

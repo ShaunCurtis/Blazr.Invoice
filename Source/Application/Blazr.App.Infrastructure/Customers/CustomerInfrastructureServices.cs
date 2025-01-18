@@ -10,6 +10,6 @@ public static class CustomerInfrastructureServices
     public static void AddCustomerInfrastructureServices(this IServiceCollection services)
     {
         services.AddScoped<IRecordIdProvider<DmoCustomer, CustomerId>, CustomerIdProvider>();
-        services.AddScoped<INewRecordProvider<DmoCustomer>, NewCustomerProvider>();
+        services.AddScoped<IRecordFactory<DmoCustomer>, CustomerRecordFactory>();
     }
 }

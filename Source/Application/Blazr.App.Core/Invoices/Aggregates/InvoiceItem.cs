@@ -4,13 +4,18 @@
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
 namespace Blazr.App.Core;
+
 public sealed class InvoiceItem : IDisposable
 {
     private Action<InvoiceItem>? UpdateCallback;
-    public CommandState State { get; internal set; } = CommandState.None;
+    
+    public CommandState State { get; internal set; } 
+        = CommandState.None;
 
     public DmoInvoiceItem InvoiceItemRecord { get; private set; }
-    public bool IsDirty => this.State != CommandState.None;
+    
+    public bool IsDirty 
+        => this.State != CommandState.None;
 
     public InvoiceItem(DmoInvoiceItem item, Action<InvoiceItem> callback, bool isNew = false)
     {

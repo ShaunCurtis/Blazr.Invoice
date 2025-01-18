@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public class NewInvoiceProvider : INewRecordProvider<DmoInvoice>
+public class InvoiceRecordFactory : IRecordFactory<DmoInvoice>
 {
     public DmoInvoice NewRecord()
     {

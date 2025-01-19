@@ -16,5 +16,6 @@ public static class AppFluentUIPresentationServices
         services.AddQuickGridEntityFrameworkAdapter();
 
         services.AddCustomerFluentUIPresentationServices();
+        services.AddInvoiceFluentUIPresentationServices();
     }
 }

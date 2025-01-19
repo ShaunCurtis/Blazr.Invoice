@@ -22,8 +22,8 @@ public readonly record struct Result
         _error = error;
     }
 
-    private bool IsSuccess { get; }
-    private bool IsFailure => !IsSuccess;
+    public bool IsSuccess { get; }
+    public bool IsFailure => !IsSuccess;
 
     /// <summary>
     /// Returns true is failure and sets the out item to the exception

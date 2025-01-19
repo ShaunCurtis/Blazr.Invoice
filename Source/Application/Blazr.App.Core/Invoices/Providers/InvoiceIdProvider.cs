@@ -9,10 +9,12 @@ public class InvoiceIdProvider : IRecordIdProvider<DmoInvoice, InvoiceId>
 {
     public InvoiceId GetKey(object key)
     {
-        if (key is Guid value)
-            return new(value);
-
-        throw new InvalidKeyProviderException("Object provided is not a WeatherForecastId Value");
+        return key switch
+        {
+            InvoiceId id => id,
+            Guid guid => new InvoiceId(guid),
+            _ => InvoiceId.Default
+        };
     }
 
     public InvoiceId GetKey(DmoInvoice record)

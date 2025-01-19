@@ -2,19 +2,19 @@
 @inject NavigationManager NavManager
 @inject IToastService ToastService
 @inject IDialogService DialogService
-@inject InvoicePresenterFactory PresenterFactory
+@inject InvoiceAggregatePresenterFactory PresenterFactory
 @implements IDisposable
 
 <FluentOverlay @bind-Visible="_loading"
-               Opacity="0.4"
-               Alignment="Align.Center"
-               Justification="JustifyContent.Center">
+Opacity="0.4"
+Alignment="Align.Center"
+Justification="JustifyContent.Center">
     <FluentProgressRing />
 </FluentOverlay>
 
 @if (!_loading)
 {
-    <CascadingValue Value="this.Presenter.Composite">
+    <CascadingValue Value="_invoice">
 
         <FluentStack VerticalAlignment="VerticalAlignment.Center">
             <FluentIcon Value="@(new Icons.Regular.Size24.DocumentBorder())" />
@@ -74,19 +74,18 @@
 @code {
     [Parameter, EditorRequired] public InvoiceId InvoiceId { get; set; } = new(Guid.Empty);
 
-    private InvoiceCompositePresenter Presenter = default!;
+    private InvoiceAggregatePresenter Presenter = default!;
     private bool _loading = true;
-    private bool _isDirty => this.Presenter.Composite.State.IsModified;
+    private bool _isDirty => this.Presenter.Invoice.IsDirty;
     private bool _isError = false;
-    private string _message => _isError ? this.Presenter.LastDataResult.Message ?? "Unspecified Error" : "Invoice changes are not currently saved to the data store!";
+    private string _message => _isError ? this.Presenter.LastResult.Message ?? "Unspecified Error" : "Invoice changes are not currently saved to the data store!";
     private MessageIntent _messageIntent => _isError ? MessageIntent.Error : MessageIntent.Warning;
+    private Invoice _invoice => this.Presenter.Invoice ?? Invoice.Default; 
 
-    protected async override Task OnInitializedAsync()
+    protected async override Task  OnInitializedAsync()
     {
-        // Get a InvoiceCompositePresenter instance
-        this.Presenter = await this.PresenterFactory.CreateCompositeInstanceAsync(this.InvoiceId);
-        this.Presenter.Composite.StateHasChanged += this.OnCompositeStateChanged;
-        _loading = false;
+        this.Presenter = await this.PresenterFactory.CreateAsync(this.InvoiceId);
+        this.Presenter.Invoice.StateHasChanged += this.OnAggregateStateChanged;
     }
 
     private Task OnLocationChanging(LocationChangingContext context)
@@ -101,7 +100,7 @@
         return Task.CompletedTask;
     }
 
-    private void OnCompositeStateChanged(object? sender, EventArgs e)
+    private void OnAggregateStateChanged(object? sender, InvoiceId invoiceId)
     {
         this.StateHasChanged();
     }
@@ -109,9 +108,9 @@
     private async Task EditAsync()
     {
         // Pop up the Editor dialog
-        var dialog = await DialogService.ShowDialogAsync<InvoiceEditForm>(this.Presenter.Composite, new DialogParameters()
+        var dialog = await DialogService.ShowDialogAsync<InvoiceEditForm>(_invoice, new DialogParameters()
             {
-                Title = this.Presenter.Composite.State.IsNew ? "Add Invoice" : "Edit Invoice",
+                Title = _invoice.State == CommandState.Add ? "Add Invoice" : "Edit Invoice",
                 PreventDismissOnOverlayClick = true,
                 PreventScroll = true,
             });
@@ -120,25 +119,19 @@
         var result = await dialog.Result;
 
         // If we have a cancelled new invoice we need to exit back to the invoices page
-        if (result.Cancelled && this.Presenter.Composite.State.IsNew)
+        if (result.Cancelled && _invoice.State == CommandState.Add)
         {
             this.ToastService.ShowEvent("You exited creating the new invoice.");
-            this.Presenter.Composite.Persisted();
+            this.Presenter.FakePersistenceToAllowExit();
             this.NavManager.NavigateTo($"/invoices");
         }
     }
 
     private async Task SaveAsync()
     {
-        // Build the command request and execute it
-        var state = this.Presenter.Composite.State.ToCommandState();
-        CommandRequest<InvoiceComposite> command = new() { Item = this.Presenter.Composite, State = state };
-        var result = await this.DataBroker.ExecuteCommandAsync(command);
-
-        // On Success we need to update the composite state so we can exit to the invoices page
-        if (result.Successful)
+        var result = await this.Presenter.SaveAsync();
+        if (result.IsSuccess)
         {
-            this.Presenter.Composite.Persisted();
             this.NavManager.NavigateTo($"/invoices");
             return;
         }
@@ -154,7 +147,7 @@
     private Task ExitWithoutSavingAsync()
     {
         // We aren't saving the composite so we can update the state so we can exit
-        this.Presenter.Composite.Persisted();
+        this.Presenter.FakePersistenceToAllowExit();
 
         this.NavManager.NavigateTo($"/invoices");
         return Task.CompletedTask;
@@ -162,6 +155,6 @@
 
     public void Dispose()
     {
-        this.Presenter.Composite.StateHasChanged -= this.OnCompositeStateChanged;
+        this.Presenter.Invoice.StateHasChanged -= this.OnAggregateStateChanged;
     }
 }

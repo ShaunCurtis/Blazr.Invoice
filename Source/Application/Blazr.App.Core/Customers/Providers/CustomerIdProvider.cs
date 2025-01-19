@@ -9,10 +9,12 @@ public class CustomerIdProvider : IRecordIdProvider<DmoCustomer, CustomerId>
 {
     public CustomerId GetKey(object key)
     {
-        if (key is Guid value)
-            return new(value);
-
-        throw new InvalidKeyProviderException("Object provided is not a CustomerId Value");
+        return key switch
+        {
+            CustomerId id => id,
+            Guid guid => new CustomerId(guid),
+            _ => CustomerId.Default
+        };
     }
 
     public CustomerId GetKey(DmoCustomer record)

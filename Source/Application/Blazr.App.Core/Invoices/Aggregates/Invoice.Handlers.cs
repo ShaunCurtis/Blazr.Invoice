@@ -1,17 +1,18 @@
-﻿/// ============================================================
+﻿
+
+/// ============================================================
 /// Author: Shaun Curtis, Cold Elm Coders
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-
 namespace Blazr.App.Core;
 
 public sealed partial class Invoice
 {
-    public ValueTask<Result> DispatchAsync(UpdateInvoiceAction action, CancellationToken? cancellationToken = null)
+    public Result Dispatch(InvoiceActions.UpdateInvoiceAction action)
     {
         this.UpdateInvoice(action.Item);
-        return ValueTask.FromResult(Result.Success());
+        return Result.Success();
     }
 
     /// <summary>
@@ -21,17 +22,17 @@ public sealed partial class Invoice
     /// <param name="action"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public ValueTask<Result> DispatchAsync(DeleteInvoiceAction action, CancellationToken cancellationToken)
+    public Result Dispatch(InvoiceActions.DeleteInvoiceAction action)
     {
         this.State = CommandState.Delete;
-        return ValueTask.FromResult(Result.Success());
+        return Result.Success();
     }
 
-    public ValueTask<Result> DispatchAsync(DeleteInvoiceItemAction action, CancellationToken cancellationToken)
+    public Result Dispatch(InvoiceActions.DeleteInvoiceItemAction action)
     {
         var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord == action.Item);
         if (invoiceItem is null)
-            return ValueTask.FromResult(Result.Fail(new ActionException($"No Invoice Item with Id: {action.Item.Id} exists in the Invoice")));
+            return Result.Fail(new ActionException($"No Invoice Item with Id: {action.Item.Id} exists in the Invoice"));
 
         // we don#t set the Command State to delete because the handler needs to know
         // if the deleted item is New and therefore not in the data store
@@ -40,33 +41,33 @@ public sealed partial class Invoice
         this.Items.Remove(invoiceItem);
         this.Process();
 
-        return ValueTask.FromResult(Result.Success());
+        return Result.Success();
     }
 
-    public ValueTask<Result> DispatchAsync(UpdateInvoiceItemAction action, CancellationToken cancellationToken)
+    public Result DispatchAsync(InvoiceActions.UpdateInvoiceItemAction action)
     {
         var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord == action.Item);
 
         if (invoiceItem is null)
-            return ValueTask.FromResult(Result.Fail(new ActionException($"No Invoice Item with Id: {action.Item.Id} exists in the Invoice.")));
+            return Result.Fail(new ActionException($"No Invoice Item with Id: {action.Item.Id} exists in the Invoice."));
 
         invoiceItem.State = invoiceItem.State.AsDirty;
         invoiceItem.UpdateInvoiceItem(action.Item);
         this.Process();
 
-        return ValueTask.FromResult(Result.Success());
+        return Result.Success();
     }
 
-    public ValueTask<Result> DispatchAsync(AddInvoiceItemAction action, CancellationToken cancellationToken)
+    public Result Dispatch(InvoiceActions.AddInvoiceItemAction action)
     {
         if (this.Items.Any(item => item.InvoiceItemRecord == action.Item))
-            return ValueTask.FromResult(Result.Fail(new ActionException($"The Invoice Item with Id: {action.Item.Id} already exists in the Invoice.")));
+            return Result.Fail(new ActionException($"The Invoice Item with Id: {action.Item.Id} already exists in the Invoice."));
 
         var invoiceItem = new InvoiceItem(action.Item, this.ItemUpdated, action.IsNew);
         this.Items.Add(invoiceItem);
         this.Process();
 
-        return ValueTask.FromResult(Result.Success());
+        return Result.Success();
     }
 
     /// <summary>
@@ -76,14 +77,14 @@ public sealed partial class Invoice
     /// <param name="action"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public ValueTask<Result> DispatchAsync(SetAsPersistedAction action, CancellationToken cancellationToken)
+    public Result Dispatch(InvoiceActions.SetAsPersistedAction action)
     {
         this.State = CommandState.None;
 
         foreach (var item in this.Items)
             item.State = CommandState.None;
 
-        return ValueTask.FromResult(Result.Success());
+        return Result.Success();
     }
 }
 

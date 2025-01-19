@@ -6,6 +6,3 @@
 
 namespace Blazr.App.Core;
 
-public readonly record struct CustomerItemRequest(
-        CustomerId Id) 
-    : IRequest<Result<DmoCustomer>>;

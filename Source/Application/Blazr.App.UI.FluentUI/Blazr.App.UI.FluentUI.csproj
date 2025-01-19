@@ -8,13 +8,12 @@
 
   <ItemGroup>
     <Compile Remove="InvoiceItems\**" />
-    <Compile Remove="Invoices\**" />
-    <Content Remove="InvoiceItems\**" />
-    <Content Remove="Invoices\**" />
     <EmbeddedResource Remove="InvoiceItems\**" />
-    <EmbeddedResource Remove="Invoices\**" />
     <None Remove="InvoiceItems\**" />
-    <None Remove="Invoices\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Invoices\Forms\InvoiceDashboard.razor~RFed5ca8e.TMP" />
   </ItemGroup>
 
 
@@ -35,10 +34,5 @@
 		<ProjectReference Include="..\Blazr.App.Presentation.FluentUI\Blazr.App.Presentation.FluentUI.csproj" />
 		<ProjectReference Include="..\Blazr.App.Presentation\Blazr.App.Presentation.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Customers\Pages\" />
-	</ItemGroup>
-
 
 </Project>

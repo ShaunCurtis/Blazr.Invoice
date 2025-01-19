@@ -16,7 +16,7 @@ public class CustomerEditPresenter : EditPresenter<DmoCustomer, CustomerEditCont
 
     protected override Task<Result<DmoCustomer>> GetItemAsync()
     {
-        return this.Databroker.Send(new CustomerItemRequest(this.EntityId));
+        return this.Databroker.Send(new CustomerRecordRequest(this.EntityId));
     }
 
     protected override Task<Result<CustomerId>> UpdateAsync(DmoCustomer record, CommandState state)

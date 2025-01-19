@@ -9,12 +9,12 @@ namespace Blazr.App.Presentation;
 /// This object should not be used in DI.
 /// Create an instance through the Factory
 /// </summary>
-public class CustomerReadPresenter : ReadPresenter<DmoCustomer, CustomerId>
+public class InvoiceReadPresenter : ReadPresenter<DmoInvoice, InvoiceId>
 {
-    public CustomerReadPresenter(IMediator dataBroker, IRecordFactory<DmoCustomer> newRecordProvider) : base(dataBroker, newRecordProvider)  { }
+    public InvoiceReadPresenter(IMediator dataBroker, IRecordFactory<DmoInvoice> newRecordProvider) : base(dataBroker, newRecordProvider)  { }
 
-    protected override Task<Result<DmoCustomer>> GetItemAsync(CustomerId id)
+    protected override Task<Result<DmoInvoice>> GetItemAsync(InvoiceId id)
     {
-        return _dataBroker.Send(new CustomerRecordRequest(id));
+        return _dataBroker.Send(new InvoiceRequests.InvoiceRecordRequest(id));
     }
 }

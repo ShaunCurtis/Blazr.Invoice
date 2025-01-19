@@ -5,16 +5,16 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure.Server;
 
-public record CustomerItemHandler : IRequestHandler<CustomerItemRequest, Result<DmoCustomer>>
+public record CustomerRecordHandler : IRequestHandler<CustomerRecordRequest, Result<DmoCustomer>>
 {
     private IItemRequestHandler _handler;
 
-    public CustomerItemHandler(IItemRequestHandler handler)
+    public CustomerRecordHandler(IItemRequestHandler handler)
     {
         _handler = handler;
     }
 
-    public async Task<Result<DmoCustomer>> Handle(CustomerItemRequest request, CancellationToken cancellationToken)
+    public async Task<Result<DmoCustomer>> Handle(CustomerRecordRequest request, CancellationToken cancellationToken)
     {
         Expression<Func<DboCustomer, bool>> findExpression = (item) =>
             item.CustomerID == request.Id.Value;

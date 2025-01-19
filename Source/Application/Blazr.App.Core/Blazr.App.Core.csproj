@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Invoices\Requests\InvoiceRecordRequest.cs~RFe696cad.TMP" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Blazr.FluxGate" Version="1.2.0" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />

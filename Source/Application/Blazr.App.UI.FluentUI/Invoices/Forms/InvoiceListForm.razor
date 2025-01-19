@@ -1,5 +1,5 @@
 ﻿@namespace Blazr.App.UI.FluentUI
-@inject PresenterFactory PresenterFactory
+@inject IFluentGridPresenter<DmoInvoice> Presenter
 @inject IDialogService DialogService
 @inject NavigationManager NavManager
 <PageTitle>Invoices</PageTitle>
@@ -14,9 +14,9 @@
 
 </FluentStack>
 
-<FluentDataGrid Id="invoicegrid" ItemsProvider="this.Presenter.GetItemsAsync<DmoInvoice>" GridTemplateColumns="1fr 3fr" TGridItem=DmoInvoice>
+<FluentDataGrid Id="invoicegrid" ItemsProvider="this.Presenter.GetItemsAsync" GridTemplateColumns="1fr 1fr 2fr 1fr 1fr" TGridItem=DmoInvoice>
 
-    <PropertyColumn Title="Id" Property="@(c => c!.InvoiceId.Value.ToDisplayId())" Align=Align.Start />
+    <PropertyColumn Title="Id" Property="@(c => c!.Id.Value.ToDisplayId())" Align=Align.Start />
 
     <PropertyColumn Title="Date" Property="@(c => c!.Date)" Sortable="true" Align=Align.Start />
 
@@ -26,31 +26,13 @@
 
     <TemplateColumn Title="Actions" Align="@Align.End">
 
-        <FluentButton aria-label="View item" IconEnd="@(new Icons.Regular.Size16.ContentView())" OnClick="() => OnViewAsync(context.InvoiceId)" />
-        <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())" OnClick="() => OnEditAsync(context.InvoiceId)" />
+        <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())" OnClick="() => OnEditAsync(context.Id)" />
     
         </TemplateColumn>
 
 </FluentDataGrid>
 
 @code {
-    private IListPresenter<DmoInvoice> Presenter = default!;
-    private bool _isNotInitialized = true;
-
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {
-        parameters.SetParameterProperties(this);
-
-        // Get the presenter
-        if (_isNotInitialized)
-        {
-            this.Presenter = await this.PresenterFactory.CreateListPresenterAsync<DmoInvoice>();
-            _isNotInitialized = false;
-        }
-
-        await base.SetParametersAsync(ParameterView.Empty);
-    }
-
     private GridSort<Guid> _rankSort = GridSort<Guid>
         .ByDescending(x => x);
 

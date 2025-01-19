@@ -3,7 +3,7 @@
 <FluentGrid Style="padding:1em;" Spacing="1" AdaptiveRendering="true">
     <FluentGridItem sm="12" md="6">
         <FluentTextField Style="width: 100%;"
-                         Value="@_invoice.InvoiceId.Value.ToString()"
+                         Value="@_invoice.Id.Value.ToString()"
                          Label="Full Id"
                          ReadOnly />
     </FluentGridItem>
@@ -45,7 +45,7 @@
         if (this.Composite is not null)
         {
             this.Composite.StateHasChanged += this.OnCompositeStateChanged;
-            _invoice = this.Composite.Invoice;
+            _invoice = this.Composite.InvoiceRecord;
             return;
         }
 
@@ -53,10 +53,10 @@
 
     }
 
-    private void OnCompositeStateChanged(object? sender, EventArgs e)
+    private void OnCompositeStateChanged(object? sender, InvoiceId id)
     {
         // We need to reload the invoice from the composite
-        _invoice = this.Composite!.Invoice;
+        _invoice = this.Composite!.InvoiceRecord;
         this.StateHasChanged();
     }
 

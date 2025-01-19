@@ -10,6 +10,8 @@ public interface IReadPresenter<TRecord, TKey>
     where TKey : notnull, IEntityId
 {
     public TRecord Item { get; }
+    
+    public IDataResult LastResult { get;}
 
     public ValueTask LoadAsync(TKey id);
 }

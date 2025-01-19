@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @implements IDialogContentComponent<InvoiceId>
 @inject IToastService ToastService
-@inject PresenterFactory PresenterFactory
+@inject IReadPresenterFactory<DmoInvoice,InvoiceId> PresenterFactory
 
 @if (_isDialog)
 {
@@ -38,10 +38,10 @@
 @code
 {
     [CascadingParameter] private FluentDialog Dialog { get; set; } = default!;
-    [CascadingParameter] private InvoiceComposite Composite { get; set; } = default!;
+    [CascadingParameter] private Invoice Composite { get; set; } = default!;
     [Parameter] public InvoiceId Content { get; set; } = new(Guid.Empty);
 
-    private IViewPresenter<DmoInvoice, InvoiceId> Presenter = default!;
+    private IReadPresenter<DmoInvoice, InvoiceId> Presenter = default!;
     private bool _isDialog => this.Dialog is not null;
 
     private bool _isNotInitialized = true;
@@ -53,7 +53,7 @@
         // Get the presenter
         if (_isNotInitialized)
         {
-            this.Presenter = await PresenterFactory.CreateViewPresenterAsync<DmoInvoice, InvoiceId>(this.Content);
+            this.Presenter = await this.PresenterFactory.GetPresenterAsync(this.Content);
 
             if (this.Composite is not null)
                 this.Composite.StateHasChanged += this.OnCompositeStateChanged;
@@ -71,11 +71,11 @@
 
     private void CheckForToasts()
     {
-        if (!this.Presenter.LastDataResult.Successful)
-            this.ToastService.ShowError(this.Presenter.LastDataResult.Message ?? "An Error occured retrieving the record.");
+        if (!this.Presenter.LastResult.Successful)
+            this.ToastService.ShowError(this.Presenter.LastResult.Message ?? "An Error occured retrieving the record.");
     }
 
-    private void OnCompositeStateChanged(object? sender, EventArgs e)
+    private void OnCompositeStateChanged(object? sender, InvoiceId id)
     {
         this.CheckForToasts();
         this.StateHasChanged();

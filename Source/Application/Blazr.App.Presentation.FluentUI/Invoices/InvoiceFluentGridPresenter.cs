@@ -5,10 +5,10 @@
 /// ============================================================
 namespace Blazr.App.Presentation.FluentUI;
 
-public class CustomerFluentGridPresenter : IFluentGridPresenter<DmoCustomer>
+public class InvoiceFluentGridPresenter : IFluentGridPresenter<DmoInvoice>
 {
     IMediator _mediator;
-    public CustomerFluentGridPresenter(
+    public InvoiceFluentGridPresenter(
         IMediator mediator,
         IMessageBus messageBus,
         KeyedFluxGateStore<GridState, Guid> keyedFluxGateStore)
@@ -16,10 +16,10 @@ public class CustomerFluentGridPresenter : IFluentGridPresenter<DmoCustomer>
         _mediator = mediator;
     }
 
-    public async ValueTask<GridItemsProviderResult<DmoCustomer>> GetItemsAsync(GridItemsProviderRequest<DmoCustomer> request)
+    public async ValueTask<GridItemsProviderResult<DmoInvoice>> GetItemsAsync(GridItemsProviderRequest<DmoInvoice> request)
     {
         // Get the list request from the Flux Context and get the result
-        var listRequest = new CustomerListRequest()
+        var listRequest = new InvoiceRequests.InvoiceListRequest()
         {
             PageSize = request.Count ?? 10,
             StartIndex = request.StartIndex,
@@ -27,8 +27,8 @@ public class CustomerFluentGridPresenter : IFluentGridPresenter<DmoCustomer>
 
         var result = await _mediator.Send(listRequest);
 
-        if (!result.HasSucceeded(out ListResult<DmoCustomer> listResult))
-            return GridItemsProviderResult.From(new List<DmoCustomer>(), 0);
+        if (!result.HasSucceeded(out ListResult<DmoInvoice> listResult))
+            return GridItemsProviderResult.From(new List<DmoInvoice>(), 0);
 
         return GridItemsProviderResult.From(listResult.Items.ToList(), listResult.TotalCount);
     }

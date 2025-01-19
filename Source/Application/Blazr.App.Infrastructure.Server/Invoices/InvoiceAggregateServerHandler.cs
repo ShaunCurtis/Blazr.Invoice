@@ -9,20 +9,20 @@ namespace Blazr.App.Infrastructure.Server;
 /// Mediatr Server Handler that builds a Invoice Aggregate
 /// It uses the Antimony Database Handlers to interface with the database
 /// </summary>
-public record GetInvoiceServerHandler : IRequestHandler<GetInvoiceRequest, Result<Invoice>>
+public record InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.InvoiceRequest, Result<Invoice>>
 {
     private IListRequestHandler _listHandler;
     private IItemRequestHandler _itemHhandler;
     private IMessageBus _messageBus;
 
-    public GetInvoiceServerHandler(IItemRequestHandler itemRequestHandler, IListRequestHandler listRequestHandler, IMessageBus messageBus)
+    public InvoiceAggregateServerHandler(IItemRequestHandler itemRequestHandler, IListRequestHandler listRequestHandler, IMessageBus messageBus)
     {
         _messageBus = messageBus;
         _listHandler = listRequestHandler;
         _itemHhandler = itemRequestHandler;
     }
 
-    public async Task<Result<Invoice>> Handle(GetInvoiceRequest request, CancellationToken cancellationToken)
+    public async Task<Result<Invoice>> Handle(InvoiceRequests.InvoiceRequest request, CancellationToken cancellationToken)
     {
         DmoInvoice? invoice = null;
         

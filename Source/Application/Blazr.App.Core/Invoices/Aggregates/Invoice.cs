@@ -24,6 +24,9 @@ public sealed partial class Invoice
 
     public event EventHandler<InvoiceId>? StateHasChanged;
 
+    public static Invoice Default
+        => new Invoice(new DmoInvoice(), Enumerable.Empty<DmoInvoiceItem>());
+
     private List<InvoiceItem> Items { get; set; }
         = new List<InvoiceItem>();
 

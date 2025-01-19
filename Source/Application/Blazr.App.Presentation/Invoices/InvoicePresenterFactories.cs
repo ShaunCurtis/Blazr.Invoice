@@ -22,3 +22,20 @@ public class InvoiceReadPresenterFactory : IReadPresenterFactory<DmoInvoice, Inv
         return presenter;
     }
 }
+
+public class InvoiceEditPresenterFactory
+{
+    private IServiceProvider _serviceProvider;
+    public InvoiceEditPresenterFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public InvoiceEditPresenter GetPresenter(InvoiceId id)
+    {
+        var presenter = ActivatorUtilities.CreateInstance<InvoiceEditPresenter>(_serviceProvider, new[] { id });
+        ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
+        return presenter;
+    }
+}
+

@@ -12,7 +12,7 @@ public class CustomerIdProvider : IRecordIdProvider<DmoCustomer, CustomerId>
         if (key is Guid value)
             return new(value);
 
-        throw new InvalidKeyProviderException("Object provided is not a WeatherForecastId Value");
+        throw new InvalidKeyProviderException("Object provided is not a CustomerId Value");
     }
 
     public CustomerId GetKey(DmoCustomer record)

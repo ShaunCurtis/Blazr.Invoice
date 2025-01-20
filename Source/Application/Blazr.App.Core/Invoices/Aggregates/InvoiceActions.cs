@@ -8,11 +8,13 @@ namespace Blazr.App.Core;
 
 public static class InvoiceActions
 {
+    public readonly record struct GetInvoiceItemAction(InvoiceItemId id);
+
     public readonly record struct UpdateInvoiceAction(DmoInvoice Item);
 
     public readonly record struct DeleteInvoiceAction();
 
-    public readonly record struct DeleteInvoiceItemAction(DmoInvoiceItem Item);
+    public readonly record struct DeleteInvoiceItemAction(InvoiceItemId Id);
 
     public readonly record struct UpdateInvoiceItemAction(DmoInvoiceItem Item);
 

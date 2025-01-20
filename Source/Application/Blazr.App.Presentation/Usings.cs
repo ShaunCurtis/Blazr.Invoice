@@ -6,3 +6,5 @@ global using Blazr.Gallium;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Components.QuickGrid;
+global using Blazored.Toast.Services;
+global using Microsoft.AspNetCore.Components.Forms;

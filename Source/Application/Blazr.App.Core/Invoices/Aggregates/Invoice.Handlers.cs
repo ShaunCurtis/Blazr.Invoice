@@ -28,11 +28,19 @@ public sealed partial class Invoice
         return Result.Success();
     }
 
+    public DmoInvoiceItem Dispatch(InvoiceActions.GetInvoiceItemAction action)
+    {
+        var record = this.Items.SingleOrDefault(item => item.InvoiceItemRecord.Id == action.id);
+        
+        return record?.InvoiceItemRecord 
+            ?? new DmoInvoiceItem { InvoiceId = this.InvoiceRecord.Id, Id = InvoiceItemId.Create };
+    }
+
     public Result Dispatch(InvoiceActions.DeleteInvoiceItemAction action)
     {
-        var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord == action.Item);
+        var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord.Id == action.Id);
         if (invoiceItem is null)
-            return Result.Fail(new ActionException($"No Invoice Item with Id: {action.Item.Id} exists in the Invoice"));
+            return Result.Fail(new ActionException($"No Invoice Item with Id: {action.Id} exists in the Invoice"));
 
         // we don#t set the Command State to delete because the handler needs to know
         // if the deleted item is New and therefore not in the data store
@@ -44,7 +52,7 @@ public sealed partial class Invoice
         return Result.Success();
     }
 
-    public Result DispatchAsync(InvoiceActions.UpdateInvoiceItemAction action)
+    public Result Dispatch(InvoiceActions.UpdateInvoiceItemAction action)
     {
         var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord == action.Item);
 
@@ -63,7 +71,8 @@ public sealed partial class Invoice
         if (this.Items.Any(item => item.InvoiceItemRecord == action.Item))
             return Result.Fail(new ActionException($"The Invoice Item with Id: {action.Item.Id} already exists in the Invoice."));
 
-        var invoiceItem = new InvoiceItem(action.Item, this.ItemUpdated, action.IsNew);
+        var invoiceItemRecord = action.Item with { InvoiceId = this.InvoiceRecord.Id };
+        var invoiceItem = new InvoiceItem(invoiceItemRecord, this.ItemUpdated, action.IsNew);
         this.Items.Add(invoiceItem);
         this.Process();
 

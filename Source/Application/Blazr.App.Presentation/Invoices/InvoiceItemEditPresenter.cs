@@ -1,8 +1,3 @@
-using Blazored.Toast.Services;
-using Microsoft.AspNetCore.Components.Forms;
-
-using static Blazr.App.Core.InvoiceActions;
-
 /// ============================================================
 /// Author: Shaun Curtis, Cold Elm Coders
 /// License: Use And Donate
@@ -14,7 +9,7 @@ public class InvoiceItemEditPresenter
 {
     private readonly IToastService _toastService;
     private readonly Invoice _invoice;
-    private InvoiceItemId _invoiceItemId = InvoiceItemId.Create;
+    private InvoiceItemId _invoiceItemId = InvoiceItemId.Default;
 
     public IDataResult LastResult { get; private set; } = DataResult.Success();
     public EditContext EditContext { get; private set; }
@@ -40,16 +35,7 @@ public class InvoiceItemEditPresenter
     {
         this.LastResult = DataResult.Success();
 
-        var item = IsNew
-            ? _invoice.GetNewInvoiceItem()
-            : _invoice.GetInvoiceItem(id).Item;
-
-        if (item is null)
-        {
-            this.LastDataResult = DataResult.Failure("The record does not exist.");
-            _toastService.ShowError("The record does not exist.");
-            return new();
-        }
+        var item = _invoice.Dispatch(new InvoiceActions.GetInvoiceItemAction(_invoiceItemId));
 
         return item;
     }
@@ -59,66 +45,61 @@ public class InvoiceItemEditPresenter
 
         if (!this.RecordEditContext.IsDirty)
         {
-            this.LastDataResult = DataResult.Failure("The record has not changed and therefore has not been updated.");
+            this.LastResult = DataResult.Failure("The record has not changed and therefore has not been updated.");
             _toastService.ShowWarning("The record has not changed and therefore has not been updated.");
-            return Task.FromResult(this.LastDataResult);
+            return Task.FromResult(this.LastResult);
         }
 
         if (IsNew)
         {
-            var success = _invoice.DispatchInvoiceItemAction(this.RecordEditContext.Id, new AddInvoiceItemAction(this, this.RecordEditContext.AsRecord));
+            var AddAction = _invoice.Dispatch(new InvoiceActions.AddInvoiceItemAction(this.RecordEditContext.AsRecord));
 
-            if (success.Successful)
+            if (AddAction.IsSuccess)
             {
                 var message = "The Invoice Item was added to the invoice.";
                 _toastService.ShowSuccess(message);
-                this.LastDataResult = DataResult.Success(message);
+                this.LastResult = DataResult.Success(message);
             }
             else
             {
                 var message = "The Invoice Item could not be added to the invoice.";
                 _toastService.ShowError(message);
-                this.LastDataResult = DataResult.Failure(message);
+                this.LastResult = DataResult.Failure(message);
             }
 
-            return Task.FromResult(this.LastDataResult);
+            return Task.FromResult(this.LastResult);
         }
 
-        this.LastDataResult = _invoice.DispatchInvoiceItemAction(this.RecordEditContext.Id, new UpdateInvoiceItemAction(this, this.RecordEditContext.AsRecord));
+        var updateResult = _invoice.Dispatch(new InvoiceActions.UpdateInvoiceItemAction(this.RecordEditContext.AsRecord));
+        this.LastResult = updateResult.ToDataResult;
 
-        if (this.LastDataResult.Successful)
+        if (updateResult.IsSuccess)
             _toastService.ShowSuccess("The invoice item was updated.");
         else
-            _toastService.ShowError(this.LastDataResult.Message ?? "The Invoice Item could not be added to the invoice.");
+            _toastService.ShowError(this.LastResult.Message ?? "The Invoice Item could not be added to the invoice.");
 
-        return Task.FromResult(this.LastDataResult);
+        return Task.FromResult(this.LastResult);
     }
 
     public Task<IDataResult> DeleteItemAsync()
     {
         if (IsNew)
         {
-            var message = "You cn't delete an item that you haven't created.";
+            var message = "You can't delete an item that you haven't created.";
             _toastService.ShowError(message);
-            this.LastDataResult = DataResult.Failure(message);
+            this.LastResult = DataResult.Failure(message);
 
-            return Task.FromResult(this.LastDataResult);
+            return Task.FromResult(this.LastResult);
         }
 
-        this.LastDataResult = _invoice.DispatchInvoiceItemAction(this.RecordEditContext.Id, new DeleteInvoiceItemAction(this));
+        var deleteResult = _invoice.Dispatch(new InvoiceActions.DeleteInvoiceItemAction(this.RecordEditContext.Id));
+        this.LastResult = deleteResult.ToDataResult;
 
-        if (this.LastDataResult.Successful)
+        if (this.LastResult.Successful)
             _toastService.ShowSuccess("The invoice item was deleted.");
         else
-            _toastService.ShowError(this.LastDataResult.Message ?? "The Invoice Item could not be deleted from the invoice.");
+            _toastService.ShowError(this.LastResult.Message ?? "The Invoice Item could not be deleted from the invoice.");
 
-        return Task.FromResult(this.LastDataResult);
-    }
-
-    public static InvoiceItemEditPresenter CreateInstance(InvoiceComposite composite, IToastService toastService, InvoiceItemId id)
-    {
-        var presenter = new InvoiceItemEditPresenter(composite, toastService, id);
-
-        return presenter;
+        return Task.FromResult(this.LastResult);
     }
 }

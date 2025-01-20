@@ -11,17 +11,14 @@ public abstract class LookUpPresenter<TItem>
 {
     protected IMediator DataBroker;
 
-    public Task LoadTask { get; private set; } = Task.CompletedTask;
-
     public IEnumerable<TItem> Items { get; protected set; } = Enumerable.Empty<TItem>();
 
     public LookUpPresenter(IMediator dataBroker)
     {
         DataBroker = dataBroker;
-        LoadTask = LoadAsync();
     }
 
-    public abstract Task<bool> LoadAsync();
+    public abstract ValueTask<Result> LoadAsync();
 
     public async void OnUpdate(object? sender, EventArgs e)
         => await this.LoadAsync();

@@ -5,10 +5,8 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public interface ILookUpPresenter<TItem>
-    where TItem : class, IFkItem, new()
+public interface ILookupPresenterFactory<TRecord>
+    where TRecord : class, IFkItem, new()
 {
-    public IEnumerable<TItem> Items { get; }
-
-    public ValueTask<Result> LoadAsync();
+    public ValueTask<ILookUpPresenter<TRecord>> GetPresenterAsync();
 }

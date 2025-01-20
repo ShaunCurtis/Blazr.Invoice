@@ -23,7 +23,6 @@ public class CustomerEditPresenterFactory : IEditPresenterFactory<CustomerEditCo
     }
 }
 
-
 public class CustomerReadPresenterFactory : IReadPresenterFactory<DmoCustomer, CustomerId>
 {
     private IServiceProvider _serviceProvider;
@@ -39,5 +38,43 @@ public class CustomerReadPresenterFactory : IReadPresenterFactory<DmoCustomer, C
         await presenter.LoadAsync(id);
 
         return presenter;
+    }
+}
+
+public class LookupPresenterFactory<TRecord, TPresenter> : ILookupPresenterFactory<TRecord>
+    where TRecord : class, IFkItem, new()
+    where TPresenter: class, ILookUpPresenter<TRecord>
+{
+    private IServiceProvider _serviceProvider;
+    public LookupPresenterFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public async ValueTask<ILookUpPresenter<TRecord>> GetPresenterAsync()
+    {
+        var presenter = ActivatorUtilities.CreateInstance<TPresenter>(_serviceProvider);
+        ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
+        await presenter.LoadAsync();
+
+        return presenter;
+    }
+}
+
+public class CustomerLookupPresenterFactory : ILookupPresenterFactory<CustomerLookUpItem>
+{
+    private IServiceProvider _serviceProvider;
+    public CustomerLookupPresenterFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public async ValueTask<ILookUpPresenter<CustomerLookUpItem>> GetPresenterAsync()
+    {
+        var presenter = ActivatorUtilities.CreateInstance<CustomerLookupPresenter>(_serviceProvider);
+        ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
+        await presenter.LoadAsync();
+
+        return presenter as ILookUpPresenter<CustomerLookUpItem>;
     }
 }

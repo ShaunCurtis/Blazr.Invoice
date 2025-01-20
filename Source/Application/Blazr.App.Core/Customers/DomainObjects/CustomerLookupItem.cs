@@ -7,5 +7,5 @@
 namespace Blazr.App.Core;
 
 public record CustomerLookUpItem
-    : FkItem
+    : FkItem, IFkItem
 { }

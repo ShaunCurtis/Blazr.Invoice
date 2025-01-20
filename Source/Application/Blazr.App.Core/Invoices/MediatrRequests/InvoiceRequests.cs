@@ -8,9 +8,9 @@ namespace Blazr.App.Core;
 
 public static class InvoiceRequests
 {
-    public readonly record struct SaveInvoiceRequest(Invoice Invoice) : IRequest<Result>;
+    public readonly record struct InvoiceSaveRequest(Invoice Invoice) : IRequest<Result>;
 
-    public readonly record struct NewInvoiceRequest() : IRequest<Result<Invoice>>;
+    public readonly record struct InvoiceNewRequest() : IRequest<Result<Invoice>>;
 
     public readonly record struct InvoiceRequest(InvoiceId Id) : IRequest<Result<Invoice>>;
 

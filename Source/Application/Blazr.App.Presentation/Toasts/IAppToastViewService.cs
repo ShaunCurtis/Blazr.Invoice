@@ -4,7 +4,7 @@
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
 
-namespace Blazr.UI.Toasts;
+namespace Blazr.App.Presentation;
 
 /// <summary>
 /// Interface used by the UI component to display Toasts

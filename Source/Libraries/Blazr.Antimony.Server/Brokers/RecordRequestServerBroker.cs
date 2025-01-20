@@ -5,26 +5,26 @@
 /// ============================================================
 namespace Blazr.Antimony.Infrastructure.Server;
 
-public sealed class ItemRequestServerHandler<TDbContext>
-    : IItemRequestHandler
+public sealed class RecordRequestServerBroker<TDbContext>
+    : IRecordRequestBroker
     where TDbContext : DbContext
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IDbContextFactory<TDbContext> _factory;
 
-    public ItemRequestServerHandler(IServiceProvider serviceProvider, IDbContextFactory<TDbContext> factory)
+    public RecordRequestServerBroker(IServiceProvider serviceProvider, IDbContextFactory<TDbContext> factory)
     {
         _serviceProvider = serviceProvider;
         _factory = factory;
     }
 
-    public async ValueTask<Result<TRecord>> ExecuteAsync<TRecord>(ItemQueryRequest<TRecord> request)
+    public async ValueTask<Result<TRecord>> ExecuteAsync<TRecord>(RecordQueryRequest<TRecord> request)
         where TRecord : class
     {
         return await this.GetItemAsync<TRecord>(request);
     }
 
-    private async ValueTask<Result<TRecord>> GetItemAsync<TRecord>(ItemQueryRequest<TRecord> request)
+    private async ValueTask<Result<TRecord>> GetItemAsync<TRecord>(RecordQueryRequest<TRecord> request)
         where TRecord : class
     {
         using var dbContext = _factory.CreateDbContext();

@@ -6,13 +6,14 @@
 
 namespace Blazr.Antimony.Core;
 
-public interface ICommandHandler
+public interface IListRequestBroker
 {
-    public ValueTask<Result<TRecord>> ExecuteAsync<TRecord>(CommandRequest<TRecord> request)
+    public ValueTask<Result<ListResult<TRecord>>> ExecuteAsync<TRecord>(ListQueryRequest<TRecord> request)
         where TRecord : class;
 }
 
-public interface ICommandHandler<TRecord>
+public interface IListRequestBroker<TRecord>
+    where TRecord : class
 {
-    public ValueTask<Result<TRecord>> ExecuteAsync(CommandRequest<TRecord> request);
+    public ValueTask<Result<ListResult<TRecord>>> ExecuteAsync(ListQueryRequest<TRecord> request);
 }

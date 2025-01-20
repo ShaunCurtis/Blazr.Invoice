@@ -7,7 +7,7 @@ namespace Blazr.App.Presentation;
 
 public class InvoiceItemEditPresenter
 {
-    private readonly IToastService _toastService;
+    private readonly IAppToastService _toastService;
     private readonly Invoice _invoice;
     private InvoiceItemId _invoiceItemId = InvoiceItemId.Default;
 
@@ -16,7 +16,7 @@ public class InvoiceItemEditPresenter
     public DmoInvoiceItemEditContext RecordEditContext { get; private set; }
     public bool IsNew { get; private set; }
 
-    internal InvoiceItemEditPresenter(Invoice invoice, IToastService toastService, InvoiceItemId id)
+    internal InvoiceItemEditPresenter(Invoice invoice, IAppToastService toastService, InvoiceItemId id)
     {
         _invoice = invoice;
         _toastService = toastService;

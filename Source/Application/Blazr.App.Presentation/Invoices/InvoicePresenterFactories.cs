@@ -31,9 +31,9 @@ public class InvoiceEditPresenterFactory
         _serviceProvider = serviceProvider;
     }
 
-    public InvoiceEditPresenter GetPresenter(InvoiceId id)
+    public InvoiceEditPresenter GetPresenter(Invoice Invoice)
     {
-        var presenter = ActivatorUtilities.CreateInstance<InvoiceEditPresenter>(_serviceProvider, new[] { id });
+        var presenter = ActivatorUtilities.CreateInstance<InvoiceEditPresenter>(_serviceProvider, new[] { Invoice });
         ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
         return presenter;
     }

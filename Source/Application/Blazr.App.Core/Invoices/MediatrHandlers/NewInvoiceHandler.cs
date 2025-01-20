@@ -5,7 +5,10 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public record NewInvoiceHandler : IRequestHandler<InvoiceRequests.NewInvoiceRequest, Result<Invoice>>
+/// <summary>
+/// Mediatr Handler to return a new Invoice 
+/// </summary>
+public record NewInvoiceHandler : IRequestHandler<InvoiceRequests.InvoiceNewRequest, Result<Invoice>>
 {
     private IRecordFactory<DmoInvoice> _recordFactory;
 
@@ -14,7 +17,7 @@ public record NewInvoiceHandler : IRequestHandler<InvoiceRequests.NewInvoiceRequ
          _recordFactory = newRecordProvider;
     }
 
-    public Task<Result<Invoice>> Handle(InvoiceRequests.NewInvoiceRequest request, CancellationToken cancellationToken)
+    public Task<Result<Invoice>> Handle(InvoiceRequests.InvoiceNewRequest request, CancellationToken cancellationToken)
     {
         var invoiceRecord = _recordFactory.NewRecord();
 

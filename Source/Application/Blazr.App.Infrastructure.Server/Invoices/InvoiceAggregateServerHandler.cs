@@ -11,15 +11,13 @@ namespace Blazr.App.Infrastructure.Server;
 /// </summary>
 public record InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.InvoiceRequest, Result<Invoice>>
 {
-    private IListRequestHandler _listHandler;
-    private IItemRequestHandler _itemHhandler;
-    private IMessageBus _messageBus;
+    private readonly IListRequestBroker _listBroker;
+    private readonly IRecordRequestBroker _recordBroker;
 
-    public InvoiceAggregateServerHandler(IItemRequestHandler itemRequestHandler, IListRequestHandler listRequestHandler, IMessageBus messageBus)
+    public InvoiceAggregateServerHandler(IRecordRequestBroker recordBroker, IListRequestBroker listBroker)
     {
-        _messageBus = messageBus;
-        _listHandler = listRequestHandler;
-        _itemHhandler = itemRequestHandler;
+        _listBroker = listBroker;
+        _recordBroker = recordBroker;
     }
 
     public async Task<Result<Invoice>> Handle(InvoiceRequests.InvoiceRequest request, CancellationToken cancellationToken)
@@ -30,8 +28,8 @@ public record InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.In
             Expression<Func<DboInvoice, bool>> findExpression = (item) =>
                 item.InvoiceID == request.Id.Value;
 
-            var query = new ItemQueryRequest<DboInvoice>(findExpression);
-            var result = await _itemHhandler.ExecuteAsync<DboInvoice>(query);
+            var query = new RecordQueryRequest<DboInvoice>(findExpression);
+            var result = await _recordBroker.ExecuteAsync<DboInvoice>(query);
             
             if (!result.HasSucceeded(out DboInvoice? record))
                 return result.ConvertFail<Invoice>();
@@ -45,7 +43,7 @@ public record InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.In
                 item.InvoiceID == request.Id.Value;
             
             var query = new ListQueryRequest<DboInvoiceItem>() { FilterExpression=filterExpression };
-            var result = await _listHandler.ExecuteAsync<DboInvoiceItem>(query);
+            var result = await _listBroker.ExecuteAsync<DboInvoiceItem>(query);
             
             if (!result.HasSucceeded(out ListResult<DboInvoiceItem> records))
                 return result.ConvertFail<Invoice>();

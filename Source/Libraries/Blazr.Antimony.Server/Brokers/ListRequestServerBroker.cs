@@ -6,14 +6,14 @@
 
 namespace Blazr.Antimony.Infrastructure.Server;
 
-public sealed class ListRequestServerHandler<TDbContext>
-    : IListRequestHandler
+public sealed class ListRequestServerBroker<TDbContext>
+    : IListRequestBroker
     where TDbContext : DbContext
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IDbContextFactory<TDbContext> _factory;
 
-    public ListRequestServerHandler(IDbContextFactory<TDbContext> factory, IServiceProvider serviceProvider)
+    public ListRequestServerBroker(IDbContextFactory<TDbContext> factory, IServiceProvider serviceProvider)
     {
         _factory = factory;
         _serviceProvider = serviceProvider;

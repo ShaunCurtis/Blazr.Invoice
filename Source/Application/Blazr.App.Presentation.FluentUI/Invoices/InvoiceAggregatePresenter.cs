@@ -68,7 +68,7 @@ public class InvoiceAggregatePresenter
 
     public async ValueTask<Result> SaveAsync()
     {
-        var result = await _dataBroker.Send(new InvoiceRequests.SaveInvoiceRequest(this.Invoice));
+        var result = await _dataBroker.Send(new InvoiceRequests.InvoiceSaveRequest(this.Invoice));
 
         LastResult = result.ToDataResult;
 

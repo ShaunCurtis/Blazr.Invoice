@@ -21,12 +21,12 @@ public static class ApplicationServerInfrastructureServices
         services.AddScoped<IMessageBus, MessageBus>();
 
         // Add the standard handlers
-        services.AddScoped<IListRequestHandler, ListRequestServerHandler<InMemoryInvoiceTestDbContext>>();
-        services.AddScoped<IItemRequestHandler, ItemRequestServerHandler<InMemoryInvoiceTestDbContext>>();
-        services.AddScoped<ICommandHandler, CommandServerHandler<InMemoryInvoiceTestDbContext>>();
+        services.AddScoped<IListRequestBroker, ListRequestServerBroker<InMemoryInvoiceTestDbContext>>();
+        services.AddScoped<IRecordRequestBroker, RecordRequestServerBroker<InMemoryInvoiceTestDbContext>>();
+        services.AddScoped<ICommandBroker, CommandServerBroker<InMemoryInvoiceTestDbContext>>();
 
         // Add Custom Handlers
-        services.AddScoped<ICommandHandler<Invoice>, InvoiceCommandServerHandler<InMemoryInvoiceTestDbContext>>();
+        services.AddScoped<ICommandBroker<Invoice>, InvoiceCommandServerBroker<InMemoryInvoiceTestDbContext>>();
 
         // Add any individual entity services
         services.AddCustomerInfrastructureServices();

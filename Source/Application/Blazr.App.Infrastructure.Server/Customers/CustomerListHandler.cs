@@ -5,13 +5,16 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure.Server;
 
+/// <summary>
+/// Mediatr Handler for executing list requests against a Customer Entity
+/// </summary>
 public record CustomerListHandler : IRequestHandler<CustomerListRequest, Result<ListResult<DmoCustomer>>>
 {
-    private IListRequestHandler listRequestHandler;
+    private IListRequestBroker _broker;
 
-    public CustomerListHandler(IListRequestHandler listRequestHandler)
+    public CustomerListHandler(IListRequestBroker broker)
     {
-        this.listRequestHandler = listRequestHandler;
+        this._broker = broker;
     }
 
     public async Task<Result<ListResult<DmoCustomer>>> Handle(CustomerListRequest request, CancellationToken cancellationToken)
@@ -28,7 +31,7 @@ public record CustomerListHandler : IRequestHandler<CustomerListRequest, Result<
             Cancellation = cancellationToken
         };
 
-        var result = await listRequestHandler.ExecuteAsync<DboCustomer>(query);
+        var result = await _broker.ExecuteAsync<DboCustomer>(query);
 
         if (!result.HasSucceeded(out ListResult<DboCustomer> listResult))
             return result.ConvertFail<ListResult<DmoCustomer>>();

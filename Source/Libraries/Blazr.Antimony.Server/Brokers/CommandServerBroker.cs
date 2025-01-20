@@ -10,13 +10,13 @@ namespace Blazr.Antimony.Infrastructure.Server;
 /// against an EF `TDbContext`
 /// </summary>
 /// <typeparam name="TDbContext"></typeparam>
-public sealed class CommandServerHandler<TDbContext>
-    : ICommandHandler
+public sealed class CommandServerBroker<TDbContext>
+    : ICommandBroker
     where TDbContext : DbContext
 {
     private readonly IDbContextFactory<TDbContext> _factory;
 
-    public CommandServerHandler(IDbContextFactory<TDbContext> factory)
+    public CommandServerBroker(IDbContextFactory<TDbContext> factory)
     {
         _factory = factory;
     }

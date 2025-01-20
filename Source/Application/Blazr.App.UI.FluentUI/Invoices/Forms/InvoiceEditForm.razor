@@ -1,8 +1,7 @@
 ﻿@namespace Blazr.App.UI.FluentUI
 @implements IDialogContentComponent<Invoice>
-@inject IToastService ToastService
-@inject PresenterFactory PresenterFactory
-@inject InvoicePresenterFactory InvoicePresenterFactory
+@inject IAppToastService ToastService
+@inject InvoiceEditPresenterFactory InvoicePresenterFactory
 @inject NavigationManager NavManager
 
 <!-- Header -->
@@ -98,8 +97,8 @@
     protected async override Task OnInitializedAsync()
     {
         ArgumentNullException.ThrowIfNull(this.Content);
-        this.CustomerLookupPresenter = await this.PresenterFactory.CreateGuidLookupPresenterAsync<CustomerLookUpItem>();
-        this.Presenter = await this.InvoicePresenterFactory.CreateInvoiceEditInstanceAsync(this.Content);
+        //this.CustomerLookupPresenter = await this.PresenterFactory.CreateGuidLookupPresenterAsync<CustomerLookUpItem>();
+        this.Presenter = await this.InvoicePresenterFactory.GetPresenter(this.Content);
  
         if (this.Content.State.IsNew)
             this.Presenter.EditContext.Validate();
@@ -141,7 +140,7 @@
             return;
         }
 
-        await this.Presenter.SaveItemAsync();
+        await this.Presenter.SaveItemToAggregateAsync();
 
         if (this.Presenter.LastDataResult.Successful)
             await Dialog.CloseAsync(Content);

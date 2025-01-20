@@ -3,17 +3,10 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-
 namespace Blazr.Antimony.Core;
 
-public interface IListRequestHandler
+public interface IRecordRequestBroker
 {
-    public ValueTask<Result<ListResult<TRecord>>> ExecuteAsync<TRecord>(ListQueryRequest<TRecord> request)
+    public ValueTask<Result<TRecord>> ExecuteAsync<TRecord>(RecordQueryRequest<TRecord> request)
         where TRecord : class;
-}
-
-public interface IListRequestHandler<TRecord>
-    where TRecord : class
-{
-    public ValueTask<Result<ListResult<TRecord>>> ExecuteAsync(ListQueryRequest<TRecord> request);
 }

@@ -3,14 +3,14 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Blazored.Toast.Services;
-using Microsoft.AspNetCore.Components.Forms;
-
 namespace Blazr.App.Presentation;
 
+/// <summary>
+/// Provides the Edit context for a Invoice entity in an Invoice Aggregate
+/// </summary>
 public class InvoiceEditPresenter
 {
-    private readonly IToastService _toastService;
+    private readonly IAppToastService _toastService;
     private readonly Invoice _invoice;
 
     public IDataResult LastResult { get; private set; } = DataResult.Success();
@@ -18,7 +18,7 @@ public class InvoiceEditPresenter
     public DmoInvoiceEditContext RecordEditContext { get; private set; }
     public bool IsNew => _invoice.State == CommandState.Add;
 
-    public InvoiceEditPresenter(Invoice invoice, IToastService toastService)
+    public InvoiceEditPresenter(Invoice invoice, IAppToastService toastService)
     {
         _invoice = invoice;
         _toastService = toastService;
@@ -26,7 +26,11 @@ public class InvoiceEditPresenter
         this.EditContext = new(this.RecordEditContext);
     }
 
-    public Task<IDataResult> SaveItemAsync()
+    /// <summary>
+    /// Updates the Invoice entity in the Invoice Aggregate
+    /// </summary>
+    /// <returns></returns>
+    public Task<IDataResult> SaveItemToAggregateAsync()
     {
 
         if (!this.RecordEditContext.IsDirty)

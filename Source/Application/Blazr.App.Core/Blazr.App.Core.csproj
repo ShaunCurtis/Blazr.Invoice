@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Invoices\Requests\InvoiceRecordRequest.cs~RFe696cad.TMP" />
+    <None Remove="Invoices\MediatrRequests\InvoiceRecordRequest.cs~RFe696cad.TMP" />
   </ItemGroup>
 
 	<ItemGroup>

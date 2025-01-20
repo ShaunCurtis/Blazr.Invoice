@@ -5,20 +5,23 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure.Server;
 
+/// <summary>
+/// Mediatr Handler for executing commands against a Customer Entity
+/// </summary>
 public record CustomerCommandHandler : IRequestHandler<CustomerCommandRequest, Result<CustomerId>>
 {
-    private ICommandHandler _handler;
+    private ICommandBroker _broker;
     private IMessageBus _messageBus;
 
-    public CustomerCommandHandler(ICommandHandler handler, IMessageBus messageBus)
+    public CustomerCommandHandler(ICommandBroker broker, IMessageBus messageBus)
     {
         _messageBus = messageBus;
-        _handler = handler;
+        _broker = broker;
     }
 
     public async Task<Result<CustomerId>> Handle(CustomerCommandRequest request, CancellationToken cancellationToken)
     {
-        var result = await _handler.ExecuteAsync<DboCustomer>(new CommandRequest<DboCustomer>(
+        var result = await _broker.ExecuteAsync<DboCustomer>(new CommandRequest<DboCustomer>(
             Item: DboCustomerMap.Map(request.Item),
             State: request.State,
             Cancellation: cancellationToken

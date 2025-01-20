@@ -5,13 +5,16 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure.Server;
 
+/// <summary>
+/// Mediatr Handler for executing record requests to get a Customer Entity
+/// </summary>
 public record CustomerRecordHandler : IRequestHandler<CustomerRecordRequest, Result<DmoCustomer>>
 {
-    private IItemRequestHandler _handler;
+    private IRecordRequestBroker _broker;
 
-    public CustomerRecordHandler(IItemRequestHandler handler)
+    public CustomerRecordHandler(IRecordRequestBroker broker)
     {
-        _handler = handler;
+        _broker = broker;
     }
 
     public async Task<Result<DmoCustomer>> Handle(CustomerRecordRequest request, CancellationToken cancellationToken)
@@ -19,9 +22,9 @@ public record CustomerRecordHandler : IRequestHandler<CustomerRecordRequest, Res
         Expression<Func<DboCustomer, bool>> findExpression = (item) =>
             item.CustomerID == request.Id.Value;
 
-        var query = new ItemQueryRequest<DboCustomer>(findExpression);
+        var query = new RecordQueryRequest<DboCustomer>(findExpression);
 
-        var result = await _handler.ExecuteAsync<DboCustomer>(query);
+        var result = await _broker.ExecuteAsync<DboCustomer>(query);
 
         if (!result.HasSucceeded(out DboCustomer? record))
             return result.ConvertFail<DmoCustomer>();

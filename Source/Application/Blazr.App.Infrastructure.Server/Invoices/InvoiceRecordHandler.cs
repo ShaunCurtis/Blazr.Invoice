@@ -5,13 +5,16 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure.Server;
 
-public record InvoiceItemHandler : IRequestHandler<InvoiceRequests.InvoiceRecordRequest, Result<DmoInvoice>>
+/// <summary>
+/// Mediator Handler to get an Invoice Entity - A DmoInvoice object
+/// </summary>
+public record InvoiceRecordHandler : IRequestHandler<InvoiceRequests.InvoiceRecordRequest, Result<DmoInvoice>>
 {
-    private IItemRequestHandler _handler;
+    private IRecordRequestBroker _broker;
 
-    public InvoiceItemHandler(IItemRequestHandler handler)
+    public InvoiceRecordHandler(IRecordRequestBroker broker)
     {
-        _handler = handler;
+        _broker = broker;
     }
 
     public async Task<Result<DmoInvoice>> Handle(InvoiceRequests.InvoiceRecordRequest request, CancellationToken cancellationToken)
@@ -19,9 +22,9 @@ public record InvoiceItemHandler : IRequestHandler<InvoiceRequests.InvoiceRecord
         Expression<Func<DboInvoice, bool>> findExpression = (item) =>
             item.InvoiceID == request.Id.Value;
 
-        var query = new ItemQueryRequest<DboInvoice>(findExpression);
+        var query = new RecordQueryRequest<DboInvoice>(findExpression);
 
-        var result = await _handler.ExecuteAsync<DboInvoice>(query);
+        var result = await _broker.ExecuteAsync<DboInvoice>(query);
 
         if (!result.HasSucceeded(out DboInvoice? record))
             return result.ConvertFail<DmoInvoice>();

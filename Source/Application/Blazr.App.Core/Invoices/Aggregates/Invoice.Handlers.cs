@@ -1,15 +1,23 @@
-﻿
-
-/// ============================================================
+﻿/// ============================================================
 /// Author: Shaun Curtis, Cold Elm Coders
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using static Blazr.App.Core.InvoiceActions;
+
 namespace Blazr.App.Core;
 
+/// <summary>
+/// Contains all the actions that can be applied to the Invoice Aggregate
+/// </summary>
 public sealed partial class Invoice
 {
-    public Result Dispatch(InvoiceActions.UpdateInvoiceAction action)
+    /// <summary>
+    /// Updates the Invoice record
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public Result Dispatch(UpdateInvoiceAction action)
     {
         this.UpdateInvoice(action.Item);
         return Result.Success();
@@ -22,27 +30,37 @@ public sealed partial class Invoice
     /// <param name="action"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Result Dispatch(InvoiceActions.DeleteInvoiceAction action)
+    public Result Dispatch(DeleteInvoiceAction action)
     {
         this.State = CommandState.Delete;
         return Result.Success();
     }
 
-    public DmoInvoiceItem Dispatch(InvoiceActions.GetInvoiceItemAction action)
+    /// <summary>
+    /// Gets an existing Invoice Item.  If one doesn't exist, reurns a new Invoice Item.
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public DmoInvoiceItem Dispatch(GetInvoiceItemAction action)
     {
         var record = this.Items.SingleOrDefault(item => item.InvoiceItemRecord.Id == action.id);
-        
-        return record?.InvoiceItemRecord 
+
+        return record?.InvoiceItemRecord
             ?? new DmoInvoiceItem { InvoiceId = this.InvoiceRecord.Id, Id = InvoiceItemId.Create };
     }
 
-    public Result Dispatch(InvoiceActions.DeleteInvoiceItemAction action)
+    /// <summary>
+    /// Moves an InvoiveItem to the Bin
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public Result Dispatch(DeleteInvoiceItemAction action)
     {
         var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord.Id == action.Id);
         if (invoiceItem is null)
             return Result.Fail(new ActionException($"No Invoice Item with Id: {action.Id} exists in the Invoice"));
 
-        // we don#t set the Command State to delete because the handler needs to know
+        // we don't set the Command State to delete because the handler needs to know
         // if the deleted item is New and therefore not in the data store
         // The fact that the item is in the Bin is enough to delete it.
         this.ItemsBin.Add(invoiceItem);
@@ -52,7 +70,12 @@ public sealed partial class Invoice
         return Result.Success();
     }
 
-    public Result Dispatch(InvoiceActions.UpdateInvoiceItemAction action)
+    /// <summary>
+    /// Updates an existing InvoiceItem in the Invoice
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public Result Dispatch(UpdateInvoiceItemAction action)
     {
         var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord == action.Item);
 
@@ -66,7 +89,12 @@ public sealed partial class Invoice
         return Result.Success();
     }
 
-    public Result Dispatch(InvoiceActions.AddInvoiceItemAction action)
+    /// <summary>
+    /// Adds an InvoiceItem to the Invoice
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public Result Dispatch(AddInvoiceItemAction action)
     {
         if (this.Items.Any(item => item.InvoiceItemRecord == action.Item))
             return Result.Fail(new ActionException($"The Invoice Item with Id: {action.Item.Id} already exists in the Invoice."));
@@ -86,7 +114,7 @@ public sealed partial class Invoice
     /// <param name="action"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Result Dispatch(InvoiceActions.SetAsPersistedAction action)
+    public Result Dispatch(SetAsPersistedAction action)
     {
         this.State = CommandState.None;
 

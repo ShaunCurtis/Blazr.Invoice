@@ -13,6 +13,8 @@ public static class AppFluentUIPresentationServices
         services.AddScoped<KeyedFluxGateStore<GridState, Guid>>();
         services.AddTransient<FluxGateDispatcher<GridState>, GridStateDispatcher>();
 
+        services.AddScoped<LookupPresenterFactory>();
+
         services.AddQuickGridEntityFrameworkAdapter();
 
         services.AddCustomerFluentUIPresentationServices();

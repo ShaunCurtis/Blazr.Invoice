@@ -47,7 +47,7 @@
         ArgumentNullException.ThrowIfNull(this.Content);
         var invoice = this.InvoiceAggregate ?? this.Content.Invoice;
 
-        var item = invoice.Dispatch(new InvoiceActions.GetInvoiceItemAction(this.Content.Id));
+        _item = invoice.Dispatch(new InvoiceActions.GetInvoiceItemAction(this.Content.Id));
     }
 
     private async Task ExitAsync()

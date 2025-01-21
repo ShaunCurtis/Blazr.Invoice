@@ -13,6 +13,6 @@ public readonly record struct InvoiceId(Guid Value) : IEntityId
 
     public override string ToString()
     {
-        return this.IsDefault ? Value.ToString() : "Not Valid";
+        return Value.ToString();
     }
 }

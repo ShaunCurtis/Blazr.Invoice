@@ -5,6 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
+//[DebuggerDisplay("CustomerId : Value = {Value}")]
 public readonly record struct CustomerId(Guid Value) : IEntityId
 {
     public bool IsDefault => this == Default;
@@ -13,6 +14,6 @@ public readonly record struct CustomerId(Guid Value) : IEntityId
 
     public override string ToString()
     {
-        return this.IsDefault ? Value.ToString() : "Not Valid";
+        return Value.ToString();
     }
 }

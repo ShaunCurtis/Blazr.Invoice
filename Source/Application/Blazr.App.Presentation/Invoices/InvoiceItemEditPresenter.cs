@@ -16,7 +16,7 @@ public class InvoiceItemEditPresenter
     public DmoInvoiceItemEditContext RecordEditContext { get; private set; }
     public bool IsNew { get; private set; }
 
-    internal InvoiceItemEditPresenter(Invoice invoice, IAppToastService toastService, InvoiceItemId id)
+    public InvoiceItemEditPresenter(IAppToastService toastService, Invoice invoice, InvoiceItemId id)
     {
         _invoice = invoice;
         _toastService = toastService;

@@ -1,6 +1,7 @@
 ﻿@namespace Blazr.App.UI.FluentUI
 @implements IDialogContentComponent<Invoice>
 @inject IAppToastService ToastService
+@inject ILookupPresenterFactory LookupPresenterFactory
 @inject InvoiceEditPresenterFactory InvoicePresenterFactory
 @inject NavigationManager NavManager
 
@@ -24,10 +25,10 @@
 <!-- Body -->
 <FluentDialogBody>
 
-    @if (!this.Presenter.LastDataResult.Successful)
+    @if (!this.Presenter.LastResult.Successful)
     {
         <FluentMessageBar Title="Save Failed" Intent="@MessageIntent.Error">
-            @this.Presenter.LastDataResult.Message
+            @this.Presenter.LastResult.Message
         </FluentMessageBar>
 
     }
@@ -39,13 +40,11 @@
             <BlazrEditStateTracker LockNavigation="true" />
 
 
-            <BlazrFluentValidator TRecord="DmoInvoiceEditContext" TValidator="DmoInvoiceEditContextValidator" />
-
             <FluentGridItem sm="12">
 
-                <FluentDatePicker @bind-Value="this.Presenter.RecordEditContext.Date"
-                                  Placeholder="Enter a date"
-                                  Label="Description" />
+                <FluentDatePicker Placeholder="Enter a date"
+                                  @bind-Value="this.Presenter.RecordEditContext.Date"
+                                  Label="Date" />
 
             </FluentGridItem>
 
@@ -84,10 +83,10 @@
 
 @code {
     [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
-    [Parameter] public InvoiceComposite Content { get; set; } = default!;
+    [Parameter] public Invoice Content { get; set; } = default!;
 
     private InvoiceEditPresenter Presenter = default!;
-    private IGuidLookUpPresenter<CustomerLookUpItem> CustomerLookupPresenter = default!;
+    private ILookUpPresenter<CustomerLookUpItem> CustomerLookupPresenter = default!;
 
     private bool _isDirty;
     private bool _isClean => !_isDirty;
@@ -97,10 +96,10 @@
     protected async override Task OnInitializedAsync()
     {
         ArgumentNullException.ThrowIfNull(this.Content);
-        //this.CustomerLookupPresenter = await this.PresenterFactory.CreateGuidLookupPresenterAsync<CustomerLookUpItem>();
-        this.Presenter = await this.InvoicePresenterFactory.GetPresenter(this.Content);
- 
-        if (this.Content.State.IsNew)
+        this.CustomerLookupPresenter = await this.LookupPresenterFactory.GetPresenterAsync<CustomerLookUpItem, CustomerLookupPresenter>();
+        this.Presenter = this.InvoicePresenterFactory.GetPresenter(this.Content);
+
+        if (this.Content.State == CommandState.Add)
             this.Presenter.EditContext.Validate();
     }
 
@@ -142,7 +141,7 @@
 
         await this.Presenter.SaveItemToAggregateAsync();
 
-        if (this.Presenter.LastDataResult.Successful)
+        if (this.Presenter.LastResult.Successful)
             await Dialog.CloseAsync(Content);
     }
 

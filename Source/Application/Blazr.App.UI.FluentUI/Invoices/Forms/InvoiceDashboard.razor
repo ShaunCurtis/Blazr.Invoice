@@ -86,6 +86,7 @@ Justification="JustifyContent.Center">
     {
         this.Presenter = await this.PresenterFactory.CreateAsync(this.InvoiceId);
         this.Presenter.Invoice.StateHasChanged += this.OnAggregateStateChanged;
+        _loading = false;
     }
 
     private Task OnLocationChanging(LocationChangingContext context)

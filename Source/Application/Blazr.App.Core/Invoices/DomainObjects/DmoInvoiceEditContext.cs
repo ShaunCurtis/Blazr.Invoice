@@ -12,11 +12,11 @@ public class DmoInvoiceEditContext : BaseRecordEditContext<DmoInvoice, InvoiceId
     [TrackState] public CustomerLookUpItem? Customer { get; set; }
 
     // We use a DateTime here as some edit controls only like DateTime
-    [TrackState] public DateTime Date { get; set; } = DateTime.Now;
+    [TrackState] public DateTime? Date { get; set; } = DateTime.Now;
 
     public override DmoInvoice AsRecord => this.BaseRecord with
     {
-         Date = DateOnly.FromDateTime(this.Date),
+         Date = DateOnly.FromDateTime(this.Date ?? DateTime.Now),
         CustomerId = new(this.Customer?.Id ?? Guid.Empty),
         CustomerName = this.Customer?.Name ?? "Not Set",
     };

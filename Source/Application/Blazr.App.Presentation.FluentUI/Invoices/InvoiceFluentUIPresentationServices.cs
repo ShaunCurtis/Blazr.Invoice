@@ -13,5 +13,9 @@ public static class InvoiceFluentUIPresentationServices
         services.AddTransient<IReadPresenterFactory<DmoInvoice, InvoiceId>, InvoiceReadPresenterFactory>();
 
         services.AddTransient<InvoiceAggregatePresenterFactory>();
+        services.AddTransient<InvoiceEditPresenterFactory>();
+        services.AddTransient<InvoiceItemEditPresenterFactory>();
+        //services.AddTransient<InvoiceReadPresenterFactory>();
+        services.AddTransient<InvoiceItemRecordFactory>();
     }
 }

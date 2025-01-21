@@ -38,4 +38,20 @@ public class InvoiceEditPresenterFactory
         return presenter;
     }
 }
+public class InvoiceItemEditPresenterFactory
+{
+    private IServiceProvider _serviceProvider;
+    public InvoiceItemEditPresenterFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public InvoiceItemEditPresenter GetPresenter(Invoice invoice, InvoiceItemId invoiceItemId)
+    {
+        var presenter = ActivatorUtilities.CreateInstance<InvoiceItemEditPresenter>(_serviceProvider, new object[] {invoice , invoiceItemId });
+        ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
+        return presenter;
+    }
+}
+
 

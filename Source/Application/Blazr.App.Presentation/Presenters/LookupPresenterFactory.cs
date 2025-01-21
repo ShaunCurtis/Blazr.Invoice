@@ -13,9 +13,9 @@ public class LookupPresenterFactory : ILookupPresenterFactory
         _serviceProvider = serviceProvider;
     }
 
-    public async ValueTask<ILookUpPresenter<TRecord>> GetPresenterAsync<TRecord, TPresenter>()
-    where TRecord : class, IFkItem, new()
-    where TPresenter : class, ILookUpPresenter<TRecord>
+    public async ValueTask<ILookUpPresenter<TLookupRecord>> GetPresenterAsync<TLookupRecord, TPresenter>()
+    where TLookupRecord : class, IFkItem, new()
+    where TPresenter : class, ILookUpPresenter<TLookupRecord>
     {
         var presenter = ActivatorUtilities.CreateInstance<TPresenter>(_serviceProvider);
         ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));

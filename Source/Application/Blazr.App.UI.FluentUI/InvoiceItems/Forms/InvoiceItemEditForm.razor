@@ -1,5 +1,5 @@
 ﻿@namespace Blazr.App.UI.FluentUI
-@implements IDialogContentComponent<InvoiceItemEditData>
+@implements IDialogContentComponent<(InvoiceItemId Id, Invoice Invoice)>
 @inject IAppToastService ToastService
 @inject InvoiceItemEditPresenterFactory PresenterFactory
 @implements IDisposable
@@ -24,10 +24,10 @@
 <!-- Body -->
 <FluentDialogBody>
 
-    @if (!this.Presenter.LastDataResult.Successful)
+    @if (!this.Presenter.LastResult.Successful)
     {
         <FluentMessageBar Title="Save Failed" Intent="@MessageIntent.Error">
-            @this.Presenter.LastDataResult.Message
+            @this.Presenter.LastResult.Message
         </FluentMessageBar>
 
     }
@@ -83,7 +83,7 @@
 
 @code {
     [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
-    [Parameter] public InvoiceItemEditData Content { get; set; } = default!;
+    [Parameter] public (InvoiceItemId Id, Invoice Invoice) Content { get; set; } = default!;
 
     private InvoiceItemEditPresenter Presenter = default!;
 
@@ -96,7 +96,7 @@
     {
         ArgumentNullException.ThrowIfNull(this.Content);
 
-        this.Presenter = this.PresenterFactory.CreateInstance(this.Content.composite, this.Content.invoiceItemId);
+        this.Presenter = this.PresenterFactory.GetPresenter(this.Content.Invoice, this.Content.Id);
     }
 
     protected override void OnParametersSet()
@@ -128,7 +128,7 @@
 
         await this.Presenter.SaveItemAsync();
 
-        if (this.Presenter.LastDataResult.Successful)
+        if (this.Presenter.LastResult.Successful)
             await Dialog.CloseAsync(Content);
     }
 
@@ -136,7 +136,7 @@
     {
         await this.Presenter.DeleteItemAsync();
 
-        if (this.Presenter.LastDataResult.Successful)
+        if (this.Presenter.LastResult.Successful)
             await Dialog.CloseAsync(Content);
     }
 

@@ -19,17 +19,17 @@ public record InvoiceRecordHandler : IRequestHandler<InvoiceRequests.InvoiceReco
 
     public async Task<Result<DmoInvoice>> Handle(InvoiceRequests.InvoiceRecordRequest request, CancellationToken cancellationToken)
     {
-        Expression<Func<DboInvoice, bool>> findExpression = (item) =>
+        Expression<Func<DvoInvoice, bool>> findExpression = (item) =>
             item.InvoiceID == request.Id.Value;
 
-        var query = new RecordQueryRequest<DboInvoice>(findExpression);
+        var query = new RecordQueryRequest<DvoInvoice>(findExpression);
 
-        var result = await _broker.ExecuteAsync<DboInvoice>(query);
+        var result = await _broker.ExecuteAsync<DvoInvoice>(query);
 
-        if (!result.HasSucceeded(out DboInvoice? record))
+        if (!result.HasSucceeded(out DvoInvoice? record))
             return result.ConvertFail<DmoInvoice>();
 
-        var returnItem = DboInvoiceMap.Map(record);
+        var returnItem = DvoInvoiceMap.Map(record);
 
         return Result<DmoInvoice>.Success(returnItem);
     }

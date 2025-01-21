@@ -35,11 +35,12 @@ public sealed partial class Invoice
 
     public Invoice(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> items)
     {
-        InvoiceRecord = invoice;
+        // We create new records for the Invoice and InvoiceItems
+        InvoiceRecord = invoice with { };
 
         foreach (var item in items)
         {
-            Items.Add(new InvoiceItem(item, this.ItemUpdated));
+            Items.Add(new InvoiceItem(item with { }, this.ItemUpdated));
         }
     }
 

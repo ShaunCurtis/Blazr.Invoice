@@ -25,16 +25,16 @@ public record InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.In
         DmoInvoice? invoice = null;
         
         {
-            Expression<Func<DboInvoice, bool>> findExpression = (item) =>
+            Expression<Func<DvoInvoice, bool>> findExpression = (item) =>
                 item.InvoiceID == request.Id.Value;
 
-            var query = new RecordQueryRequest<DboInvoice>(findExpression);
-            var result = await _recordBroker.ExecuteAsync<DboInvoice>(query);
+            var query = new RecordQueryRequest<DvoInvoice>(findExpression);
+            var result = await _recordBroker.ExecuteAsync<DvoInvoice>(query);
             
-            if (!result.HasSucceeded(out DboInvoice? record))
+            if (!result.HasSucceeded(out DvoInvoice? record))
                 return result.ConvertFail<Invoice>();
             
-            invoice = DboInvoiceMap.Map(record);
+            invoice = DvoInvoiceMap.Map(record);
         }
 
         List<DmoInvoiceItem>? invoiceItems = new();

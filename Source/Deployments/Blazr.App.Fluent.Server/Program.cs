@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Blazr.App.Infrastructure.Server;
 using Blazr.App.Presentation.FluentUI;
-;
+using Blazr.App.UI.FluentUI;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,8 +20,10 @@ builder.Services.AddRazorComponents()
 builder.Services.AddLogging(builder => builder.AddConsole());
 
 builder.Services.AddFluentUIComponents();
+
 builder.Services.AddAppServerInfrastructureServices();
 builder.Services.AddAppFluentUIPresentationServices();
+builder.Services.AddAppFluentUIServices();
 
 var app = builder.Build();
 

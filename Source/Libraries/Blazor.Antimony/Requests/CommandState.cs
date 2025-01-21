@@ -18,6 +18,11 @@ public readonly record struct CommandState
         Value = value;
     }
 
+    public override string ToString()
+    {
+        return this.Value;
+    }
+
     public CommandState AsDirty
         => this.Index == 0 ? CommandState.Update : this;
 

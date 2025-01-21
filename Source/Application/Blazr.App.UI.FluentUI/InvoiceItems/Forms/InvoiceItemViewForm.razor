@@ -1,9 +1,7 @@
 ﻿@namespace Blazr.App.UI.FluentUI
-@implements IDialogContentComponent<InvoiceItemId>
+@implements IDialogContentComponent<(InvoiceItemId Id, Invoice Invoice)>
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@inject IReadPresenterFactory<DmoInvoiceItem, InvoiceItemId> PresenterFactory
-@inject IToastService ToastService
 
 @if (_isDialog)
 {
@@ -38,30 +36,18 @@
 
 @code {
     [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
-    [Parameter] public InvoiceItemId Content { get; set; } = default!;
-    [CascadingParameter] private InvoiceComposite Composite { get; set; } = default!;
+    [Parameter] public (InvoiceItemId Id, Invoice Invoice) Content { get; set; } = default!;
+    [CascadingParameter] private Invoice InvoiceAggregate { get; set; } = default!;
 
-    private IReadPresenter<DmoInvoiceItem, InvoiceItemId> Presenter = default!;
     private bool _isDialog => this.Dialog is not null;
     private DmoInvoiceItem _item = default!;
 
-    protected async override Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        DmoInvoiceItem? item = null;
+        ArgumentNullException.ThrowIfNull(this.Content);
+        var invoice = this.InvoiceAggregate ?? this.Content.Invoice;
 
-        if (this.Composite is not null)
-            item = this.Composite.GetInvoiceItem(this.Content).Item ?? null;
-
-        if (item is null)
-        {
-            this.Presenter = await this.PresenterFactory.GetPresenterAsync(this.Content);
-            item = this.Presenter.Item;
-        }
-
-        _item = item;
-
-        if (!this.Presenter.LastDataResult.Successful)
-            this.ToastService.ShowError(this.Presenter.LastDataResult.Message ?? "An Error occured retriving the record.");
+        var item = invoice.Dispatch(new InvoiceActions.GetInvoiceItemAction(this.Content.Id));
     }
 
     private async Task ExitAsync()

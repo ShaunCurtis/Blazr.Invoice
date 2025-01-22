@@ -5,6 +5,24 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
+public class EditPresenterFactory<TEditContext, TKey> : IEditPresenterFactory<TEditContext, TKey>
+        where TKey : notnull, IEntityId
+{
+    private IEditPresenter<TEditContext, TKey> _presenter;
+
+    public EditPresenterFactory(IEditPresenter<TEditContext, TKey> presenter)
+    {
+        _presenter = presenter;
+    }
+
+    public async ValueTask<IEditPresenter<TEditContext, TKey>> GetPresenterAsync(TKey id)
+    {
+        await _presenter.LoadAsync(id);
+
+        return _presenter;
+    }
+}
+
 public class CustomerEditPresenterFactory : IEditPresenterFactory<CustomerEditContext, CustomerId>
 {
     private IServiceProvider _serviceProvider;

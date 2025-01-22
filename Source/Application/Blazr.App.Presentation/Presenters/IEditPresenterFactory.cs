@@ -8,5 +8,5 @@ namespace Blazr.App.Presentation;
 public interface IEditPresenterFactory<TRecordEditContext, TKey>
         where TKey : notnull, IEntityId
 {
-    public ValueTask<IEditPresenter<TRecordEditContext, TKey>> GetPresenterAsync(TKey? id);
+    public ValueTask<IEditPresenter<TRecordEditContext, TKey>> GetPresenterAsync(TKey id);
 }

@@ -89,7 +89,7 @@ public abstract partial class GridFormBase<TRecord, TKey> : ComponentBase, IDisp
 
     protected virtual Task OnDashboardAsync(TKey id)
     {
-        this.NavManager.NavigateTo($"{this.UIEntityService.Url}/dash/{RecordIdProvider.GetValueObject(id)}");
+        this.NavManager.NavigateTo($"{this.UIEntityService.Url}/dash/{id.ToString()}");
 
         return Task.CompletedTask;
     }

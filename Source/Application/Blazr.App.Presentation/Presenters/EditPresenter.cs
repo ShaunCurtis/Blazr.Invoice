@@ -13,9 +13,10 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
     where TRecordEditContext : IRecordEditContext<TRecord>, new()
     where TKey : notnull, IEntityId
 {
-    private readonly IRecordIdProvider<TRecord, TKey> _recordIdProvider;
+    private readonly IEntityProvider<TRecord, TKey> _entityProvider;
+    //private readonly IRecordIdProvider<TRecord, TKey> _recordIdProvider;
     protected readonly IMediator Databroker;
-    private readonly IRecordFactory<TRecord> _newRecordProvider;
+    //private readonly IRecordFactory<TRecord> _newRecordProvider;
 
     protected TKey EntityId = default!;
     private bool _isLoaded;
@@ -27,12 +28,11 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
 
     public EditContext EditContext { get; protected set; }
 
-    public EditPresenter(IMediator mediator, IRecordIdProvider<TRecord, TKey> keyProvider, IRecordFactory<TRecord> newRecordProvider)
+    public EditPresenter(IMediator mediator, IEntityProvider<TRecord, TKey> entityProvider)
     {
         this.Databroker = mediator;
-        _recordIdProvider = keyProvider;
-        _newRecordProvider = newRecordProvider;
-
+        _entityProvider = entityProvider;
+ 
         this.EditContext = new EditContext(EditMutator);
     }
 
@@ -88,7 +88,7 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
     {
         this.LastResult = DataResult.Success();
 
-        var record = _newRecordProvider.NewRecord();
+        var record = _entityProvider.NewRecord();
 
         this.EditMutator = new();
         this.EditMutator.Load(record);
@@ -101,13 +101,11 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
         return ValueTask.CompletedTask;
     }
 
-    protected abstract Task<Result<TRecord>> GetItemAsync();
-
     private async ValueTask GetRecordItemAsync()
     {
         this.LastResult = DataResult.Success();
 
-        var result = await GetItemAsync();
+        var result = await _entityProvider.RecordRequest.Invoke(Databroker, this.EntityId );
 
         if (!result.HasSucceeded(out TRecord? record))
         {
@@ -124,8 +122,6 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
         _isLoaded = true;
     }
 
-    protected abstract Task<Result<TKey>> UpdateAsync(TRecord record, CommandState state);
-
     private async ValueTask UpdateRecordAsync(bool refreshOnNew = true)
     {
         LastResult = DataResult.Failure("Nothing to Do");
@@ -137,7 +133,8 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
         var mutatedResult = EditMutator.AsRecord;
 
 
-        var commandResult = await UpdateAsync(mutatedResult, this.CommandState);
+        var commandResult = await _entityProvider.RecordCommand.Invoke( this.Databroker, mutatedResult, this.CommandState);
+
         this.LastResult = commandResult.ToDataResult;
 
         if (!commandResult.HasSucceeded(out TKey? key ))
@@ -145,7 +142,7 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
 
         if (this.CommandState == CommandState.Add && refreshOnNew)
         {
-            this.EntityId = _recordIdProvider.GetKey(key);
+            this.EntityId = _entityProvider.GetKey(key);
             await GetRecordItemAsync();
         }
     }

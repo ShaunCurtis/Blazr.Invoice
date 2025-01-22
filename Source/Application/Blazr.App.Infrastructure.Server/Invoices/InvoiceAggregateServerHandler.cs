@@ -6,10 +6,10 @@
 namespace Blazr.App.Infrastructure.Server;
 
 /// <summary>
-/// Mediatr Server Handler that builds a Invoice Aggregate
+/// Mediatr Server Handler that builds an Invoice Aggregate
 /// It uses the Antimony Database Handlers to interface with the database
 /// </summary>
-public record InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.InvoiceRequest, Result<Invoice>>
+public sealed class InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.InvoiceRequest, Result<Invoice>>
 {
     private readonly IListRequestBroker _listBroker;
     private readonly IRecordRequestBroker _recordBroker;

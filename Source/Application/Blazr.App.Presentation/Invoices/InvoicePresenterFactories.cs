@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public class InvoiceEditPresenterFactory
+public sealed class InvoiceEditPresenterFactory
 {
     private IServiceProvider _serviceProvider;
     public InvoiceEditPresenterFactory(IServiceProvider serviceProvider)
@@ -20,7 +20,7 @@ public class InvoiceEditPresenterFactory
         return presenter;
     }
 }
-public class InvoiceItemEditPresenterFactory
+public sealed class InvoiceItemEditPresenterFactory
 {
     private IServiceProvider _serviceProvider;
     public InvoiceItemEditPresenterFactory(IServiceProvider serviceProvider)

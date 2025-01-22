@@ -8,7 +8,7 @@ namespace Blazr.App.Infrastructure.Server;
 /// <summary>
 /// Mediator Handler to get an Invoice Entity - A DmoInvoice object
 /// </summary>
-public record InvoiceRecordHandler : IRequestHandler<InvoiceRequests.InvoiceRecordRequest, Result<DmoInvoice>>
+public sealed class InvoiceRecordHandler : IRequestHandler<InvoiceRequests.InvoiceRecordRequest, Result<DmoInvoice>>
 {
     private IRecordRequestBroker _broker;
 

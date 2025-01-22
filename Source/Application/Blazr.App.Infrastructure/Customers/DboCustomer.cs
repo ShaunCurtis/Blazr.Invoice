@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure;
 
-public record DboCustomer : ICommandEntity
+public sealed record DboCustomer : ICommandEntity
 {
     [Key] public Guid CustomerID { get; init; }
     public string CustomerName { get; init; } = string.Empty;

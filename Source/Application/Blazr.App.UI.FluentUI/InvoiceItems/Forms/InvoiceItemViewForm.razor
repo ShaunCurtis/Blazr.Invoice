@@ -35,12 +35,20 @@
 <InvoiceItemViewer Item="_item" />
 
 @code {
-    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
-    [Parameter] public (InvoiceItemId Id, Invoice Invoice) Content { get; set; } = default!;
-    [CascadingParameter] private Invoice InvoiceAggregate { get; set; } = default!;
+    [CascadingParameter] public FluentDialog Dialog { get; set; } 
+        = default!;
+    
+    [Parameter] public (InvoiceItemId Id, Invoice Invoice) Content { get; set; } 
+        = default!;
+    
+    [CascadingParameter] private Invoice InvoiceAggregate { get; set; } 
+        = default!;
 
-    private bool _isDialog => this.Dialog is not null;
-    private DmoInvoiceItem _item = default!;
+    private bool _isDialog 
+        => this.Dialog is not null;
+    
+    private DmoInvoiceItem _item 
+        = default!;
 
     protected override void OnInitialized()
     {

@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public class InvoiceItemEditPresenter
+public sealed class InvoiceItemEditPresenter
 {
     private readonly IAppToastService _toastService;
     private readonly Invoice _invoice;

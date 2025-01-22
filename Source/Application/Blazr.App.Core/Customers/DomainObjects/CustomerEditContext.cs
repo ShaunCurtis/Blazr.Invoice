@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public class CustomerEditContext : BaseRecordEditContext<DmoCustomer, CustomerId>, IRecordEditContext<DmoCustomer>
+public sealed class CustomerEditContext : BaseRecordEditContext<DmoCustomer, CustomerId>, IRecordEditContext<DmoCustomer>
 {
     [TrackState] public string CustomerName { get; set; } = string.Empty;
 

@@ -19,11 +19,14 @@
 </FluentDataGrid>
 
 @code {
-    [CascadingParameter] private Invoice InvoiceAggregate { get; set; } = default!;
+    [CascadingParameter] private Invoice InvoiceAggregate { get; set; } 
+        = default!;
 
-    private IQueryable<DmoInvoiceItem> _invoiceItems => this.InvoiceAggregate.InvoiceItems.Select(item => item.InvoiceItemRecord).AsQueryable();
-    private GridSort<Guid> _rankSort = GridSort<Guid>
-        .ByDescending(x => x);
+    private IQueryable<DmoInvoiceItem> _invoiceItems 
+        => this.InvoiceAggregate.InvoiceItems.Select(item => item.InvoiceItemRecord).AsQueryable();
+    
+    private GridSort<Guid> _rankSort 
+        = GridSort<Guid>.ByDescending(x => x);
 
     protected override void OnInitialized()
     {

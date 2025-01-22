@@ -9,7 +9,7 @@ namespace Blazr.App.Infrastructure.Server;
 /// Mediatr Server Handler that saves an Invoice Aggregate
 /// It uses the custom Invoice Database Handler to interface with the database
 /// </summary>
-public record PersistInvoiceServerHandler : IRequestHandler<InvoiceRequests.InvoiceSaveRequest, Result>
+public sealed class PersistInvoiceServerHandler : IRequestHandler<InvoiceRequests.InvoiceSaveRequest, Result>
 {
     private readonly IMessageBus _messageBus;
     private readonly ICommandBroker<Invoice> _broker;

@@ -3,20 +3,17 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Microsoft.AspNetCore.Components.Forms;
 using System.Diagnostics;
 
 namespace Blazr.App.Presentation;
 
-public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPresenter<TRecordEditContext, TKey>
+public class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPresenter<TRecordEditContext, TKey>
     where TRecord : class, new()
     where TRecordEditContext : IRecordEditContext<TRecord>, new()
     where TKey : notnull, IEntityId
 {
-    private readonly IEntityProvider<TRecord, TKey> _entityProvider;
-    //private readonly IRecordIdProvider<TRecord, TKey> _recordIdProvider;
     protected readonly IMediator Databroker;
-    //private readonly IRecordFactory<TRecord> _newRecordProvider;
+    private readonly IEntityProvider<TRecord, TKey> _entityProvider;
 
     protected TKey EntityId = default!;
     private bool _isLoaded;
@@ -32,7 +29,7 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
     {
         this.Databroker = mediator;
         _entityProvider = entityProvider;
- 
+
         this.EditContext = new EditContext(EditMutator);
     }
 
@@ -105,7 +102,7 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
     {
         this.LastResult = DataResult.Success();
 
-        var result = await _entityProvider.RecordRequest.Invoke(Databroker, this.EntityId );
+        var result = await _entityProvider.RecordRequest.Invoke(Databroker, this.EntityId);
 
         if (!result.HasSucceeded(out TRecord? record))
         {
@@ -133,11 +130,11 @@ public abstract class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPr
         var mutatedResult = EditMutator.AsRecord;
 
 
-        var commandResult = await _entityProvider.RecordCommand.Invoke( this.Databroker, mutatedResult, this.CommandState);
+        var commandResult = await _entityProvider.RecordCommand.Invoke(this.Databroker, mutatedResult, this.CommandState);
 
         this.LastResult = commandResult.ToDataResult;
 
-        if (!commandResult.HasSucceeded(out TKey? key ))
+        if (!commandResult.HasSucceeded(out TKey? key))
             return;
 
         if (this.CommandState == CommandState.Add && refreshOnNew)

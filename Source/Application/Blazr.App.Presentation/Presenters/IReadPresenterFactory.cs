@@ -5,9 +5,16 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public interface IReadPresenterFactory<TRecord, TKey>
-    where TRecord : class, new()
-    where TKey : notnull, IEntityId
+//public interface IReadPresenterFactory<TRecord, TKey>
+//    where TRecord : class, new()
+//    where TKey : notnull, IEntityId
+//{
+//    public ValueTask<IReadPresenter<TRecord, TKey>> GetPresenterAsync(TKey id);
+//}
+
+public interface IReadPresenterFactory
 {
-    public ValueTask<IReadPresenter<TRecord, TKey>> GetPresenterAsync(TKey id);
+    public ValueTask<IReadPresenter<TRecord, TKey>> GetPresenterAsync<TRecord, TKey>(TKey id)
+        where TRecord : class, new()
+        where TKey : notnull, IEntityId;
 }

@@ -5,36 +5,33 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public abstract class ReadPresenter<TRecord, TKey> : IReadPresenter<TRecord, TKey>
+public class ReadPresenter<TRecord, TKey> : IReadPresenter<TRecord, TKey>
     where TRecord : class, new()
     where TKey : notnull, IEntityId
 {
-    protected IMediator _dataBroker;
-    private readonly IRecordFactory<TRecord> _newRecordProvider;
+    protected readonly IMediator _dataBroker;
+    private readonly IEntityProvider<TRecord, TKey> _entityProvider;
 
     public TRecord Item { get; protected set; } = new TRecord();
 
     public IDataResult LastResult { get; protected set; } = DataResult.Success();
 
-    public ReadPresenter(IMediator dataBroker, IRecordFactory<TRecord> newRecordProvider)
+    public ReadPresenter(IMediator dataBroker, IEntityProvider<TRecord, TKey> entityProvider)
     {
         _dataBroker = dataBroker;
-        _newRecordProvider = newRecordProvider;
+        _entityProvider = entityProvider;
     }
 
     public async ValueTask LoadAsync(TKey id)
         => await GetRecordItemAsync(id);
 
-    protected abstract Task<Result<TRecord>> GetItemAsync(TKey id);
-
     private async ValueTask GetRecordItemAsync(TKey id)
     {
-        var result = await this.GetItemAsync(id);
+        var result = await _entityProvider.RecordRequest.Invoke(_dataBroker, id);
         
         LastResult = result.ToDataResult;
 
         if (result.HasSucceeded(out TRecord? record))
-            this.Item = record ?? _newRecordProvider.NewRecord(); 
+            this.Item = record ?? _entityProvider.NewRecord(); 
     }
-
 }

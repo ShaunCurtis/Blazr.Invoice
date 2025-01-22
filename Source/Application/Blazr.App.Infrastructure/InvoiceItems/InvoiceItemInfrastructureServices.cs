@@ -9,8 +9,5 @@ public static class InvoiceItemInfrastructureServices
 {
     public static void AddInvoiceItemInfrastructureServices(this IServiceCollection services)
     {
-        services.AddSingleton<IRecordFactory<DmoInvoiceItem>, InvoiceItemRecordFactory>();
-
-        services.AddScoped<IRecordIdProvider<DmoInvoiceItem, InvoiceItemId>, InvoiceItemIdProvider>();
     }
 }

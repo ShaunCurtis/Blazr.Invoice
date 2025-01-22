@@ -10,16 +10,16 @@ namespace Blazr.App.Core;
 /// </summary>
 public record NewInvoiceHandler : IRequestHandler<InvoiceRequests.InvoiceNewRequest, Result<Invoice>>
 {
-    private IRecordFactory<DmoInvoice> _recordFactory;
+    private IEntityProvider<DmoInvoice, InvoiceId> _entityProvider;
 
-    public NewInvoiceHandler(IRecordFactory<DmoInvoice> newRecordProvider)
+    public NewInvoiceHandler(IEntityProvider<DmoInvoice, InvoiceId> entityProvider)
     {
-         _recordFactory = newRecordProvider;
+        _entityProvider = entityProvider;
     }
 
     public Task<Result<Invoice>> Handle(InvoiceRequests.InvoiceNewRequest request, CancellationToken cancellationToken)
     {
-        var invoiceRecord = _recordFactory.NewRecord();
+        var invoiceRecord = _entityProvider.NewRecord();
 
         var invoiceComposite = new Invoice(invoiceRecord, Enumerable.Empty<DmoInvoiceItem>());
 

@@ -10,12 +10,10 @@ public static class InvoiceFluentUIPresentationServices
     public static void AddInvoiceFluentUIPresentationServices(this IServiceCollection services)
     {
         services.AddTransient<IFluentGridPresenter<DmoInvoice>, InvoiceFluentGridPresenter>();
-        services.AddTransient<IReadPresenterFactory<DmoInvoice, InvoiceId>, InvoiceReadPresenterFactory>();
+        services.AddTransient<IReadPresenter<DmoInvoice, InvoiceId>, ReadPresenter<DmoInvoice, InvoiceId>>();
 
         services.AddTransient<InvoiceAggregatePresenterFactory>();
         services.AddTransient<InvoiceEditPresenterFactory>();
         services.AddTransient<InvoiceItemEditPresenterFactory>();
-        //services.AddTransient<InvoiceReadPresenterFactory>();
-        services.AddTransient<InvoiceItemRecordFactory>();
     }
 }

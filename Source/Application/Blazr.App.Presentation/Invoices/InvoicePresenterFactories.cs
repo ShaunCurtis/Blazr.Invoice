@@ -5,24 +5,6 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public class InvoiceReadPresenterFactory : IReadPresenterFactory<DmoInvoice, InvoiceId>
-{
-    private IServiceProvider _serviceProvider;
-    public InvoiceReadPresenterFactory(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
-    public async ValueTask<IReadPresenter<DmoInvoice, InvoiceId>> GetPresenterAsync(InvoiceId id)
-    {
-        var presenter = ActivatorUtilities.CreateInstance<InvoiceReadPresenter>(_serviceProvider);
-        ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
-        await presenter.LoadAsync(id);
-
-        return presenter;
-    }
-}
-
 public class InvoiceEditPresenterFactory
 {
     private IServiceProvider _serviceProvider;

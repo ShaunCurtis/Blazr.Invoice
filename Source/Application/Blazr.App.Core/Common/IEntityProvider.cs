@@ -3,16 +3,18 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-namespace Blazr.App.Core;
 
-/// <summary>
-/// All Concrete implementations should be registered as Singletons to ensure unique new record Ids
-/// are generated for volatile records in composite objects
-/// </summary>
-/// <typeparam name="TRecord"></typeparam>
-public interface IRecordFactory<TRecord>
-    where TRecord : new()
+namespace Blazr.App.Core;
+public interface IEntityProvider<TRecord, TKey>
 {
+    public Func<IMediator, TKey, Task<Result<TRecord>>> RecordRequest { get; }
+
+    public Func<IMediator, TRecord, CommandState, Task<Result<TKey>>> RecordCommand { get; }
+
+    public TKey GetKey(object key);
+
+    public TKey GetKey(TRecord record);
+
     public TRecord NewRecord();
 
     public TRecord DefaultRecord();

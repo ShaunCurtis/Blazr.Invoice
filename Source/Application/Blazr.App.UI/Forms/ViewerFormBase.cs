@@ -9,7 +9,7 @@ public abstract partial class ViewerFormBase<TRecord, TKey> : ComponentBase, IDi
     where TRecord : class, new()
     where TKey : notnull, IEntityId
 {
-    [Inject] protected IReadPresenterFactory<TRecord, TKey> PresenterFactory { get; set; } = default!;
+    [Inject] protected IReadPresenterFactory PresenterFactory { get; set; } = default!;
     [Inject] protected NavigationManager NavManager { get; set; } = default!;
     [Inject] protected IUIEntityService<TRecord> UIEntityService { get; set; } = default!;
     [Inject] protected IMessageBus MessageBus { get; set; } = default!;
@@ -28,7 +28,7 @@ public abstract partial class ViewerFormBase<TRecord, TKey> : ComponentBase, IDi
 
         this.MessageBus.Subscribe<TRecord>(this.OnRecordChanged);
 
-        this.Presenter = await this.PresenterFactory.GetPresenterAsync(this.Uid);
+        this.Presenter = await this.PresenterFactory.GetPresenterAsync<TRecord, TKey>(this.Uid);
     }
 
     private async void OnRecordChanged(object? message)

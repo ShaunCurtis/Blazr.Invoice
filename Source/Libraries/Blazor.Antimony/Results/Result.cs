@@ -22,7 +22,12 @@ public readonly record struct Result
         _error = error;
     }
 
-    public bool IsSuccess { get; }
+    //public Result()
+    //{
+    //    IsSuccess = true;
+    //}
+
+    public bool IsSuccess { get; init; } = true;
     public bool IsFailure => !IsSuccess;
 
     /// <summary>
@@ -45,7 +50,7 @@ public readonly record struct Result
     /// </summary>
     public IDataResult ToDataResult => new DataResult() { Message = _error?.Message, Successful = this.IsSuccess };
 
-    public static Result Success() => new();
+    public static Result Success() => new() { IsSuccess = true };
     public static Result Fail(Exception error) => new(error);
 }
 

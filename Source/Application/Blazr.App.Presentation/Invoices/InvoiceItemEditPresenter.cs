@@ -19,6 +19,7 @@ public class InvoiceItemEditPresenter
     public InvoiceItemEditPresenter(IAppToastService toastService, Invoice invoice, InvoiceItemId id)
     {
         _invoice = invoice;
+        _invoiceItemId = id;
         _toastService = toastService;
 
         // Detect if we have a new item request.
@@ -35,7 +36,7 @@ public class InvoiceItemEditPresenter
     {
         this.LastResult = DataResult.Success();
 
-        var item = _invoice.Dispatch(new InvoiceActions.GetInvoiceItemAction(_invoiceItemId));
+        var item = _invoice.Dispatch(new InvoiceActions.GetInvoiceItemAction(id));
 
         return item;
     }

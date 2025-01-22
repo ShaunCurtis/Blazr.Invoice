@@ -77,7 +77,7 @@ public sealed partial class Invoice
     /// <returns></returns>
     public Result Dispatch(UpdateInvoiceItemAction action)
     {
-        var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord == action.Item);
+        var invoiceItem = this.Items.FirstOrDefault(item => item.InvoiceItemRecord.Id.Equals(action.Item.Id));
 
         if (invoiceItem is null)
             return Result.Fail(new ActionException($"No Invoice Item with Id: {action.Item.Id} exists in the Invoice."));

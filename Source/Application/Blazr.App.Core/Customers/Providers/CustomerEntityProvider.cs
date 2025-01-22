@@ -5,23 +5,8 @@
 /// ============================================================
 
 namespace Blazr.App.Core;
-public interface IEntityProvider<TRecord, TKey>
-{
-    public Func<IMediator, TKey, Task<Result<TRecord>>> RecordRequest { get; }
 
-    public Func<IMediator, TRecord, CommandState, Task<Result<TKey>>> RecordCommand { get; }
-
-    public TKey GetKey(object key);
-
-    public CustomerId GetKey(TRecord record);
-
-    public TRecord NewRecord();
-
-    public TRecord DefaultRecord();
-}
-
-
-public class CustomerEntityProvider : IEntityProvider<DmoCustomer, CustomerId>, IRecordIdProvider<DmoCustomer, CustomerId>, IRecordFactory<DmoCustomer>
+public class CustomerEntityProvider : IEntityProvider<DmoCustomer, CustomerId>
 {
     public Func<IMediator, CustomerId,  Task<Result<DmoCustomer>>> RecordRequest
         => (broker, id) => broker.Send(new CustomerRecordRequest(id));
@@ -42,11 +27,6 @@ public class CustomerEntityProvider : IEntityProvider<DmoCustomer, CustomerId>, 
     public CustomerId GetKey(DmoCustomer record)
     {
         return record.Id;
-    }
-    //TODO - obselete - now uses tostring
-    public object GetValueObject(CustomerId key)
-    {
-        return key.Value;
     }
 
     public DmoCustomer NewRecord()

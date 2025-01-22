@@ -14,6 +14,8 @@ public static class AppFluentUIPresentationServices
         services.AddTransient<FluxGateDispatcher<GridState>, GridStateDispatcher>();
 
         services.AddScoped<ILookupPresenterFactory, LookupPresenterFactory>();
+        services.AddScoped<IEditPresenterFactory, EditPresenterFactory>();
+        services.AddTransient<IReadPresenterFactory, ReadPresenterFactory>();
 
         services.AddQuickGridEntityFrameworkAdapter();
 

@@ -1,7 +1,7 @@
 ﻿@namespace Blazr.App.UI.FluentUI
 @implements IDialogContentComponent<CustomerId>
 @implements IDisposable
-@inject IEditPresenterFactory<CustomerEditContext, CustomerId> PresenterFactory
+@inject IEditPresenterFactory PresenterFactory
  @inject IToastService ToastService
 
 <!-- Header -->
@@ -91,7 +91,7 @@
         // Get the presenter
         if(_isNotInitialized)
         {
-            this.Presenter = await this.PresenterFactory.GetPresenterAsync(this.Content);
+            this.Presenter = await this.PresenterFactory.GetPresenterAsync<CustomerEditContext, CustomerId>(this.Content);
             _isNotInitialized = false;
         }
 

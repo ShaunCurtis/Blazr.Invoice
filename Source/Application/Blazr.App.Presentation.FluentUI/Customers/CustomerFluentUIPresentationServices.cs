@@ -10,7 +10,7 @@ public static class CustomerFluentUIPresentationServices
     public static void AddCustomerFluentUIPresentationServices(this IServiceCollection services)
     {
         services.AddTransient<IFluentGridPresenter<DmoCustomer>, CustomerFluentGridPresenter>();
-        services.AddTransient<IEditPresenterFactory<CustomerEditContext, CustomerId>, CustomerEditPresenterFactory>();
-        services.AddTransient<IReadPresenterFactory<DmoCustomer, CustomerId>, CustomerReadPresenterFactory>();
+        services.AddTransient<IEditPresenter<CustomerEditContext, CustomerId>, EditPresenter<DmoCustomer, CustomerEditContext, CustomerId>>();
+        services.AddTransient<IReadPresenter<DmoCustomer, CustomerId>, ReadPresenter<DmoCustomer, CustomerId>>();
     }
 }

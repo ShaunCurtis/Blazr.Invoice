@@ -13,6 +13,10 @@ public static class AppBootstrapPresentationServices
         services.AddScoped<KeyedFluxGateStore<GridState, Guid>>();
         services.AddTransient<FluxGateDispatcher<GridState>, GridStateDispatcher>();
 
+        services.AddScoped<ILookupPresenterFactory, LookupPresenterFactory>();
+        services.AddScoped<IEditPresenterFactory, EditPresenterFactory>();
+        services.AddTransient<IReadPresenterFactory, ReadPresenterFactory>();
+
         services.AddQuickGridEntityFrameworkAdapter();
 
         services.AddCustomerBootstrapPresentationServices();

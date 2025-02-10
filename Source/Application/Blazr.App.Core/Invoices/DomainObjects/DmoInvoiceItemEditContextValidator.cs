@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public class DmoInvoiceItemEditContextValidator : AbstractValidator<DmoInvoiceItemEditContext>
+public sealed class DmoInvoiceItemEditContextValidator : AbstractValidator<DmoInvoiceItemEditContext>
 {
     public DmoInvoiceItemEditContextValidator()
     {

@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure;
 
-public class DboInvoiceMap : IDboEntityMap<DboInvoice, DmoInvoice>
+public sealed class DboInvoiceMap : IDboEntityMap<DboInvoice, DmoInvoice>
 {
     public DmoInvoice MapTo(DboInvoice item)
         => Map(item);

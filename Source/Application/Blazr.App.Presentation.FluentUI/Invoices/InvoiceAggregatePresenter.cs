@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public class InvoiceAggregatePresenterFactory
+public sealed class InvoiceAggregatePresenterFactory
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -27,10 +27,9 @@ public class InvoiceAggregatePresenterFactory
 }
 
 
-public class InvoiceAggregatePresenter
+public sealed class InvoiceAggregatePresenter
 {
     private readonly IMediator _dataBroker;
-    private readonly IToastService _toastService;
 
     public IDataResult LastResult { get; private set; } = DataResult.Success();
 
@@ -38,9 +37,8 @@ public class InvoiceAggregatePresenter
 
     public IQueryable<DmoInvoiceItem> InvoiceItems => this.Invoice.InvoiceItems.Select(item => item.InvoiceItemRecord).AsQueryable();
 
-    public InvoiceAggregatePresenter(IToastService toastService, IMediator dataBroker)
+    public InvoiceAggregatePresenter(IMediator dataBroker)
     {
-        _toastService = toastService;
         _dataBroker = dataBroker;
 
         // Get a default Invoice

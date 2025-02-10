@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Presentation.FluentUI;
 
-public class CustomerFluentGridPresenter : IFluentGridPresenter<DmoCustomer>
+public sealed class CustomerFluentGridPresenter : IFluentGridPresenter<DmoCustomer>
 {
     IMediator _mediator;
     public CustomerFluentGridPresenter(

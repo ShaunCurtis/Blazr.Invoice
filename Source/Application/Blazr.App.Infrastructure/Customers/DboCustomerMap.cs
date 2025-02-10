@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Infrastructure;
 
-public class DboCustomerMap : IDboEntityMap<DboCustomer, DmoCustomer>
+public sealed class DboCustomerMap : IDboEntityMap<DboCustomer, DmoCustomer>
 {
     public DmoCustomer MapTo(DboCustomer item)
         => Map(item);

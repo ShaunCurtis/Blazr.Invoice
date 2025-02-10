@@ -82,8 +82,11 @@
 </FluentDialogFooter>
 
 @code {
-    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
-    [Parameter] public (InvoiceItemId Id, Invoice Invoice) Content { get; set; } = default!;
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+        = default!;
+
+    [Parameter] public (InvoiceItemId Id, Invoice Invoice) Content { get; set; } 
+        = default!;
 
     private InvoiceItemEditPresenter Presenter = default!;
 

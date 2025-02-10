@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public class DmoInvoiceItemEditContext
+public sealed class DmoInvoiceItemEditContext
 {
     private DmoInvoiceItem _baseRecord;
     public InvoiceItemId Id => _baseRecord.Id;

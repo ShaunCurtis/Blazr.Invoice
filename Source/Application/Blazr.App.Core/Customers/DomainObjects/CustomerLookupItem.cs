@@ -6,6 +6,6 @@
 
 namespace Blazr.App.Core;
 
-public record CustomerLookUpItem
+public sealed record CustomerLookUpItem
     : FkItem, IFkItem
 { }

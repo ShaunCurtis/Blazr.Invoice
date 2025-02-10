@@ -8,7 +8,7 @@ namespace Blazr.App.Infrastructure.Server;
 /// <summary>
 /// Mediatr Handler for executing commands against a Customer Entity
 /// </summary>
-public record CustomerCommandHandler : IRequestHandler<CustomerCommandRequest, Result<CustomerId>>
+public sealed record CustomerCommandHandler : IRequestHandler<CustomerCommandRequest, Result<CustomerId>>
 {
     private ICommandBroker _broker;
     private IMessageBus _messageBus;

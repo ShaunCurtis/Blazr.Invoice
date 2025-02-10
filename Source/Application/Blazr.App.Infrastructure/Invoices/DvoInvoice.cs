@@ -5,7 +5,7 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public record DvoInvoice
+public sealed record DvoInvoice
 {
     [Key] public Guid InvoiceID { get; init; }
     public Guid CustomerID { get; init; }

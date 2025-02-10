@@ -9,7 +9,7 @@ namespace Blazr.App.Presentation;
 /// This object should not be used in DI.
 /// Create an instance through the Factory
 /// </summary>
-public class CustomerLookupPresenter : LookUpPresenter<CustomerLookUpItem>
+public sealed class CustomerLookupPresenter : LookUpPresenter<CustomerLookUpItem>
 {
     public CustomerLookupPresenter(IMediator dataBroker)
         : base(dataBroker) { }

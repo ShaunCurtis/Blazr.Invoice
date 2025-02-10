@@ -8,7 +8,7 @@ namespace Blazr.App.Presentation;
 /// <summary>
 /// Provides the Edit context for a Invoice entity in an Invoice Aggregate
 /// </summary>
-public class InvoiceEditPresenter
+public sealed class InvoiceEditPresenter
 {
     private readonly IAppToastService _toastService;
     private readonly Invoice _invoice;

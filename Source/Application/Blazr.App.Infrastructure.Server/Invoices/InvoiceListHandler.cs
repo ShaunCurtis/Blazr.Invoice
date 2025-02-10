@@ -10,7 +10,7 @@ namespace Blazr.App.Infrastructure.Server;
 /// <summary>
 /// Mediatr Handler for executing list requests against a Invoice Entity
 /// </summary>
-public record InvoiceListHandler : IRequestHandler<InvoiceListRequest, Result<ListResult<DmoInvoice>>>
+public sealed class InvoiceListHandler : IRequestHandler<InvoiceListRequest, Result<ListResult<DmoInvoice>>>
 {
     private IListRequestBroker _broker;
 

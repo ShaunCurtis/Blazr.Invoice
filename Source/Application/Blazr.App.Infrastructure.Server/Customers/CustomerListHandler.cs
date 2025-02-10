@@ -8,7 +8,7 @@ namespace Blazr.App.Infrastructure.Server;
 /// <summary>
 /// Mediatr Handler for executing list requests against a Customer Entity
 /// </summary>
-public record CustomerListHandler : IRequestHandler<CustomerListRequest, Result<ListResult<DmoCustomer>>>
+public sealed record CustomerListHandler : IRequestHandler<CustomerListRequest, Result<ListResult<DmoCustomer>>>
 {
     private IListRequestBroker _broker;
 

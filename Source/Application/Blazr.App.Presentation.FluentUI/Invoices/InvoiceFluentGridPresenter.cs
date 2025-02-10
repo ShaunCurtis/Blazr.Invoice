@@ -5,9 +5,10 @@
 /// ============================================================
 namespace Blazr.App.Presentation.FluentUI;
 
-public class InvoiceFluentGridPresenter : IFluentGridPresenter<DmoInvoice>
+public sealed class InvoiceFluentGridPresenter : IFluentGridPresenter<DmoInvoice>
 {
-    IMediator _mediator;
+    private readonly IMediator _mediator;
+    
     public InvoiceFluentGridPresenter(
         IMediator mediator,
         IMessageBus messageBus,

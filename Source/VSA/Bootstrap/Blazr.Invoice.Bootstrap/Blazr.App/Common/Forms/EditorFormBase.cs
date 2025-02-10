@@ -17,13 +17,13 @@ public abstract class EditorFormBase<TRecord, TKey, TEditContext, TEntityService
     where TEditContext : class, IRecordEditContext<TRecord>, new()
     where TEntityService : class, IUIEntityService<TRecord>
 {
-    [Inject] protected IEditPresenterFactory<TEditContext, TKey> PresenterFactory { get; set; } = default!;
+    [Inject] protected IEditPresenterFactory PresenterFactory { get; set; } = default!;
     [Inject] protected NavigationManager NavManager { get; set; } = default!;
     [Inject] protected IJSRuntime Js { get; set; } = default!;
     [Inject] protected IUIEntityService<TRecord> UIEntityService { get; set; } = default!;
 
     [CascadingParameter] private IModalDialog? ModalDialog { get; set; }
-    [Parameter] public TKey? Uid { get; set; }
+    [Parameter, EditorRequired] public TKey Uid { get; set; } = default!;
     [Parameter] public bool LockNavigation { get; set; } = true;
 
     protected IEditPresenter<TEditContext, TKey> Presenter = default!;
@@ -36,7 +36,9 @@ public abstract class EditorFormBase<TRecord, TKey, TEditContext, TEntityService
 
     protected async override Task OnInitializedAsync()
     {
-        this.Presenter = await this.PresenterFactory.GetPresenterAsync(Uid);
+        ArgumentNullException.ThrowIfNull(Uid);
+
+        this.Presenter = await this.PresenterFactory.GetPresenterAsync<TEditContext, TKey>(Uid);
         this.Presenter.EditContext.OnFieldChanged += OnEditStateMayHaveChanged;
     }
 

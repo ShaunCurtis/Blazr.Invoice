@@ -7,10 +7,14 @@ using Blazr.App.Presentation;
 using Blazr.Gallium;
 using Blazr.UI;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.QuickGrid;
 
 namespace Blazr.App.UI;
 
+/// <summary>
+/// The boilerplate base class for View Forms 
+/// </summary>
+/// <typeparam name="TRecord"></typeparam>
+/// <typeparam name="TKey"></typeparam>
 public abstract partial class ViewerFormBase<TRecord, TKey> : ComponentBase, IDisposable
     where TRecord : class, new()
     where TKey : notnull, IEntityId

@@ -47,7 +47,7 @@ public static class ApplicationServerServices
 
         // Add any individual entity services
         services.AddCustomerServices();
-        //services.AddInvoiceInfrastructureServices();
+        services.AddInvoiceServices();
         //services.AddInvoiceItemInfrastructureServices();
    }
 

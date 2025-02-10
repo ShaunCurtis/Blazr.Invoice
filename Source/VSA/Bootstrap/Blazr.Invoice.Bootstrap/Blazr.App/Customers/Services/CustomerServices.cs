@@ -17,11 +17,8 @@ public static class CustomerServices
         services.AddScoped<IEntityProvider<DmoCustomer, CustomerId>, CustomerEntityProvider>();
         services.AddSingleton<IUIEntityService<DmoCustomer>, CustomerUIEntityService>();
 
-        //services.AddScoped<IRecordIdProvider<DmoCustomer, CustomerId>, CustomerIdProvider>();
-        //services.AddScoped<IRecordFactory<DmoCustomer>, CustomerRecordFactory>();
-
         services.AddTransient<IGridPresenter<DmoCustomer>, CustomerGridPresenter>();
-        //services.AddTransient<IEditPresenterFactory<CustomerEditContext, CustomerId>, CustomerEditPresenterFactory>();
-        //services.AddTransient<IReadPresenterFactory<DmoCustomer, CustomerId>, CustomerReadPresenterFactory>();
+        services.AddTransient<IEditPresenter<CustomerEditContext, CustomerId>, EditPresenter<DmoCustomer, CustomerEditContext, CustomerId>>();
+        services.AddTransient<IReadPresenter<DmoCustomer, CustomerId>, ReadPresenter<DmoCustomer,CustomerId>>();
     }
 }

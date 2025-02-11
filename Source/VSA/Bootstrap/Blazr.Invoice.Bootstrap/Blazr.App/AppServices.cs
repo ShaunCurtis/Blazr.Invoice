@@ -3,6 +3,7 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazored.Toast;
 using Blazr.Antimony.Infrastructure.Server;
 using Blazr.App.Presentation;
 using Blazr.FluxGate;
@@ -16,14 +17,20 @@ public static class ApplicationServerServices
 {
     public static void AddAppServices(this IServiceCollection services)
     {
+        // Add the InMemory Database
         services.AddDbContextFactory<InMemoryInvoiceTestDbContext>(options
             => options.UseInMemoryDatabase($"TestDatabase-{Guid.NewGuid().ToString()}"));
 
+        // Add MediatR
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
                 typeof(DmoCustomer).Assembly
                 ));
 
+        // Add the Gallium Message Bus Server services
         services.AddScoped<IMessageBus, MessageBus>();
+
+        // Add the Blazored Toast services
+        services.AddBlazoredToast();
 
         // Add the standard Antimony Server handlers
         // These are used for simple entities
@@ -43,6 +50,7 @@ public static class ApplicationServerServices
         services.AddScoped<IEditPresenterFactory, EditPresenterFactory>();
         services.AddTransient<IReadPresenterFactory, ReadPresenterFactory>();
 
+        // Add the QuickGrid Entity Framework Adapter
         services.AddQuickGridEntityFrameworkAdapter();
 
         // Add any individual entity services

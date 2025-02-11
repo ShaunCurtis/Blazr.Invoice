@@ -12,14 +12,17 @@
 <div class="@this.ColumnCss">
     <div class="text-end">
         <UIButton Type="button" Hidden="!this.AllowDelete" ButtonSize="UIButtonSize.Small" ButtonColourType="UIButtonColourType.Delete" ClickEvent="this.OnDelete">@Options.DeleteText</UIButton>
+        @if (this.Reset.HasDelegate)
+        {
             <UIButton Type="button" Hidden="_isClean" ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Reset ClickEvent=this.OnReset>@Options.ResetText</UIButton>
-            <UIButton Type="button" Hidden=@_isDirty ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Exit ClickEvent=this.OnDirtyExit>@Options.ExitText</UIButton>
-            <UIButton Type="button" Hidden=@_isClean ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.ExitWithoutSave ClickEvent=this.OnExit>@Options.ExitWithoutSaveText</UIButton>
-            <UIButton Type="@_saveButtonType" Hidden=@_isClean ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Save ClickEvent=this.OnSave>@_saveButtonText</UIButton>
-        </div>
+        }
+        <UIButton Type="button" Hidden=@_isDirty ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Exit ClickEvent=this.OnDirtyExit>@Options.ExitText</UIButton>
+        <UIButton Type="button" Hidden=@_isClean ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.ExitWithoutSave ClickEvent=this.OnExit>@Options.ExitWithoutSaveText</UIButton>
+        <UIButton Type="@_saveButtonType" Hidden=@_isClean ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Save ClickEvent=this.OnSave>@_saveButtonText</UIButton>
     </div>
+</div>
 
-    @code {
+@code {
     [CascadingParameter] private EditContext _editContext { get; set; } = default!;
     [Parameter] public EventCallback Exit { get; set; }
     [Parameter] public EventCallback DirtyExit { get; set; }

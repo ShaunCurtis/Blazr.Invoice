@@ -5,11 +5,11 @@
 /// ============================================================
 namespace Blazr.App.UI;
 
-public sealed record InvoiceUIEntityService : IUIEntityService<DmoCustomer>
+public sealed record InvoiceUIEntityService : IUIEntityService<DmoInvoice>
 {
-    public string SingleDisplayName { get; } = "Customer";
-    public string PluralDisplayName { get; } = "Customers";
-    public Type? EditForm { get; } = typeof(CustomerEditForm);
-    public Type? ViewForm { get; } = typeof(CustomerViewForm);
-    public string Url { get; } = "/customer";
+    public string SingleDisplayName { get; } = "Invoice";
+    public string PluralDisplayName { get; } = "Invoices";
+    public Type? EditForm { get; } = null;
+    public Type? ViewForm { get; } = null;
+    public string Url { get; } = "/invoice";
 }

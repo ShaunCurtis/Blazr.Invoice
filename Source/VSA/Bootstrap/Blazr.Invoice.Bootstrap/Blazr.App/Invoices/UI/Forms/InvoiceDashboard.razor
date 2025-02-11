@@ -8,6 +8,55 @@
 
 <PageTitle>Invoice Dashboard</PageTitle>
 
+@if (_loading)
+{
+    <div class="text-center">
+        <div class="spinner-border" style="width: 5rem; height: 5rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    return;
+}
+
+<div class="d-flex flex-row mb-1 pt-1 border-bottom">
+
+    <div class="flex-fill justify-content-start h4">
+        Invoice Manager
+    </div>
+    
+    <div class="justify-content-end">
+
+        <button class="btn btn-sm btn-primary ms-1" @onclick="this.EditAsync">Edit Invoice Data</button>
+        @if (_isDirty)
+        {
+            <button class="btn btn-sm btn-success ms-1" @onclick="this.SaveAsync">Save Invoice</button>
+            <button class="btn btn-sm btn-danger ms-1" @onclick="this.ExitWithoutSavingAsync">Exit Without Saving</button>
+        }
+        else
+        {
+            <button class="btn btn-sm btn-dark ms-1" @onclick="this.ExitAsync">Exit</button>
+        }
+
+    </div>
+
+</div>
+
+@if (_isDirty)
+{
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill" /></svg>
+        <div>
+            @_message
+        </div>
+    </div>
+}
+
+<CascadingValue Value="_invoice">
+
+    <InvoiceViewer HideHeader="true" HideFooter="true" />
+
+</CascadingValue>
+
 <BsModalDialog @ref=_modalDialog />
 
 @code {
@@ -18,13 +67,13 @@
     private bool _isError = false;
     private IModalDialog _modalDialog = default!;
 
-    private bool _isDirty 
+    private bool _isDirty
         => this.Presenter.Invoice.IsDirty;
-    
-    private string _message 
+
+    private string _message
         => _isError ? this.Presenter.LastResult.Message ?? "Unspecified Error" : "Invoice changes are not currently saved to the data store!";
-    
-    private Invoice _invoice 
+
+    private Invoice _invoice
         => this.Presenter.Invoice ?? Invoice.Default;
 
     protected async override Task OnInitializedAsync()
@@ -53,24 +102,17 @@
 
     private async Task EditAsync()
     {
-        // // Pop up the Editor dialog
-        // var dialog = await DialogService.ShowDialogAsync<InvoiceEditForm>(_invoice, new DialogParameters()
-        //     {
-        //         Title = _invoice.State == CommandState.Add ? "Add Invoice" : "Edit Invoice",
-        //         PreventDismissOnOverlayClick = true,
-        //         PreventScroll = true,
-        //     });
+        var options = new ModalOptions();
 
-        // // Await the result when the dialog closes
-        // var result = await dialog.Result;
+        var result = await _modalDialog.ShowAsync(typeof(InvoiceEditForm), options);
 
-        // // If we have a cancelled new invoice we need to exit back to the invoices page
-        // if (result.Cancelled && _invoice.State == CommandState.Add)
-        // {
-        //     this.ToastService.ShowEvent("You exited creating the new invoice.");
-        //     this.Presenter.FakePersistenceToAllowExit();
-        //     this.NavManager.NavigateTo($"/invoices");
-        // }
+        // If we have cancelled new invoice we need to exit back to the invoices page
+        if(result.ResultType != ModalResultType.OK && _invoice.State == CommandState.Add )
+        {
+            this.ToastService.ShowInfo("You exited creating the new invoice.");
+            this.Presenter.FakePersistenceToAllowExit();
+            this.NavManager.NavigateTo($"/invoices");
+        }
     }
 
     private async Task SaveAsync()

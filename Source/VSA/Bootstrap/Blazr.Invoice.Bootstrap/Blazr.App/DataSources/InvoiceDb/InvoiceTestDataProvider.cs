@@ -26,7 +26,7 @@ public sealed class InvoiceTestDataProvider
     {
         _customers = new();
 
-        var id = Guid.NewGuid();
+        var id = Guid.CreateVersion7();
         DboCustomer customer = new()
         {
             CustomerID = id,
@@ -35,7 +35,7 @@ public sealed class InvoiceTestDataProvider
         _customers.Add(customer);
 
         {
-            var _id = Guid.NewGuid();
+            var _id = Guid.CreateVersion7();
             _invoices.Add(new()
             {
                 InvoiceID = _id,
@@ -45,21 +45,21 @@ public sealed class InvoiceTestDataProvider
             });
             _invoiceItems.Add(new()
             {
-                InvoiceItemID = Guid.NewGuid(),
+                InvoiceItemID = Guid.CreateVersion7(),
                 InvoiceID = _id,
                 Description = "Airbus A321",
                 Amount = 15
             });
             _invoiceItems.Add(new()
             {
-                InvoiceItemID = Guid.NewGuid(),
+                InvoiceItemID = Guid.CreateVersion7(),
                 InvoiceID = _id,
                 Description = "Airbus A350",
                 Amount = 35
             });
         }
 
-        id = Guid.NewGuid();
+        id = Guid.CreateVersion7();
         customer = new()
         {
             CustomerID = id,
@@ -68,7 +68,7 @@ public sealed class InvoiceTestDataProvider
         _customers.Add(customer);
 
         {
-            var _id = Guid.NewGuid();
+            var _id = Guid.CreateVersion7();
             _invoices.Add(new()
             {
                 InvoiceID = _id,
@@ -78,21 +78,21 @@ public sealed class InvoiceTestDataProvider
             });
             _invoiceItems.Add(new()
             {
-                InvoiceItemID = Guid.NewGuid(),
+                InvoiceItemID = Guid.CreateVersion7(),
                 InvoiceID = _id,
                 Description = "Airbus A319",
                 Amount = 12
             });
             _invoiceItems.Add(new()
             {
-                InvoiceItemID = Guid.NewGuid(),
+                InvoiceItemID = Guid.CreateVersion7(),
                 InvoiceID = _id,
                 Description = "Airbus A321",
                 Amount = 15
             });
         }
 
-        id = Guid.NewGuid();
+        id = Guid.CreateVersion7();
         customer = new()
         {
             CustomerID = id,
@@ -101,7 +101,7 @@ public sealed class InvoiceTestDataProvider
         _customers.Add(customer);
 
         {
-            var _id = Guid.NewGuid();
+            var _id = Guid.CreateVersion7();
             _invoices.Add(new()
             {
                 InvoiceID = _id,
@@ -111,19 +111,37 @@ public sealed class InvoiceTestDataProvider
             });
             _invoiceItems.Add(new()
             {
-                InvoiceItemID = Guid.NewGuid(),
+                InvoiceItemID = Guid.CreateVersion7(),
                 InvoiceID = _id,
                 Description = "Airbus A330",
                 Amount = 25
             });
             _invoiceItems.Add(new()
             {
-                InvoiceItemID = Guid.NewGuid(),
+                InvoiceItemID = Guid.CreateVersion7(),
                 InvoiceID = _id,
                 Description = "Airbus A350",
                 Amount = 35
             });
         }
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "TAP" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "American Airlines" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Quantas" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Virgin" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Lufhansa" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "SAS" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Emirates" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Etihad" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Cathay Pacific" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Singapore Airlines" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "United Airlines" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Alaskan" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Logan Air" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Qatar Airlines" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Air Egypt" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Iberia" });
+        _customers.Add(new() { CustomerID = Guid.CreateVersion7(), CustomerName = "Alitalia" });
+
     }
 
     public void LoadDbContext<TDbContext>(IDbContextFactory<TDbContext> factory) where TDbContext : DbContext

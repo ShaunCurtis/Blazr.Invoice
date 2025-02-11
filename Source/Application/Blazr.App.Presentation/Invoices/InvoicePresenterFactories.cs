@@ -20,6 +20,7 @@ public sealed class InvoiceEditPresenterFactory
         return presenter;
     }
 }
+
 public sealed class InvoiceItemEditPresenterFactory
 {
     private IServiceProvider _serviceProvider;

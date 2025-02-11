@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Remove="ApplicationServerInfrastructureServices.cs~RF343cfeb1.TMP" />
     <None Remove="Invoices\MediatrRequests\InvoiceRecordRequest.cs~RFe696cad.TMP" />
+    <None Remove="Invoices\UI\Forms\InvoiceDashboard.razor~RF380f1bd9.TMP" />
   </ItemGroup>
 
 	<ItemGroup>

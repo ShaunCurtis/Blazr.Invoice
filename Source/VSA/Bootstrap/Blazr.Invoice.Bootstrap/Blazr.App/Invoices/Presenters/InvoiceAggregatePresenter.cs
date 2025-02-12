@@ -44,10 +44,10 @@ public sealed class InvoiceAggregatePresenter
         _dataBroker = dataBroker;
 
         // Get a default Invoice
-        this.Invoice = new(new DmoInvoice(), Enumerable.Empty<DmoInvoiceItem>());
+        this.Invoice = Invoice.Default;
     }
 
-    internal async Task LoadAsync(InvoiceId id)
+    public async Task LoadAsync(InvoiceId id)
     {
         this.LastResult = DataResult.Success();
 
@@ -64,6 +64,12 @@ public sealed class InvoiceAggregatePresenter
 
             return;
         }
+    }
+
+    public void Clear()
+    {
+        this.LastResult = DataResult.Success();
+        this.Invoice = Invoice.Default;
     }
 
     public async ValueTask<Result> SaveAsync()

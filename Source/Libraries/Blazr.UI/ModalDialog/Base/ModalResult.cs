@@ -13,11 +13,11 @@ public enum ModalResultType { NoSet, OK, Cancel, Exit }
 /// <summary>
 /// Class to encapsulate the data returned by a Modal Dialog
 /// </summary>
-public sealed class ModalResult
+public readonly record struct ModalResult
 {
-    public ModalResultType ResultType { get; private set; } = ModalResultType.NoSet;
+    public ModalResultType ResultType { get; init; }
 
-    public object? Data { get; set; } = null;
+    public object? Data { get; init; }
 
     public static ModalResult OK() => new ModalResult() { ResultType = ModalResultType.OK };
 

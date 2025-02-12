@@ -52,7 +52,7 @@ public sealed class InvoiceCommandServerBroker<TDbContext>
                 dbContext.Update<DboInvoiceItem>(invoiceItemRecord);
 
             if (invoiceItem.State == CommandState.Add)
-                dbContext.Update<DboInvoiceItem>(invoiceItemRecord);
+                dbContext.Add<DboInvoiceItem>(invoiceItemRecord);
         }
 
         foreach (var invoiceItem in request.Item.InvoiceItemsBin)

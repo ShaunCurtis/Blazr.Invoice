@@ -9,7 +9,10 @@ public sealed class DmoInvoiceEditContext : BaseRecordEditContext<DmoInvoice, In
 {
     public InvoiceId Id => this.BaseRecord.Id;
 
-    [TrackState] public CustomerLookUpItem? Customer { get; set; }
+
+    [TrackState] public string? CustomerName { get; set; }
+    
+    [TrackState] public Guid CustomerId { get; set; }
 
     // We use a DateTime here as some edit controls only like DateTime
     [TrackState] public DateTime? Date { get; set; } = DateTime.Now;
@@ -17,11 +20,9 @@ public sealed class DmoInvoiceEditContext : BaseRecordEditContext<DmoInvoice, In
     public override DmoInvoice AsRecord => this.BaseRecord with
     {
          Date = DateOnly.FromDateTime(this.Date ?? DateTime.Now),
-        CustomerId = new(this.Customer?.Id ?? Guid.Empty),
-        CustomerName = this.Customer?.Name ?? "Not Set",
+        CustomerId = new(this.CustomerId),
+        CustomerName = this.CustomerName ?? "Not Set",
     };
-
-    public bool IsCustomerClean => Customer is not null ? Customer.Id.Equals(this.BaseRecord.CustomerId.Value) : true;
 
     public DmoInvoiceEditContext() : base() { }
 
@@ -34,7 +35,8 @@ public sealed class DmoInvoiceEditContext : BaseRecordEditContext<DmoInvoice, In
 
         this.BaseRecord = record;
         this.Date = record.Date.ToDateTime(TimeOnly.MinValue);
-        this.Customer = new CustomerLookUpItem { Name = record.CustomerName, Id = record.Id.Value };
+        this.CustomerName = record.CustomerName;
+        this.CustomerId = record.CustomerId.Value;
         return DataResult.Success();
     }
 }

@@ -3,13 +3,14 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Blazr.App.Presentation;
 
 public sealed class InvoiceItemEditPresenter
 {
-    private readonly IAppToastService _toastService;
+    private readonly IToastService _toastService;
     private readonly Invoice _invoice;
     private InvoiceItemId _invoiceItemId = InvoiceItemId.Default;
 
@@ -18,7 +19,7 @@ public sealed class InvoiceItemEditPresenter
     public DmoInvoiceItemEditContext RecordEditContext { get; private set; }
     public bool IsNew { get; private set; }
 
-    public InvoiceItemEditPresenter(IAppToastService toastService, Invoice invoice, InvoiceItemId id)
+    public InvoiceItemEditPresenter(IToastService toastService, Invoice invoice, InvoiceItemId id)
     {
         _invoice = invoice;
         _invoiceItemId = id;

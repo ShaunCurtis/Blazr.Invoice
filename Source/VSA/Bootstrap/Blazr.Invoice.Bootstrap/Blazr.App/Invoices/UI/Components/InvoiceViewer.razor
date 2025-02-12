@@ -1,6 +1,8 @@
 ﻿@namespace Blazr.App.UI
+
 @inject IUIEntityService<DmoInvoice> UIEntityService
 @inject NavigationManager NavManager
+@inject InvoiceAggregatePresenter Presenter
 <PageTitle>@this.FormTitle</PageTitle>
 
 @if (!this.HideHeader)
@@ -51,40 +53,21 @@
 
 @code {
     protected virtual string FormTitle => $"{this.UIEntityService.SingleDisplayName} Viewer";
-    [CascadingParameter] private Invoice? Composite { get; set; }
     [CascadingParameter] private IModalDialog? ModalDialog { get; set; }
 
-    [Parameter] public DmoInvoice? Invoice { get; set; }
     [Parameter] public bool HideHeader { get; set; }
     [Parameter] public bool HideFooter { get; set; }
 
-    private DmoInvoice _invoice = default!;
+    private DmoInvoice _invoice => this.Presenter.Invoice.InvoiceRecord;
     private string _exitUrl { get; set; } = "/";
 
     protected override void OnInitialized()
     {
-        if (this.Composite is null && this.Invoice is null)
-            ArgumentNullException.ThrowIfNull(this.Composite);
-
-        _invoice = this.Composite is not null
-            ? this.Composite.InvoiceRecord
-            : this.Invoice!;
-
-        if (this.Composite is not null)
-        {
-            this.Composite.StateHasChanged += this.OnCompositeStateChanged;
-            _invoice = this.Composite.InvoiceRecord;
-            return;
-        }
-
-        _invoice = this.Invoice!;
-
+      this.Presenter.Invoice.StateHasChanged += this.OnInvoiceContextStateChanged;
     }
 
-    private void OnCompositeStateChanged(object? sender, InvoiceId id)
+    private void OnInvoiceContextStateChanged(object? sender, InvoiceId id)
     {
-        // We need to reload the invoice from the composite
-        _invoice = this.Composite!.InvoiceRecord;
         this.StateHasChanged();
     }
 
@@ -99,7 +82,6 @@
 
     public void Dispose()
     {
-        if (this.Composite is not null)
-            this.Composite.StateHasChanged -= this.OnCompositeStateChanged;
+        this.Presenter.Invoice.StateHasChanged -= this.OnInvoiceContextStateChanged;
     }
 }

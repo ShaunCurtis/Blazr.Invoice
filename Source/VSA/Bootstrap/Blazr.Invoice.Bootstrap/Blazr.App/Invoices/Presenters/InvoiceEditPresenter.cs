@@ -3,6 +3,7 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Blazr.App.Presentation;
@@ -12,17 +13,17 @@ namespace Blazr.App.Presentation;
 /// </summary>
 public sealed class InvoiceEditPresenter
 {
-    private readonly IAppToastService _toastService;
+    private readonly IToastService _toastService;
     private readonly Invoice _invoice;
 
     public IDataResult LastResult { get; private set; } = DataResult.Success();
     public EditContext EditContext { get; private set; }
     public DmoInvoiceEditContext RecordEditContext { get; private set; }
-    public bool IsNew => _invoice.State == CommandState.Add;
+    public bool IsNew => _invoice.InvoiceRecord.Id == InvoiceId.Default;
 
-    public InvoiceEditPresenter(Invoice invoice, IAppToastService toastService)
+    public InvoiceEditPresenter(InvoiceAggregatePresenter invoiceAggregatePresenter, IToastService toastService)
     {
-        _invoice = invoice;
+        _invoice = invoiceAggregatePresenter.Invoice;
         _toastService = toastService;
         this.RecordEditContext = new(_invoice.InvoiceRecord);
         this.EditContext = new(this.RecordEditContext);
@@ -34,7 +35,6 @@ public sealed class InvoiceEditPresenter
     /// <returns></returns>
     public Task<IDataResult> SaveItemToAggregateAsync()
     {
-
         if (!this.RecordEditContext.IsDirty)
         {
             this.LastResult = DataResult.Failure("The record has not changed and therefore has not been updated.");
@@ -42,7 +42,12 @@ public sealed class InvoiceEditPresenter
             return Task.FromResult(this.LastResult);
         }
 
-        var result = _invoice.Dispatch(new InvoiceActions.UpdateInvoiceAction(this.RecordEditContext.AsRecord));
+        // get the updated invoice, Need to create a new invoice Id if the Id is the default
+        var invoice = this.RecordEditContext.Id == InvoiceId.Default
+            ? this.RecordEditContext.AsRecord
+            : this.RecordEditContext.AsRecord with { Id = InvoiceId.Create };
+
+        var result = _invoice.Dispatch(new InvoiceActions.UpdateInvoiceAction(invoice));
 
         if (result.IsSuccess)
             _toastService.ShowSuccess("The invoice data was updated.");

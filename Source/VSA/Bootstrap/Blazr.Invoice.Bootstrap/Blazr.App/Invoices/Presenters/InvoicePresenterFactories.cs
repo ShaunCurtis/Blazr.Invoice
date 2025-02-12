@@ -7,21 +7,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazr.App.Presentation;
 
-public sealed class InvoiceEditPresenterFactory
-{
-    private IServiceProvider _serviceProvider;
-    public InvoiceEditPresenterFactory(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
+//public sealed class InvoiceEditPresenterFactory
+//{
+//    private IServiceProvider _serviceProvider;
+//    public InvoiceEditPresenterFactory(IServiceProvider serviceProvider)
+//    {
+//        _serviceProvider = serviceProvider;
+//    }
 
-    public InvoiceEditPresenter GetPresenter(Invoice Invoice)
-    {
-        var presenter = ActivatorUtilities.CreateInstance<InvoiceEditPresenter>(_serviceProvider, new[] { Invoice });
-        ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
-        return presenter;
-    }
-}
+//    public InvoiceEditPresenter GetPresenter(Invoice Invoice)
+//    {
+//        var presenter = ActivatorUtilities.CreateInstance<InvoiceEditPresenter>(_serviceProvider, new[] { Invoice });
+//        ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
+//        return presenter;
+//    }
+//}
+
 public sealed class InvoiceItemEditPresenterFactory
 {
     private IServiceProvider _serviceProvider;

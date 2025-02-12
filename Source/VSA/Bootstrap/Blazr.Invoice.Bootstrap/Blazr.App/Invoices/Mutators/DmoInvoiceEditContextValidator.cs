@@ -9,8 +9,8 @@ public sealed class DmoInvoiceEditContextValidator : AbstractValidator<DmoInvoic
 {
     public DmoInvoiceEditContextValidator()
     {
-        this.RuleFor(p => p.Customer)
-            .NotNull()
+        this.RuleFor(p => p.CustomerId)
+            .NotEmpty()
             .WithState(p => p);
 
         this.RuleFor(p => p.Date)

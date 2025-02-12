@@ -12,10 +12,7 @@
 <div class="@this.ColumnCss">
     <div class="text-end">
         <UIButton Type="button" Hidden="!this.AllowDelete" ButtonSize="UIButtonSize.Small" ButtonColourType="UIButtonColourType.Delete" ClickEvent="this.OnDelete">@Options.DeleteText</UIButton>
-        @if (this.Reset.HasDelegate)
-        {
-            <UIButton Type="button" Hidden="_isClean" ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Reset ClickEvent=this.OnReset>@Options.ResetText</UIButton>
-        }
+        <UIButton Type="button" Hidden="_hideReset" ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Reset ClickEvent=this.OnReset>@Options.ResetText</UIButton>
         <UIButton Type="button" Hidden=@_isDirty ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Exit ClickEvent=this.OnDirtyExit>@Options.ExitText</UIButton>
         <UIButton Type="button" Hidden=@_isClean ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.ExitWithoutSave ClickEvent=this.OnExit>@Options.ExitWithoutSaveText</UIButton>
         <UIButton Type="@_saveButtonType" Hidden=@_isClean ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Save ClickEvent=this.OnSave>@_saveButtonText</UIButton>
@@ -37,6 +34,7 @@
 
     private bool _isDirty;
     private bool _isClean => !_isDirty;
+    private bool _hideReset => _isClean || !this.Reset.HasDelegate;
     private string _saveButtonType => this.SaveOnSubmit ? "submit" : "button";
     private string _saveButtonText => this.IsNewRecord ? Options.SaveText : Options.UpdateText;
 

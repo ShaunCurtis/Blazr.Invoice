@@ -73,6 +73,6 @@ public static class FieldFormatting
     public static string ToDisplayId(this Guid value)
     {
         // There are 4 hyphens in ToString!
-        return value.ToString().Substring(28, 8);
+        return value.ToString().Substring(28, 8).ToUpper();
     }
 }

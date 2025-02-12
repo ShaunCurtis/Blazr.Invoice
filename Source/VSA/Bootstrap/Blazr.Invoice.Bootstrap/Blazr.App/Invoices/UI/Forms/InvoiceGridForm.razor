@@ -1,6 +1,8 @@
 ﻿@inherits GridFormBase<DmoInvoice,InvoiceId>
 @namespace Blazr.App.UI
 
+@inject InvoiceAggregatePresenter InvoiceAggregatePresenter
+
 <div class="d-flex flex-row mb-1 pt-1 border-bottom">
     <div class="flex-fill justify-content-start h4">
         @this.formTitle
@@ -39,4 +41,24 @@
 @code {
     protected string TableCss = "table table-sm table-striped table-hover border-bottom no-margin hide-blank-rows";
     protected string GridCss = "grid";
+
+    protected override async Task OnAddAsync()
+    {
+        // reset the InvoiceAggregatePresenter to the default Invoice
+        this.InvoiceAggregatePresenter.Clear();
+
+        var result = await modalDialog.ShowAsync(typeof(InvoiceAddForm), new ModalOptions());
+
+        if(result.ResultType == ModalResultType.OK)
+            this.NavManager.NavigateTo($"{this.UIEntityService.Url}/dash/");
+    }
+
+    protected async override Task OnDashboardAsync(InvoiceId id)
+    {
+        // Load the invoice data into the presenter
+        //await this.InvoiceAggregatePresenter.LoadAsync(id);
+
+        // and navigate to the dashboard
+        this.NavManager.NavigateTo($"{this.UIEntityService.Url}/dash/{id.ToString()}");
+    }
 }

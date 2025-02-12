@@ -48,6 +48,7 @@ public sealed partial class Invoice
     {
         this.InvoiceRecord = invoice;
         this.State = State.AsDirty;
+        this.Process();
     }
 
     private void ItemUpdated(InvoiceItem item)

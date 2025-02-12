@@ -21,7 +21,6 @@ public static class InvoiceServices
         services.AddTransient<IGridPresenter<DmoInvoice>, InvoiceGridPresenter>();
         services.AddTransient<IReadPresenter<DmoInvoice, InvoiceId>, ReadPresenter<DmoInvoice, InvoiceId>>();
 
-        services.AddTransient<InvoiceAggregatePresenterFactory>();
         services.AddTransient<InvoiceEditPresenter>();
         services.AddTransient<InvoiceItemEditPresenterFactory>();
 

@@ -19,9 +19,9 @@ public sealed class InvoiceItemEditPresenter
     public DmoInvoiceItemEditContext RecordEditContext { get; private set; }
     public bool IsNew { get; private set; }
 
-    public InvoiceItemEditPresenter(IToastService toastService, Invoice invoice, InvoiceItemId id)
+    public InvoiceItemEditPresenter(IToastService toastService, InvoiceAggregatePresenter invoiceAggregatePresenter, InvoiceItemId id)
     {
-        _invoice = invoice;
+        _invoice = invoiceAggregatePresenter.Invoice;
         _invoiceItemId = id;
         _toastService = toastService;
 

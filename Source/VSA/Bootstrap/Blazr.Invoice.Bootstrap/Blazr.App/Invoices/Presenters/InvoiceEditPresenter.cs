@@ -44,8 +44,8 @@ public sealed class InvoiceEditPresenter
 
         // get the updated invoice, Need to create a new invoice Id if the Id is the default
         var invoice = this.RecordEditContext.Id == InvoiceId.Default
-            ? this.RecordEditContext.AsRecord
-            : this.RecordEditContext.AsRecord with { Id = InvoiceId.Create };
+            ? this.RecordEditContext.AsRecord with { Id = InvoiceId.Create }
+            : this.RecordEditContext.AsRecord;
 
         var result = _invoice.Dispatch(new InvoiceActions.UpdateInvoiceAction(invoice));
 

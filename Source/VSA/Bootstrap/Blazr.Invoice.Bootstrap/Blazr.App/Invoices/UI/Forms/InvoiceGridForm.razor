@@ -45,7 +45,7 @@
     protected override async Task OnAddAsync()
     {
         // reset the InvoiceAggregatePresenter to the default Invoice
-        this.InvoiceAggregatePresenter.Clear();
+        this.InvoiceAggregatePresenter.Reset();
 
         var result = await modalDialog.ShowAsync(typeof(InvoiceAddForm), new ModalOptions());
 

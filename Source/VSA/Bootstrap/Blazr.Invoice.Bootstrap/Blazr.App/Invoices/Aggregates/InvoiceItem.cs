@@ -22,7 +22,7 @@ public sealed class InvoiceItem : IDisposable
         InvoiceItemRecord = item;
         this.UpdateCallback = callback;
 
-        if (isNew)
+        if (isNew || item.Id.IsDefault)
             this.State = CommandState.Add;
     }
 

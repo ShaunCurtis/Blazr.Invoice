@@ -3,35 +3,11 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Blazr.App.Presentation;
-
-public sealed class InvoiceAggregatePresenterFactory
-{
-    private readonly IServiceProvider _serviceProvider;
-
-    public InvoiceAggregatePresenterFactory(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
-    public async ValueTask<InvoiceAggregatePresenter> CreateAsync(InvoiceId invoiceId)
-    {
-        var presenter = ActivatorUtilities.CreateInstance<InvoiceAggregatePresenter>(_serviceProvider);
-
-        ArgumentNullException.ThrowIfNull(presenter);
-
-        await presenter.LoadAsync(invoiceId);
-
-        return presenter!;
-    }
-}
-
 
 public sealed class InvoiceAggregatePresenter
 {
-    private readonly IMediator _dataBroker;
+    private readonly IMediator _dispatcher;
 
     public IDataResult LastResult { get; private set; } = DataResult.Success();
 
@@ -39,9 +15,9 @@ public sealed class InvoiceAggregatePresenter
 
     public IQueryable<DmoInvoiceItem> InvoiceItems => this.Invoice.InvoiceItems.Select(item => item.InvoiceItemRecord).AsQueryable();
 
-    public InvoiceAggregatePresenter(IMediator dataBroker)
+    public InvoiceAggregatePresenter(IMediator mediator)
     {
-        _dataBroker = dataBroker;
+        _dispatcher = mediator;
 
         // Get a default Invoice
         this.Invoice = Invoice.Default;
@@ -55,18 +31,16 @@ public sealed class InvoiceAggregatePresenter
         if (id.Value != Guid.Empty)
         {
             var request = new InvoiceRequests.InvoiceRequest(id);
-            var result = await _dataBroker.Send(request);
+            var result = await _dispatcher.Send(request);
 
             LastResult = result.ToDataResult;
 
             if (result.HasSucceeded(out Invoice? invoice))
                 this.Invoice = invoice!;
-
-            return;
         }
     }
 
-    public void Clear()
+    public void Reset()
     {
         this.LastResult = DataResult.Success();
         this.Invoice = Invoice.Default;
@@ -74,7 +48,7 @@ public sealed class InvoiceAggregatePresenter
 
     public async ValueTask<Result> SaveAsync()
     {
-        var result = await _dataBroker.Send(new InvoiceRequests.InvoiceSaveRequest(this.Invoice));
+        var result = await _dispatcher.Send(new InvoiceRequests.InvoiceSaveRequest(this.Invoice));
 
         LastResult = result.ToDataResult;
 

@@ -38,6 +38,10 @@ public sealed partial class Invoice
         // We create new records for the Invoice and InvoiceItems
         InvoiceRecord = invoice with { };
 
+        // Detect if the Invoice is a new record
+        if (invoice.Id.IsDefault)
+            this.State = CommandState.Add;
+
         foreach (var item in items)
         {
             Items.Add(new InvoiceItem(item with { }, this.ItemUpdated));

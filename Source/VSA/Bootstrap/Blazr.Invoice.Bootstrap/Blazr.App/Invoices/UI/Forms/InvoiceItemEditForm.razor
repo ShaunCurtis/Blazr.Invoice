@@ -3,7 +3,6 @@
 @inject IToastService ToastService
 @inject InvoiceItemEditPresenterFactory InvoiceItemPresenterFactory
 @inject NavigationManager NavManager
-@inject IUIEntityService<DmoInvoice> UIEntityService
 
 <PageTitle>@_formTitle</PageTitle>
 
@@ -49,7 +48,6 @@
 
 @code {
     [CascadingParameter] private IModalDialog? ModalDialog { get; set; }
-    [CascadingParameter] public Invoice Content { get; set; } = default!;
     [Parameter, EditorRequired] public InvoiceItemId Uid { get; set; } = default!;
 
     private EditFormButtonsOptions _editFormButtonsOptions = new();
@@ -58,7 +56,7 @@
 
     private InvoiceItemEditPresenter Presenter = default!;
     private string _exitUrl = "/";
-    private string @_formTitle = "Invoice Item Editor";
+    private string _formTitle = "Invoice Item Editor";
     private bool _isDirty;
     private bool _isClean => !_isDirty;
     private bool _stateStoreAttached;
@@ -66,10 +64,9 @@
 
     protected override void OnInitialized()
     {
-        ArgumentNullException.ThrowIfNull(this.Content);
-        this.Presenter = this.InvoiceItemPresenterFactory.GetPresenter(this.Content, this.Uid);
+        this.Presenter = this.InvoiceItemPresenterFactory.GetPresenter(this.Uid);
         
-        if (this.Content.State == CommandState.Add)
+        if (!this.Presenter.IsNew)
             this.Presenter.EditContext.Validate();
     }
 

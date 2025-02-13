@@ -47,10 +47,7 @@
         // reset the InvoiceAggregatePresenter to the default Invoice
         this.InvoiceAggregatePresenter.Reset();
 
-        var result = await modalDialog.ShowAsync(typeof(InvoiceAddForm), new ModalOptions());
-
-        if(result.ResultType == ModalResultType.OK)
-            this.NavManager.NavigateTo($"{this.UIEntityService.Url}/dash/");
+        this.NavManager.NavigateTo($"{this.UIEntityService.Url}/dash/");
     }
 
     protected async override Task OnDashboardAsync(InvoiceId id)

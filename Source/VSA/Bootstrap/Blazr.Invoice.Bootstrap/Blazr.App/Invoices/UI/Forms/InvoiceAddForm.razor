@@ -18,7 +18,8 @@
 <EditForm EditContext=this.Presenter.EditContext OnValidSubmit="this.OnSaveAsync">
 
     <Blazr.FluentValidation.BlazrFluentValidator TRecord="DmoInvoiceEditContext" TValidator="DmoInvoiceEditContextValidator" />
-    <BlazrEditStateTracker LockNavigation=true />
+    <BlazrEditStateTracker />
+    <NavigationLock OnBeforeInternalNavigation="this.OnLocationChanged" ConfirmExternalNavigation="_isDirty" />
 
     <div class="row">
 
@@ -41,25 +42,24 @@
 
     </div>
 
-    <EditFormButtons SaveOnSubmit
-                     ColumnCss="col-12 mb-3 text-end"
-                     Options=_editFormButtonsOptions
-                     DirtyExit=this.OnExit
-                     Exit=this.OnExit
-                     Save=this.OnSaveAsync
-                     IsNewRecord=true />
+    <div class="row">
+        <div class="text-end">
+            <UIButton Type="button" ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Exit ClickEvent=this.OnExit>Exit</UIButton>
+            <UIButton Type="submit" Hidden=@_isClean ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Save>Continue</UIButton>
+        </div>
+    </div>
 
 </EditForm>
 
 @code {
-    [CascadingParameter] private IModalDialog? ModalDialog { get; set; }
+    [Parameter] public EventCallback InvoiceCreated { get; set; }
 
     private string _formTitle => $"Create A New Invoice";
     private EditFormButtonsOptions _editFormButtonsOptions = new();
     private List<CustomerLookUpItem> _customerList = new();
 
     private ILookUpPresenter<CustomerLookUpItem> CustomerLookupPresenter = default!;
-    private string _exitUrl = "/";
+    private string _exitUrl = "/invoices";
 
     private bool _isDirty;
     private bool _isClean => !_isDirty;
@@ -91,16 +91,29 @@
         }
     }
 
+    /// <summary>
+    /// Set the customer name when the customerId is changed
+    /// </summary>
     private void OnCustomerUpdate()
     {
         this.Presenter.RecordEditContext.CustomerName = _customerList.FirstOrDefault(c => c.Id == this.Presenter.RecordEditContext.CustomerId)?.Name ?? "[Not Set]";
     }
 
+    /// <summary>
+    /// Update the edit context whenever an edit control is updated
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnEditStateMayHaveChanged(object? sender, EventArgs e)
     {
+        _isDirty = this.Presenter.EditContext.GetEditState();
         this.StateHasChanged();
     }
 
+    /// <summary>
+    /// Save handler
+    /// </summary>
+    /// <returns></returns>
     private async Task OnSaveAsync()
     {
         if (!this.Presenter.EditContext.Validate())
@@ -108,17 +121,33 @@
 
         await this.Presenter.SaveItemToAggregateAsync();
 
-        if (this.Presenter.LastResult.Successful)
-            ModalDialog?.Close(ModalResult.OK());
+        await this.InvoiceCreated.InvokeAsync();
     }
 
+    /// <summary>
+    /// Exit Handler
+    /// </summary>
+    /// <returns></returns>
     private Task OnExit()
     {
-        if (this.ModalDialog is null)
-            this.NavManager.NavigateTo(_exitUrl);
+        // reset the edit state store so the edit state is clean
+        _store?.Reset();
 
-        ModalDialog?.Close(ModalResult.Exit());
+        this.NavManager.NavigateTo(_exitUrl);
+
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Get the edit state and only allow navigation if it's clean
+    /// </summary>
+    /// <param name="context"></param>
+    private void OnLocationChanged(LocationChangingContext context)
+    {
+        var isdirty = this.Presenter.EditContext.GetEditState();
+
+        if (isdirty)
+            context.PreventNavigation();
     }
 
     public void Dispose()

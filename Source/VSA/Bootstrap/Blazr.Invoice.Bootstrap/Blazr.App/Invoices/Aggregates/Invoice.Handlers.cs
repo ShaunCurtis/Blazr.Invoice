@@ -124,4 +124,3 @@ public sealed partial class Invoice
         return Result.Success();
     }
 }
-

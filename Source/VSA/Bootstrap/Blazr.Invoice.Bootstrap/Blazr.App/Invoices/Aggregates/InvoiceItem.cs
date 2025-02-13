@@ -26,6 +26,8 @@ public sealed class InvoiceItem : IDisposable
             this.State = CommandState.Add;
     }
 
+    public InvoiceItemId Id => this.InvoiceItemRecord.Id;
+    public string Description => this.InvoiceItemRecord.Description;
     public decimal Amount => this.InvoiceItemRecord.Amount;
 
     internal void UpdateInvoiceItem(DmoInvoiceItem invoiceItem)

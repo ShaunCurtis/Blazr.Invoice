@@ -23,26 +23,26 @@
     <div class="row">
 
         <BlazrTextControl UpdateOnInput
-                          class="form-control mb-2"
-                          ColumnCss="col-12 col-md-8 mb-2"
-                          Label="Description"
-                          @bind-Value="this.Presenter.RecordEditContext.Description" />
+        class="form-control mb-2"
+        ColumnCss="col-12 col-md-8 mb-2"
+        Label="Description"
+        @bind-Value="this.Presenter.RecordEditContext.Description" />
 
         <BlazrNumberControl UpdateOnInput
-                          class="form-control mb-2"
-                          ColumnCss="col-12 col-md-8 mb-2"
-                          Label="Amount £"
-                          @bind-Value="this.Presenter.RecordEditContext.Amount" />
+        class="form-control mb-2"
+        ColumnCss="col-12 col-md-8 mb-2"
+        Label="Amount £"
+        @bind-Value="this.Presenter.RecordEditContext.Amount" />
 
     </div>
 
     <EditFormButtons SaveOnSubmit
-                     ColumnCss="col-12 mb-3 text-end"
-                     Options=_editFormButtonsOptions
-                     DirtyExit=this.OnExit
-                     Exit=this.OnExit
-                     Save=this.OnSaveAsync
-                     IsNewRecord=_isNewRecord />
+    ColumnCss="col-12 mb-3 text-end"
+    Options=_editFormButtonsOptions
+    DirtyExit=this.OnExit
+    Exit=this.OnExit
+    Save=this.OnSaveAsync
+    IsNewRecord=_isNewRecord />
 
 </EditForm>
 
@@ -50,7 +50,12 @@
     [CascadingParameter] private IModalDialog? ModalDialog { get; set; }
     [Parameter, EditorRequired] public InvoiceItemId Uid { get; set; } = default!;
 
-    private EditFormButtonsOptions _editFormButtonsOptions = new();
+    private EditFormButtonsOptions _editFormButtonsOptions = new()
+    {
+         UpdateText = "Update Item",
+          SaveText = "Process Item"
+         
+    };
 
     private bool _isNewRecord => this.Presenter.IsNew;
 
@@ -102,7 +107,7 @@
             return;
         }
 
-        await this.Presenter.SaveItemAsync();
+        await this.Presenter.ProcessItemAsync();
 
         if (this.Presenter.LastResult.Successful)
             ModalDialog?.Close(ModalResult.OK());

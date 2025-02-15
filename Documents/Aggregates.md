@@ -1,8 +1,8 @@
 # Aggregates
 
-The aggregate concept is a fundimental building block of applications. 
+Aggregates are a fundimental building block of applications.  Aggregates provide a framework for managing complex domain entities. 
 
-> An aggregate is a set of objects bound by a set of application rules.  The purpose of the aggregate is to apply those rules to maintain application consisistency.  
+> An aggregate is a group of objects bound by one or more application rules.  The purpose of the aggregate is to ensure  those rules are applied to maintain application consisistency.  
  
 
 Editing an object where the consequences of that change are restricted to the object is simple.  Editing a customer's email has no direct consequences on the rest of the application.  You may need to resend invoices because the old one was wrong, but that's part of a process, not the integrity of the data within the application.
@@ -11,9 +11,11 @@ Editing an invoice line item object has consequences.  Change the unit cost or q
 
 Aggregates address this problem.  
 
-An aggregate is a black box.  All changes are applied to the black box, not the individual objects within it.  The black box contains the logic to ensure application consistency.  An aggregate only has purpose when you change an object to which those rules apply.  
+An aggregate is a black box.  All changes are applied to the black box, not the individual objects within it.  The black box contains the logic to maintain entity integrity and consistency.  
 
 Delete a line item through the aggregate, and it tracks the deletion of the item, calculates the new total amount and updates the invoice.  Persist the aggregate and it provides the persistance layer update/add/delete information to apply the changes as a *Unit of Work*.
+
+An important point to understand is you only need aggregeates when you need to change data.  If you're just reading data, you don't need aggregates, you can use standard simple patterns to get the data you need.
 
 The aggregate provides the invoice and line items as read only objects.  No modifications allowed.
 
@@ -39,51 +41,102 @@ The Invoice is the aggregate root.  I'll discuss why I don't like this design la
 
 The rest of this article uses the Invoice example. The objects are minimal to keep things simple.
 
+Note that the objects are immutable.  Good practice in aggregates to ensure consistency and changes can only be applied through the aggregate.
+
 ```csharp
-public DmoCustomer
+public sealed record DmoCustomer : ICommandEntity
 {
-    public CustomerId CustomerId { get; init; } = new(Guid.Empty);
+    public CustomerId Id { get; init; } = CustomerId.Default;
     public string CustomerName { get; init; } = string.Empty;
 }
 ```
 
 ```csharp
-public record Invoice
+public sealed record DmoInvoice
 {
-    public InvoiceId InvoiceId { get; init; } = new(Guid.Empty);
-    public CustomerId CustomerId { get; init; } = new(Guid.Empty);
+    public InvoiceId Id { get; init; } = InvoiceId.Default;
+    public CustomerId CustomerId { get; init; } = CustomerId.Default;
+    public string CustomerName { get; init; } = string.Empty;
     public decimal TotalAmount { get; init; }
     public DateOnly Date { get; init; }
 }
 ```
  
 ```csharp
-public record DmoInvoiceItem
+public sealed record DmoInvoiceItem
 {
-    public InvoiceItemId InvoiceItemId { get; init; } = new(Guid.Empty);
-    public InvoiceId InvoiceId { get; init; } = new(Guid.Empty);
+    public InvoiceItemId Id { get; init; } = InvoiceItemId.Default;
+    public InvoiceId InvoiceId { get; init; } = InvoiceId.Default;
     public string Description { get; init; } = string.Empty;
     public decimal Amount { get; init; }
 }
 ```
 
-## The Composite
+## The Aggregate
 
-A composite is a wrapper.  The invoice [the aggreagate root] is an object within the composite. 
+The aggregate is a wrapper containing all objects to which the rule/s apply.  In out case the invoice [the aggreagate root] and the collection of invoice items. 
 
 ```csharp
 public class InvoiceComposite
 {
-    public Invoice Invoice {get;}
-    public IEnumerable<InvoiceItems> Items {get;}
+    public DmoInvoice InvoiceRecord { get; private set; }
+    public IEnumerable<InvoiceItem> InvoiceItems
+        => this.Items.AsEnumerable();
+
+    private List<InvoiceItem> Items { get; set; }
+        = new List<InvoiceItem>();
 }
 ```
 
 `Invoice` is a `record` and `Items` an `IEnumerable` of `InvoiceItems`.  Everything is read only.
 
+The rule is simple.  The `TotalAmount` of the `Invoice` is the sum of the `Amount` of all `InvoiceItems`.  It's applied like this:
+```csharp
+private void Process()
+{
+    decimal total = 0m;
+    foreach (var item in Items)
+        total += item.Amount;
+
+    if (total != this.TotalAmount)
+    {
+        this.InvoiceRecord = this.InvoiceRecord with { TotalAmount = total };
+        this.State = State.AsDirty;
+    }
+    this.StateHasChanged?.Invoke(this, this.InvoiceRecord.Id);
+}
+```
+
 ### Managing Mutation
 
-Change is managed within the composite using `Blazor.Flux` which is a simple indexed *Flux* pattern library.
+Change is managed within the aggregate by implementing a *Flux* style pattern.  Each mutation is defined in an action and passed through a *Dispatcher* method into the aggregate.
+
+For example, the invoice is updated by creating an `UpdateInvoiceAction`:
+
+```csharp
+    public readonly record struct UpdateInvoiceAction(DmoInvoice Item);
+```
+And passing it to the `Dispatcher` method:
+
+```csharp
+    public Result Dispatch(UpdateInvoiceAction action)
+    {
+        this.UpdateInvoice(action.Item);
+        return Result.Success();
+    }
+
+    private void UpdateInvoice(DmoInvoice invoice)
+    {
+        this.InvoiceRecord = invoice;
+        this.State = State.AsDirty;
+        this.Process();
+    }
+```
+
+```csharp
+``` 
+
+   composite using `Blazor.Flux` which is a simple indexed *Flux* pattern library.
 
 We define our Flux contexts:
 

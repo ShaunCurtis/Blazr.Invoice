@@ -11,16 +11,16 @@ public sealed class InvoiceAggregatePresenter
 
     public IDataResult LastResult { get; private set; } = DataResult.Success();
 
-    public Invoice Invoice { get; private set; }
+    public InvoiceWrapper Invoice { get; private set; }
 
-    public IQueryable<DmoInvoiceItem> InvoiceItems => this.Invoice.InvoiceItems.Select(item => item.InvoiceItemRecord).AsQueryable();
+    public IQueryable<DmoInvoiceItem> InvoiceItems => this.Invoice.InvoiceItems.Select(item => item.Record).AsQueryable();
 
     public InvoiceAggregatePresenter(IMediator mediator)
     {
         _dispatcher = mediator;
 
         // Get a default Invoice
-        this.Invoice = Invoice.Default;
+        this.Invoice = InvoiceWrapper.Default;
     }
 
     public async Task LoadAsync(InvoiceId id)
@@ -35,7 +35,7 @@ public sealed class InvoiceAggregatePresenter
 
             LastResult = result.ToDataResult;
 
-            if (result.HasSucceeded(out Invoice? invoice))
+            if (result.HasSucceeded(out InvoiceWrapper? invoice))
                 this.Invoice = invoice!;
         }
     }
@@ -43,7 +43,7 @@ public sealed class InvoiceAggregatePresenter
     public void Reset()
     {
         this.LastResult = DataResult.Success();
-        this.Invoice = Invoice.Default;
+        this.Invoice = InvoiceWrapper.Default;
     }
 
     public async ValueTask<Result> SaveAsync()

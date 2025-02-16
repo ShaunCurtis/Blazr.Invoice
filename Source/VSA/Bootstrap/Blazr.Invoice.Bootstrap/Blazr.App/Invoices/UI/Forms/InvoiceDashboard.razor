@@ -62,10 +62,12 @@ else
     </div>
 }
 
+<NavigationLock OnBeforeInternalNavigation="this.OnLocationChanging" ConfirmExternalNavigation="_isDirty" />
+
 <BsModalDialog @ref=_modalDialog />
 
 @code {
-    [Parameter] public InvoiceId InvoiceId { get; set; } = new(Guid.Empty);
+    [Parameter] public InvoiceId InvoiceId { get; set; } = InvoiceId.Default;
 
     private bool _loading = true;
     private bool _isError = false;
@@ -78,13 +80,13 @@ else
         => !this.Presenter.Invoice.IsDirty;
 
     private bool _isNew
-        => this.Presenter.Invoice.InvoiceRecord.Id.IsDefault;
+        => this.Presenter.Invoice.InvoiceRecord.Record.Id.IsDefault;
 
     private string _message
         => _isError ? this.Presenter.LastResult.Message ?? "Unspecified Error" : "Invoice changes are not currently saved to the data store!";
 
-    private Invoice _invoice
-        => this.Presenter.Invoice ?? Invoice.Default;
+    private InvoiceWrapper _invoice
+        => this.Presenter.Invoice ?? InvoiceWrapper.Default;
 
     public override Task SetParametersAsync(ParameterView parameters)
     {
@@ -95,7 +97,9 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        if (!this.InvoiceId.IsDefault)
+        // If we have a default Invoive Id then it's the new pathway
+        // We need to reset the presenter.
+        if (this.InvoiceId.IsDefault)
             this.Presenter.Reset();
         else
             await this.Presenter.LoadAsync(this.InvoiceId);
@@ -103,7 +107,7 @@ else
         this.Presenter.Invoice.StateHasChanged += this.OnAggregateStateChanged;
         _loading = false;
     }
-
+    
     private Task OnLocationChanging(LocationChangingContext context)
     {
         // Need to check if the invoice is dirty before letting the user exit
@@ -134,7 +138,7 @@ else
         // wait for the modal to close
 
         // If we have cancelled new invoice we need to exit back to the invoices page
-        if (result.ResultType != ModalResultType.OK && _invoice.State == CommandState.Add)
+        if (result.ResultType != ModalResultType.OK && _invoice.InvoiceRecord.State == CommandState.Add)
         {
             this.ToastService.ShowInfo("You exited creating the new invoice.");
             this.Presenter.FakePersistenceToAllowExit();

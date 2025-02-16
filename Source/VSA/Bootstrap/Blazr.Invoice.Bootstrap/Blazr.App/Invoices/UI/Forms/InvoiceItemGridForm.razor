@@ -43,7 +43,7 @@
 
     public ValueTask<GridItemsProviderResult<DmoInvoiceItem>> GetItemsAsync(GridItemsProviderRequest<DmoInvoiceItem> gridRequest)
     {
-        var list = this.Presenter.Invoice.InvoiceItems.Select(item => item.InvoiceItemRecord).ToList();
+        var list = this.Presenter.Invoice.InvoiceItems.Select(item => item.Record).ToList();
 
         return ValueTask.FromResult(GridItemsProviderResult.From<DmoInvoiceItem>(list, list.Count));
     }

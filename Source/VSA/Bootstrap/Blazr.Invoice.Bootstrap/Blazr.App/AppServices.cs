@@ -39,7 +39,7 @@ public static class ApplicationServerServices
         services.AddScoped<ICommandBroker, CommandServerBroker<InMemoryInvoiceTestDbContext>>();
 
         // Add Custom Handlers
-        services.AddScoped<ICommandBroker<Invoice>, InvoiceCommandServerBroker<InMemoryInvoiceTestDbContext>>();
+        services.AddScoped<ICommandBroker<InvoiceWrapper>, InvoiceCommandServerBroker<InMemoryInvoiceTestDbContext>>();
 
         // GridState inMemory Store 
         services.AddScoped<KeyedFluxGateStore<GridState, Guid>>();

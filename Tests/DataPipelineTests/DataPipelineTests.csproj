@@ -30,9 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Application\Blazr.App.Core\Blazr.App.Core.csproj" />
-    <ProjectReference Include="..\..\Source\Application\Blazr.App.Infrastructure.Server\Blazr.App.Infrastructure.Server.csproj" />
-    <ProjectReference Include="..\..\Source\Application\Blazr.App.Infrastructure\Blazr.App.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Source\CleanDesign\Application\Blazr.App.Core\Blazr.App.Core.csproj" />
     <ProjectReference Include="..\..\Source\Libraries\Blazor.Antimony\Blazor.Antimony.csproj" />
     <ProjectReference Include="..\..\Source\Libraries\Blazr.Antimony.Server\Blazr.Antimony.Server.csproj" />
     <ProjectReference Include="..\..\Source\Libraries\Blazr.Gallium\Blazr.Gallium.csproj" />

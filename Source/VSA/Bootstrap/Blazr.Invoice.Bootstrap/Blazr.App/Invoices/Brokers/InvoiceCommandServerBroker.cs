@@ -12,7 +12,7 @@ namespace Blazr.App.Infrastructure.Server;
 /// </summary>
 /// <typeparam name="TDbContext"></typeparam>
 public sealed class InvoiceCommandServerBroker<TDbContext>
-    : ICommandBroker<Invoice>
+    : ICommandBroker<InvoiceWrapper>
     where TDbContext : DbContext
 {
     private readonly IDbContextFactory<TDbContext> _factory;
@@ -22,31 +22,31 @@ public sealed class InvoiceCommandServerBroker<TDbContext>
         _factory = factory;
     }
 
-    public async ValueTask<Result<Invoice>> ExecuteAsync(CommandRequest<Invoice> request)
+    public async ValueTask<Result<InvoiceWrapper>> ExecuteAsync(CommandRequest<InvoiceWrapper> request)
     {
         return await this.ExecuteCommandAsync(request);
     }
 
-    private async ValueTask<Result<Invoice>> ExecuteCommandAsync(CommandRequest<Invoice> request)
+    private async ValueTask<Result<InvoiceWrapper>> ExecuteCommandAsync(CommandRequest<InvoiceWrapper> request)
     {
         var invoice = request.Item;
 
         using var dbContext = _factory.CreateDbContext();
 
-        var invoiceRecord = DboInvoiceMap.Map(request.Item.InvoiceRecord);
+        var invoiceRecord = DboInvoiceMap.Map(request.Item.InvoiceRecord.Record);
 
-        if (request.Item.State == CommandState.Update)
+        if (request.Item.InvoiceRecord.State == CommandState.Update)
             dbContext.Update<DboInvoice>(invoiceRecord);
 
-        if (request.Item.State == CommandState.Add)
+        if (request.Item.InvoiceRecord.State == CommandState.Add)
             dbContext.Add<DboInvoice>(invoiceRecord);
 
-        if (request.Item.State == CommandState.Delete)
+        if (request.Item.InvoiceRecord.State == CommandState.Delete)
             dbContext.Remove<DboInvoice>(invoiceRecord);
 
         foreach (var invoiceItem in request.Item.InvoiceItems)
         {
-            var invoiceItemRecord = DboInvoiceItemMap.Map(invoiceItem.InvoiceItemRecord);
+            var invoiceItemRecord = DboInvoiceItemMap.Map(invoiceItem.Record);
 
             if (invoiceItem.State == CommandState.Update)
                 dbContext.Update<DboInvoiceItem>(invoiceItemRecord);
@@ -59,7 +59,7 @@ public sealed class InvoiceCommandServerBroker<TDbContext>
         {
             if (invoiceItem.State != CommandState.Add)
             {
-                var invoiceItemRecord = DboInvoiceItemMap.Map(invoiceItem.InvoiceItemRecord);
+                var invoiceItemRecord = DboInvoiceItemMap.Map(invoiceItem.Record);
 
                 dbContext.Remove<DboInvoiceItem>(invoiceItemRecord);
             }
@@ -68,7 +68,7 @@ public sealed class InvoiceCommandServerBroker<TDbContext>
         var result = await dbContext.SaveChangesAsync(request.Cancellation).ConfigureAwait(ConfigureAwaitOptions.None);
 
         return result > 0
-            ? Result<Invoice>.Success(invoice)
-            : Result<Invoice>.Fail(new CommandException("Error adding Invoice Composite to the data store."));
+            ? Result<InvoiceWrapper>.Success(invoice)
+            : Result<InvoiceWrapper>.Fail(new CommandException("Error adding Invoice Composite to the data store."));
     }
 }

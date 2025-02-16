@@ -5,13 +5,8 @@
 /// ============================================================
 namespace Blazr.App.Core;
 
-public readonly record struct CustomerId(Guid Value) : IEntityId
+public record InvoiceRecord(DmoInvoice Record, CommandState State)
 {
-    public bool IsDefault => this == Default;
-    public static CustomerId Default => new(Guid.Empty);
-
-    public override string ToString()
-    {
-        return Value.ToString();
-    }
+    public bool IsDirty
+        => this.State != CommandState.None;
 }

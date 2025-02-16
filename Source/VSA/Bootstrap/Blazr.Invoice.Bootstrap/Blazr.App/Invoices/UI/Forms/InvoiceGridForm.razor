@@ -42,20 +42,21 @@
     protected string TableCss = "table table-sm table-striped table-hover border-bottom no-margin hide-blank-rows";
     protected string GridCss = "grid";
 
-    protected override async Task OnAddAsync()
+    protected override Task OnAddAsync()
     {
         // reset the InvoiceAggregatePresenter to the default Invoice
         this.InvoiceAggregatePresenter.Reset();
 
         this.NavManager.NavigateTo($"{this.UIEntityService.Url}/dash/");
+
+        return Task.CompletedTask;
     }
 
-    protected async override Task OnDashboardAsync(InvoiceId id)
+    protected override Task OnDashboardAsync(InvoiceId id)
     {
-        // Load the invoice data into the presenter
-        //await this.InvoiceAggregatePresenter.LoadAsync(id);
-
         // and navigate to the dashboard
         this.NavManager.NavigateTo($"{this.UIEntityService.Url}/dash/{id.ToString()}");
+
+        return Task.CompletedTask;
     }
 }

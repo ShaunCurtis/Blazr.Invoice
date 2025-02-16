@@ -14,18 +14,18 @@ namespace Blazr.App.Presentation;
 public sealed class InvoiceEditPresenter
 {
     private readonly IToastService _toastService;
-    private readonly Invoice _invoice;
+    private readonly InvoiceWrapper _invoice;
 
     public IDataResult LastResult { get; private set; } = DataResult.Success();
     public EditContext EditContext { get; private set; }
     public DmoInvoiceEditContext RecordEditContext { get; private set; }
-    public bool IsNew => _invoice.InvoiceRecord.Id == InvoiceId.Default;
+    public bool IsNew => _invoice.InvoiceRecord.Record.Id == InvoiceId.Default;
 
     public InvoiceEditPresenter(InvoiceAggregatePresenter invoiceAggregatePresenter, IToastService toastService)
     {
         _invoice = invoiceAggregatePresenter.Invoice;
         _toastService = toastService;
-        this.RecordEditContext = new(_invoice.InvoiceRecord);
+        this.RecordEditContext = new(_invoice.InvoiceRecord.Record);
         this.EditContext = new(this.RecordEditContext);
     }
 

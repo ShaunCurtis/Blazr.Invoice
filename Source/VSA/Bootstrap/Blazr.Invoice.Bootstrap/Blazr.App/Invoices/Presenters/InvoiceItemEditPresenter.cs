@@ -28,23 +28,15 @@ public sealed class InvoiceItemEditPresenter
         // Detect if we have a new item request.
         this.IsNew = id == InvoiceItemId.Default;
 
-        var item = this.Load(id);
-
-        RecordEditContext = new(item);
-        this.EditContext = new(this.RecordEditContext);
-        _invoiceItemId = this.RecordEditContext.Id;
-    }
-
-    private DmoInvoiceItem Load(InvoiceItemId id)
-    {
-        this.LastResult = DataResult.Success();
-
+        // Get the invoice item from the Invoice Aggregate
         var item = _invoice.Dispatch(new InvoiceActions.GetInvoiceItemAction(id));
 
-        return item;
+        // Create the edit contexts
+        RecordEditContext = new(item);
+        this.EditContext = new(this.RecordEditContext);
     }
 
-    public Task<IDataResult> SaveItemAsync()
+    public Task<IDataResult> ProcessItemAsync()
     {
 
         if (!this.RecordEditContext.IsDirty)

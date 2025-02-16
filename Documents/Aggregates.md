@@ -2,9 +2,8 @@
 
 Updating an object where the consequences of the change are limited to the object is simple.  
 
-Editing a customer's email has no direct consequences on the rest of the application.  You may need to resend invoices because the old one was wrong, but that's part of a process, not the integrity of the data within the application.
-
-Editing an invoice line item object has consequences.  Change the unit cost or quantity of a line item, and the invoice object now has the wrong total value. 
+> An aggregate is a set of objects bound by a set of application rules.  The purpose of the aggregate is to apply those rules to maintain application consisistency.  
+ 
 
 Aggregates are a fundimental building block of applications that address this problem. 
 
@@ -12,11 +11,11 @@ Aggregates are a fundimental building block of applications that address this pr
  
 Consider an aggregate a black box.  All changes are applied to the black box, not the individual objects within it.  The black box contains the logic to ensure application consistency.
 
-Aggregates only have purpose in a change context.  You don't need aggregates just to display data.  
+An aggregate is a black box.  All changes are applied to the black box, not the individual objects within it.  The black box contains the logic to ensure application consistency.  An aggregate only has purpose when you change an object to which those rules apply.  
 
 Delete a line item through the aggregate, and it tracks the deletion of the item, calculates the new total amount and updates the invoice.  Persist the aggregate and it provides the persistance layer update/add/delete information to apply the changes as a *Unit of Work* to the data store.
 
-The aggregate provides it's data as read only objects.  No modifications allowed.
+The aggregate provides the invoice and line items as read only objects.  No modifications allowed.
 
 ## The Classic Invoice Example
 
@@ -25,9 +24,26 @@ The rest of this article uses a simple Invoice as a working example.
 The invoice objects are minimal: keep things simple.  The entity objects we use are: [*Dmo* equals *Domain Object*]
 
 ```csharp
-public DmoCustomer
+public class InvoiceAggregate
 {
-    public CustomerId CustomerId { get; init; } = new(Guid.Empty);
+    public int InvoiceID {get; set;}
+    //...
+    public ReadOnlyList<InvoiceItems> Items {get; private set;}
+
+    //...  methods to change items
+}
+```
+
+The Invoice is the aggregate root.  I'll discuss why I don't like this design later.
+
+## The Classic Invoice Example
+
+The rest of this article uses the Invoice example. The objects are minimal to keep things simple.
+
+```csharp
+public sealed record DmoCustomer : ICommandEntity
+{
+    public CustomerId Id { get; init; } = CustomerId.Default;
     public string CustomerName { get; init; } = string.Empty;
 }
 ```
@@ -53,47 +69,23 @@ public sealed record DmoInvoiceItem
 }
 ```
 
-## State Context
+## The Composite
 
-The domain objects that make up the aggregate are immutable records.  We need to provide an update mechanism and state tracking.  The basic pattern used is:
+A composite is a wrapper.  The invoice [the aggreagate root] is an object within the composite. 
 
 ```csharp
 public sealed class Item : IDisposable
 {
-    private Action<Item>? UpdateCallback;
-
-    public CommandState State { get; set; } = CommandState.None;
-    public DmoItem Record { get; private set; }
-    public bool IsDirty => this.State != CommandState.None;
-    public ItemRecord AsRecord => new(this.Record, this.State);
-
-    public Item(DmoItem item, Action<ITem> callback, bool isNew = false);
-    
-    public void Update(DmoItem item);
-    public void Dispose();
+    public Invoice Invoice {get;}
+    public IEnumerable<InvoiceItems> Items {get;}
 }
 ```
 
 `UpdateCallback` provides a callback into the parent object to notify it of a change, and thus the need to apply the aggregate rules.
 
-Items and Item collections are private to the aggregate.  Items are public exposed as *item records*.  The pattern used is: 
+### Managing Mutation
 
-```csharp
-public record ItemRecord(DmoItem Record, CommandState State)
-{
-    public bool IsDirty
-        => this.State != CommandState.None;
-}
-```
-
-The state of each object is maintained by a `CommandState` object.  There are four states:
-
-1. **None** - an existing record that is clean.  No action is required when presisting the aggregate.
-2. **Add** - a new record.  It must be added to the store when persisting the aggregate.
-3. **Update** - an existing record that is dirty.  An existing record must be updated in the store when the aggregate is persisted.
-4. **Delete** - an existing record that has been maked for deletion. The record must be removed from the store when the aggregate is persisted.
-
-## The Invoice Aggregate
+Change is managed within the composite using `Blazor.Flux` which is a simple indexed *Flux* pattern library.
 
 The `InvoiceWrapper` is the aggregate class.  
 

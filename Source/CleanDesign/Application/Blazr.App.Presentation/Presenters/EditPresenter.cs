@@ -3,6 +3,7 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Microsoft.AspNetCore.Components.Forms;
 using System.Diagnostics;
 
 namespace Blazr.App.Presentation;
@@ -85,7 +86,7 @@ public class EditPresenter<TRecord, TRecordEditContext, TKey> : IEditPresenter<T
     {
         this.LastResult = DataResult.Success();
 
-        var record = _entityProvider.NewRecord();
+        var record = _entityProvider.NewRecord;
 
         this.EditMutator = new();
         this.EditMutator.Load(record);

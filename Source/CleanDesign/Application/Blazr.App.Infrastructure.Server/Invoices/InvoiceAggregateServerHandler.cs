@@ -9,7 +9,7 @@ namespace Blazr.App.Infrastructure.Server;
 /// Mediatr Server Handler that builds an Invoice Aggregate
 /// It uses the Antimony Database Handlers to interface with the database
 /// </summary>
-public sealed class InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.InvoiceRequest, Result<Invoice>>
+public sealed class InvoiceAggregateServerHandler : IRequestHandler<InvoiceRequests.InvoiceRequest, Result<InvoiceWrapper>>
 {
     private readonly IListRequestBroker _listBroker;
     private readonly IRecordRequestBroker _recordBroker;
@@ -20,7 +20,7 @@ public sealed class InvoiceAggregateServerHandler : IRequestHandler<InvoiceReque
         _recordBroker = recordBroker;
     }
 
-    public async Task<Result<Invoice>> Handle(InvoiceRequests.InvoiceRequest request, CancellationToken cancellationToken)
+    public async Task<Result<InvoiceWrapper>> Handle(InvoiceRequests.InvoiceRequest request, CancellationToken cancellationToken)
     {
         DmoInvoice? invoice = null;
         
@@ -32,7 +32,7 @@ public sealed class InvoiceAggregateServerHandler : IRequestHandler<InvoiceReque
             var result = await _recordBroker.ExecuteAsync<DvoInvoice>(query);
             
             if (!result.HasSucceeded(out DvoInvoice? record))
-                return result.ConvertFail<Invoice>();
+                return result.ConvertFail<InvoiceWrapper>();
             
             invoice = DvoInvoiceMap.Map(record);
         }
@@ -46,13 +46,13 @@ public sealed class InvoiceAggregateServerHandler : IRequestHandler<InvoiceReque
             var result = await _listBroker.ExecuteAsync<DboInvoiceItem>(query);
             
             if (!result.HasSucceeded(out ListResult<DboInvoiceItem> records))
-                return result.ConvertFail<Invoice>();
+                return result.ConvertFail<InvoiceWrapper>();
             
             invoiceItems = records.Items.Select(item => DboInvoiceItemMap.Map(item)).ToList();
         }
 
-        var invoiceComposite = new Invoice(invoice, invoiceItems);
+        var invoiceComposite = new InvoiceWrapper(invoice, invoiceItems);
 
-        return Result<Invoice>.Success(invoiceComposite);
+        return Result<InvoiceWrapper>.Success(invoiceComposite);
     }
 }

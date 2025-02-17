@@ -6,7 +6,6 @@
 using Blazored.Toast;
 using Blazr.Antimony.Infrastructure.Server;
 using Blazr.App.Presentation;
-using Blazr.FluxGate;
 using Blazr.Gallium;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,8 +31,7 @@ public static class ApplicationServerServices
         // Add the Blazored Toast services
         services.AddBlazoredToast();
 
-        // Add the standard Antimony Server handlers
-        // These are used for simple entities
+        // Add the standard Antimony Server handlers used by simple entities
         services.AddScoped<IListRequestBroker, ListRequestServerBroker<InMemoryInvoiceTestDbContext>>();
         services.AddScoped<IRecordRequestBroker, RecordRequestServerBroker<InMemoryInvoiceTestDbContext>>();
         services.AddScoped<ICommandBroker, CommandServerBroker<InMemoryInvoiceTestDbContext>>();
@@ -42,8 +40,7 @@ public static class ApplicationServerServices
         services.AddScoped<ICommandBroker<InvoiceWrapper>, InvoiceCommandServerBroker<InMemoryInvoiceTestDbContext>>();
 
         // GridState inMemory Store 
-        services.AddScoped<KeyedFluxGateStore<GridState, Guid>>();
-        services.AddTransient<FluxGateDispatcher<GridState>, GridStateDispatcher>();
+        services.AddScoped<KeyedStateStore>();
 
         // Presenter Factories
         services.AddScoped<ILookupPresenterFactory, LookupPresenterFactory>();

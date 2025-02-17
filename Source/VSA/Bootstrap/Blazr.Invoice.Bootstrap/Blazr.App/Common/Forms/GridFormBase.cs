@@ -41,7 +41,7 @@ public abstract partial class GridFormBase<TRecord, TKey> : ComponentBase, IDisp
         this.Presenter.SetContext(this.GridContextId);
         this.Pagination.ItemsPerPage = this.PageSize;
         if (ResetGridContext)
-            this.Presenter.DispatchGridStateChange(new ResetGridAction(this, 0, this.PageSize, null, DefaultFilter));
+            await this.Presenter.DispatchGridStateChange(new ResetGridRequest(GridContextId, 0, this.PageSize, null, DefaultFilter));
 
         await Pagination.SetCurrentPageIndexAsync(this.Presenter.GridState.Page());
 
@@ -54,7 +54,7 @@ public abstract partial class GridFormBase<TRecord, TKey> : ComponentBase, IDisp
     public async ValueTask<GridItemsProviderResult<TRecord>> GetItemsAsync(GridItemsProviderRequest<TRecord> gridRequest)
     {
         //mutate the GridState
-        var mutationAction = UpdateGridPagingAction.Create(gridRequest);
+        var mutationAction = UpdateGridPagingRequest.Create(GridContextId, gridRequest);
         var mutationResult = Presenter.DispatchGridStateChange(mutationAction);
 
         var result = await this.Presenter.GetItemsAsync();

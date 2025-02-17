@@ -3,6 +3,7 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazr.FluxGate;
 using Blazr.Gallium;
 
 namespace Blazr.App.Presentation.Bootstrap;
@@ -12,7 +13,7 @@ public class CustomerGridPresenter : GridPresenter<DmoCustomer>
     public CustomerGridPresenter(
         IMediator mediator, 
         IMessageBus messageBus, 
-        KeyedStateStore keyedFluxGateStore)
+        KeyedFluxGateStore<GridState, Guid> keyedFluxGateStore)
         : base(mediator, messageBus, keyedFluxGateStore)
     { }
 

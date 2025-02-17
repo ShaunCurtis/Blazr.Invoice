@@ -6,11 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="WeatherForecasts\**" />
+    <EmbeddedResource Remove="WeatherForecasts\**" />
+    <None Remove="WeatherForecasts\**" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="MediatR" Version="12.4.1" />
-
-		<ProjectReference Include="..\..\Libraries\Blazor.Antimony\Blazor.Antimony.csproj" />
-		<ProjectReference Include="..\..\Libraries\Blazr.Gallium\Blazr.Gallium.csproj" />
+		<ProjectReference Include="..\..\..\Libraries\Blazor.Antimony\Blazor.Antimony.csproj" />
+		<ProjectReference Include="..\..\..\Libraries\Blazr.Gallium\Blazr.Gallium.csproj" />
 		<ProjectReference Include="..\Blazr.App.Core\Blazr.App.Core.csproj" />
 		<ProjectReference Include="..\Blazr.App.Infrastructure\Blazr.App.Infrastructure.csproj" />
 	</ItemGroup>

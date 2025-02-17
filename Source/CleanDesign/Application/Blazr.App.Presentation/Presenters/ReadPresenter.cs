@@ -32,6 +32,6 @@ public class ReadPresenter<TRecord, TKey> : IReadPresenter<TRecord, TKey>
         LastResult = result.ToDataResult;
 
         if (result.HasSucceeded(out TRecord? record))
-            this.Item = record ?? _entityProvider.NewRecord(); 
+            this.Item = record ?? _entityProvider.NewRecord; 
     }
 }

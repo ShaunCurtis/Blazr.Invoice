@@ -26,12 +26,11 @@ public static class ApplicationServerInfrastructureServices
         services.AddScoped<ICommandBroker, CommandServerBroker<InMemoryInvoiceTestDbContext>>();
 
         // Add Custom Handlers
-        services.AddScoped<ICommandBroker<Invoice>, InvoiceCommandServerBroker<InMemoryInvoiceTestDbContext>>();
+        services.AddScoped<ICommandBroker<InvoiceWrapper>, InvoiceCommandServerBroker<InMemoryInvoiceTestDbContext>>();
 
         // Add any individual entity services
         services.AddCustomerInfrastructureServices();
         services.AddInvoiceInfrastructureServices();
-        services.AddInvoiceItemInfrastructureServices();
    }
 
     public static void AddTestData(IServiceProvider provider)

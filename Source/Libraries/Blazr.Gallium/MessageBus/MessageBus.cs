@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks.Dataflow;
-
-/// ============================================================
+﻿/// ============================================================
 /// Author: Shaun Curtis, Cold Elm Coders
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using System.Threading.Tasks.Dataflow;
+
 namespace Blazr.Gallium;
 
 public class MessageBus : IMessageBus
@@ -43,7 +43,7 @@ public class MessageBus : IMessageBus
 
         foreach (var handler in handlers)
             _queue.Post(new(handler, message));
-            //ThreadPool.QueueUserWorkItem((state) => handler.SubscriptionAction.Invoke(message));
+        //ThreadPool.QueueUserWorkItem((state) => handler.SubscriptionAction.Invoke(message));
     }
 
     public void UnSubscribe<TMessage>(Action<object> callback)

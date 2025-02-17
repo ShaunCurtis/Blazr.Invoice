@@ -3,23 +3,24 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazr.FluxGate;
 using Blazr.Gallium;
 
 namespace Blazr.App.Presentation.Bootstrap;
 
-public class CustomerGridPresenter : GridPresenter<DmoCustomer>
+public class InvoiceGridPresenter : GridPresenter<DmoInvoice>
 {
-    public CustomerGridPresenter(
+    public InvoiceGridPresenter(
         IMediator mediator, 
         IMessageBus messageBus, 
-        KeyedStateStore keyedFluxGateStore)
+        KeyedFluxGateStore<GridState, Guid> keyedFluxGateStore)
         : base(mediator, messageBus, keyedFluxGateStore)
     { }
 
-    protected override async Task<Result<ListResult<DmoCustomer>>> GetItemsAsync(GridState state)
+    protected override async Task<Result<ListResult<DmoInvoice>>> GetItemsAsync(GridState state)
     {
         // Get the list request from the Flux Context and get the result
-        var listRequest = new CustomerListRequest()
+        var listRequest = new InvoiceRequests.InvoiceListRequest()
         {
             PageSize = state.PageSize,
             StartIndex = state.StartIndex,

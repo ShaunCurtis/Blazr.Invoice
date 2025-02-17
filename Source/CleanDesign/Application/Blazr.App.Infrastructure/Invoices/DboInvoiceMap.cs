@@ -3,6 +3,8 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazr.Antimony.Infrastructure;
+
 namespace Blazr.App.Infrastructure;
 
 public sealed class DboInvoiceMap : IDboEntityMap<DboInvoice, DmoInvoice>

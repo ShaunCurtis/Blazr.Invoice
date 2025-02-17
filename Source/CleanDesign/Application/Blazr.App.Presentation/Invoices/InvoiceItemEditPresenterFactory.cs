@@ -7,22 +7,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazr.App.Presentation;
 
-public class LookupPresenterFactory : ILookupPresenterFactory
+public sealed class InvoiceItemEditPresenterFactory
 {
     private IServiceProvider _serviceProvider;
-    public LookupPresenterFactory(IServiceProvider serviceProvider)
+    public InvoiceItemEditPresenterFactory(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public async ValueTask<ILookUpPresenter<TLookupRecord>> GetPresenterAsync<TLookupRecord, TPresenter>()
-    where TLookupRecord : class, IFkItem, new()
-    where TPresenter : class, ILookUpPresenter<TLookupRecord>
+    public InvoiceItemEditPresenter GetPresenter(InvoiceItemId invoiceItemId)
     {
-        var presenter = ActivatorUtilities.CreateInstance<TPresenter>(_serviceProvider);
+        var presenter = ActivatorUtilities.CreateInstance<InvoiceItemEditPresenter>(_serviceProvider, new object[] {invoiceItemId });
         ArgumentNullException.ThrowIfNull(presenter, nameof(presenter));
-        await presenter.LoadAsync();
-
         return presenter;
     }
 }
+
+

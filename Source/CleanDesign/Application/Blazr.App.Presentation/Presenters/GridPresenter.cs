@@ -3,6 +3,10 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazr.FluxGate;
+using Blazr.Gallium;
+using Microsoft.AspNetCore.Components.QuickGrid;
+
 namespace Blazr.App.Presentation;
 
 public abstract class GridPresenter<TRecord>

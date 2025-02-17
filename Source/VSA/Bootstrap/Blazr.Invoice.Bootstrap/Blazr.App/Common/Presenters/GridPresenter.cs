@@ -3,9 +3,10 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Blazr.FluxGate;
+using Azure.Core;
 using Blazr.Gallium;
 using Microsoft.AspNetCore.Components.QuickGrid;
+using System;
 
 namespace Blazr.App.Presentation;
 
@@ -16,12 +17,10 @@ public abstract class GridPresenter<TRecord>
     // Services
     protected readonly IMediator _dataBroker;
     protected readonly IMessageBus _messageBus;
-    private readonly KeyedFluxGateStore<GridState, Guid> _gridStateStores;
+    private readonly KeyedStateStore _gridStateStore;
 
-    // State Management
-    protected FluxGateStore<GridState> _gridStateStore;
     public Guid ContextUid { get; private set; } = Guid.NewGuid();
-    public GridState GridState => _gridStateStore.Item;
+    public GridState GridState { get; private set; } = new();
 
     public readonly Guid ComponentInstanceId = Guid.NewGuid();
 
@@ -29,36 +28,48 @@ public abstract class GridPresenter<TRecord>
 
     public event EventHandler<EventArgs>? StateChanged;
 
-    public GridPresenter(IMediator mediator, IMessageBus messageBus, KeyedFluxGateStore<GridState, Guid> keyedFluxGateStore)
+    public GridPresenter(IMediator mediator, IMessageBus messageBus, KeyedStateStore keyedFluxGateStore)
     {
         _dataBroker = mediator;
         _messageBus = messageBus;
-        _gridStateStores = keyedFluxGateStore;
-
-        _gridStateStore = _gridStateStores.GetOrCreateStore(ContextUid);
+        _gridStateStore = keyedFluxGateStore;
 
         _messageBus.Subscribe<TRecord>(this.OnStateChanged);
     }
 
     public void SetContext(Guid context)
     {
-        _gridStateStores.RemoveStore(ContextUid);
+        this.ContextUid = context;
+        if (_gridStateStore.TryGetState<GridState>(context, out GridState? state))
+        this.GridState = state;
 
-        ContextUid = context;
-
-        _gridStateStore = _gridStateStores.GetOrCreateStore(ContextUid);
+        this.GridState = new GridState();
     }
 
-    public IDataResult DispatchGridStateChange(IFluxGateAction action)
+    public async Task<IDataResult> DispatchGridStateChange(UpdateGridFiltersRequest request)
     {
-        return _gridStateStore.Dispatch(action).ToDataResult();
+        var result = await _dataBroker.Send(request);
+
+        return result.ToDataResult;
+    }
+    public async Task<IDataResult> DispatchGridStateChange(UpdateGridPagingRequest request)
+    {
+        var result = await _dataBroker.Send(request);
+
+        return result.ToDataResult;
+    }
+    public async Task<IDataResult> DispatchGridStateChange(ResetGridRequest request)
+    {
+        var result = await _dataBroker.Send(request);
+
+        return result.ToDataResult;
     }
 
     protected abstract Task<Result<ListResult<TRecord>>> GetItemsAsync(GridState state);
 
     public async ValueTask<GridItemsProviderResult<TRecord>> GetItemsAsync()
     {
-        var result = await this.GetItemsAsync(_gridStateStore.Item);
+        var result = await this.GetItemsAsync(this.GridState);
         this.LastResult = result.ToDataResult;
 
         if (!result.HasSucceeded(out ListResult<TRecord> listResult))

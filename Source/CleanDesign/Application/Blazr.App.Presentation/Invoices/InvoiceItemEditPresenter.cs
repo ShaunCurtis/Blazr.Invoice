@@ -3,12 +3,15 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazored.Toast.Services;
+using Microsoft.AspNetCore.Components.Forms;
+
 namespace Blazr.App.Presentation;
 
 public sealed class InvoiceItemEditPresenter
 {
-    private readonly IAppToastService _toastService;
-    private readonly Invoice _invoice;
+    private readonly IToastService _toastService;
+    private readonly InvoiceWrapper _invoice;
     private InvoiceItemId _invoiceItemId = InvoiceItemId.Default;
 
     public IDataResult LastResult { get; private set; } = DataResult.Success();
@@ -16,32 +19,24 @@ public sealed class InvoiceItemEditPresenter
     public DmoInvoiceItemEditContext RecordEditContext { get; private set; }
     public bool IsNew { get; private set; }
 
-    public InvoiceItemEditPresenter(IAppToastService toastService, Invoice invoice, InvoiceItemId id)
+    public InvoiceItemEditPresenter(IToastService toastService, InvoiceAggregatePresenter invoiceAggregatePresenter, InvoiceItemId id)
     {
-        _invoice = invoice;
+        _invoice = invoiceAggregatePresenter.Invoice;
         _invoiceItemId = id;
         _toastService = toastService;
 
         // Detect if we have a new item request.
         this.IsNew = id == InvoiceItemId.Default;
 
-        var item = this.Load(id);
-
-        RecordEditContext = new(item);
-        this.EditContext = new(this.RecordEditContext);
-        _invoiceItemId = this.RecordEditContext.Id;
-    }
-
-    private DmoInvoiceItem Load(InvoiceItemId id)
-    {
-        this.LastResult = DataResult.Success();
-
+        // Get the invoice item from the Invoice Aggregate
         var item = _invoice.Dispatch(new InvoiceActions.GetInvoiceItemAction(id));
 
-        return item;
+        // Create the edit contexts
+        RecordEditContext = new(item);
+        this.EditContext = new(this.RecordEditContext);
     }
 
-    public Task<IDataResult> SaveItemAsync()
+    public Task<IDataResult> ProcessItemAsync()
     {
 
         if (!this.RecordEditContext.IsDirty)

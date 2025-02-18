@@ -16,7 +16,6 @@ public abstract class GridPresenter<TRecord>
     where TRecord : class, new()
 {
     // Services
-    protected readonly IMediator _dataBroker;
     protected readonly IMessageBus _messageBus;
     private readonly KeyedStateStore _gridStateStore;
 

@@ -10,5 +10,5 @@ namespace Blazr.App.Presentation;
 
 public class DataSetPropertyColumn<TGridItem> : TemplateColumn<TGridItem>
 {
-    [Parameter, EditorRequired] public string DataSetName { get; set; } = string.Empty;
+    [Parameter] public Expression<Func<TGridItem, object>>? SortExpression { get; set; }
 }

@@ -12,7 +12,7 @@ public interface IGridPresenter<TRecord>
     where TRecord : class, new()
 {
     public Guid ContextUid { get; }
-    public GridState GridState { get; }
+    public GridState<TRecord> GridState { get; }
     public IDataResult LastResult { get; }
 
     public void SetContext(Guid context);

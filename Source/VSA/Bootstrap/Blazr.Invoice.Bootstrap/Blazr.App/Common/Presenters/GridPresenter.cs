@@ -6,6 +6,7 @@
 using Azure.Core;
 using Blazr.Gallium;
 using Microsoft.AspNetCore.Components.QuickGrid;
+using Microsoft.VisualBasic;
 using System;
 
 namespace Blazr.App.Presentation;
@@ -40,23 +41,30 @@ public abstract class GridPresenter<TRecord>
     public void SetContext(Guid context)
     {
         this.ContextUid = context;
-        if (_gridStateStore.TryGetState<GridState>(context, out GridState? state))
+        if (_gridStateStore.TryGetState<GridState<TRecord>>(context, out GridState<TRecord>? state))
         this.GridState = state;
 
-        this.GridState = new GridState();
+        this.GridState = new GridState<TRecord>();
     }
 
-    public async Task<IDataResult> DispatchGridStateChange(UpdateGridFiltersRequest request)
+    public IDataResult DispatchGridStateChange(UpdateGridFilterRequest<TRecord> request)
     {
-        var result = await _dataBroker.Send(request);
+        var item = _gridStateStore.GetState<GridState<TRecord>>(this.ContextUid) ?? new();
+        var updatedItem = item with { Filter= request.Filter };
 
-        return result.ToDataResult;
+        _gridStateStore.Dispatch(this.ContextUid, updatedItem);
+
+        return DataResult.Success() as;
     }
-    public async Task<IDataResult> DispatchGridStateChange(UpdateGridPagingRequest request)
-    {
-        var result = await _dataBroker.Send(request);
 
-        return result.ToDataResult;
+    public async Task<IDataResult> DispatchGridStateChange(UpdateGridPagingRequest<TRecord> request)
+    {
+        var item = _store.GetState<GridState>(request.Key) ?? new();
+        var updatedItem = item with { PageSize = request.PageSize, StartIndex = request.StartIndex, Sorter = request.Sorter };
+
+        _store.Dispatch(request.Key, updatedItem);
+        return Task.FromResult(Result.Success());
+
     }
     public async Task<IDataResult> DispatchGridStateChange(ResetGridRequest request)
     {

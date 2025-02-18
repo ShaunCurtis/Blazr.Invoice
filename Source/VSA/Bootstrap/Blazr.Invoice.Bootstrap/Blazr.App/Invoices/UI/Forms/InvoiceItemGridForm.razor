@@ -13,15 +13,15 @@
 
 <div class="@this.GridCss" tabindex="-1">
     <QuickGrid Theme="None" TGridItem="DmoInvoiceItem" ItemsProvider="this.GetItemsAsync" Class="@this.TableCss">
-        <DataSetPropertyColumn SortExpression="(item) => item.Id" Class="nowrap-column" Sortable="true" Title="ID">
+        <SortedPropertyColumn SortField="@AppDictionary.InvoiceItem.InvoiceItemID" Class="nowrap-column" Sortable="true" Title="ID">
             @context.Id.Value.ToDisplayId()
-        </DataSetPropertyColumn>
-        <DataSetPropertyColumn SortExpression="(item) => item.Description" Class="nowrap-column" Sortable="true" Title="Description">
+        </SortedPropertyColumn>
+        <SortedPropertyColumn SortField="@AppDictionary.InvoiceItem.Description" Class="nowrap-column" Sortable="true" Title="Description">
             @context.Description
-        </DataSetPropertyColumn>
-        <DataSetPropertyColumn SortExpression="(item) => item.Amount" Class="nowrap-column" Sortable="true" Title="Amount">
+        </SortedPropertyColumn>
+        <SortedPropertyColumn SortField="@AppDictionary.InvoiceItem.Amount" Class="nowrap-column" Sortable="true" Title="Amount">
             @context.Amount.AsMoney()
-        </DataSetPropertyColumn>
+        </SortedPropertyColumn>
         <TemplateColumn Class="" Align="Align.End">
             <UIButtonGroup>
                 <button class="btn btn-sm btn-primary" @onclick="() => OnEditAsync(context.Id)">Edit</button>

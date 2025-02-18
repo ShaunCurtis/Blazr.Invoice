@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components.QuickGrid;
 
 namespace Blazr.App.Presentation;
 
-public class DataSetPropertyColumn<TGridItem> : TemplateColumn<TGridItem>
+public class SortedPropertyColumn<TGridItem> : TemplateColumn<TGridItem>
 {
-    [Parameter] public Expression<Func<TGridItem, object>>? SortExpression { get; set; }
+    [Parameter] public string? SortField { get; set; }
 }

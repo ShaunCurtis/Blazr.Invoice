@@ -5,19 +5,23 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public record GridState<TRecord>
+public record GridState<TRecord> : IGridState<TRecord>
     where TRecord : class
 {
-    public int PageSize { get; init; } = 1000;
-    public int StartIndex { get; init; } = 0;
-    public Expression<Func<TRecord, bool>>? Filter { get; init; } = null;
-    public Expression<Func<TRecord, object>>? Sorter { get; init; } = null;
+    public int PageSize { get; init; }
+    public int StartIndex { get; init; }
+    public bool SortDescending { get; init; }
+    public string? SortField { get; init; }
 
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public int Page
+        => this.StartIndex / this.PageSize;
 
-    public GridState() { }
-
-    public static GridState<TRecord> Create(Guid id)
-        => new() { Id = id };
+    public GridState()
+    {
+        this.PageSize = 1000;
+        this.StartIndex = 0;
+        this.SortDescending = false;
+        this.SortField = null;
+    }
 }
 

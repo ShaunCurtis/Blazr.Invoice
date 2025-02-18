@@ -32,7 +32,7 @@ public abstract partial class GridFormBase<TRecord, TKey> : ComponentBase, IDisp
     protected virtual string formTitle => this.FormTitle ?? $"List of {this.UIEntityService?.PluralDisplayName ?? "Items"}";
 
     protected PaginationState Pagination = new PaginationState { ItemsPerPage = 10 };
-    protected FilterDefinition? DefaultFilter { get; set; } = null;
+    protected Expression<Func<TRecord, bool>>? DefaultFilter { get; set; } = null;
 
     protected async override Task OnInitializedAsync()
     {
@@ -41,9 +41,9 @@ public abstract partial class GridFormBase<TRecord, TKey> : ComponentBase, IDisp
         this.Presenter.SetContext(this.GridContextId);
         this.Pagination.ItemsPerPage = this.PageSize;
         if (ResetGridContext)
-            await this.Presenter.DispatchGridStateChange(new ResetGridRequest(GridContextId, 0, this.PageSize, null, DefaultFilter));
+            this.Presenter.DispatchGridStateChange(new UpdateGridRequest<TRecord>(0, this.PageSize, false, null));
 
-        await Pagination.SetCurrentPageIndexAsync(this.Presenter.GridState.Page());
+        await Pagination.SetCurrentPageIndexAsync(this.Presenter.GridState.Page);
 
         // Make sure we yield so we have the first UI render 
         await Task.Yield();
@@ -54,7 +54,7 @@ public abstract partial class GridFormBase<TRecord, TKey> : ComponentBase, IDisp
     public async ValueTask<GridItemsProviderResult<TRecord>> GetItemsAsync(GridItemsProviderRequest<TRecord> gridRequest)
     {
         //mutate the GridState
-        var mutationAction = UpdateGridPagingRequest.Create(GridContextId, gridRequest);
+        var mutationAction = UpdateGridRequest<TRecord>.Create(gridRequest);
         var mutationResult = Presenter.DispatchGridStateChange(mutationAction);
 
         var result = await this.Presenter.GetItemsAsync();

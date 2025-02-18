@@ -12,19 +12,19 @@ public class InvoiceGridPresenter : GridPresenter<DmoInvoice>
     public InvoiceGridPresenter(
         IMediator mediator, 
         IMessageBus messageBus, 
-        KeyedStateStore keyedFluxGateStore)
+        ScopedStateProvider keyedFluxGateStore)
         : base(mediator, messageBus, keyedFluxGateStore)
     { }
 
-    protected override async Task<Result<ListResult<DmoInvoice>>> GetItemsAsync(GridState state)
+    protected override async Task<Result<ListResult<DmoInvoice>>> GetItemsAsync(GridState<DmoInvoice> state)
     {
         // Get the list request from the Flux Context and get the result
         var listRequest = new InvoiceRequests.InvoiceListRequest()
         {
             PageSize = state.PageSize,
             StartIndex = state.StartIndex,
-            SortColumn = state.Sorter?.SortField,
-            SortDescending = state.Sorter?.SortDescending ?? false
+            SortColumn = state.SortField,
+            SortDescending = state.SortDescending
         };
 
         var result = await _dataBroker.Send(listRequest);

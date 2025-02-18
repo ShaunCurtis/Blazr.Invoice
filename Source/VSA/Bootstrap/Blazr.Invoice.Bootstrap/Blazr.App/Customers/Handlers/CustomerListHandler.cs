@@ -44,7 +44,7 @@ public sealed record CustomerListHandler : IRequestHandler<CustomerListRequest, 
     private Expression<Func<DboCustomer, object>> GetSorter(string? field)
         => field switch
         {
-            "CustomerName" => (Item) => Item.CustomerName,
+            AppDictionary.Customer.CustomerName => (Item) => Item.CustomerName,
             _ => (item) => item.CustomerID
         };
 

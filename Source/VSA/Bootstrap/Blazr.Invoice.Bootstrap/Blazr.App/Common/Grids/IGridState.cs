@@ -5,11 +5,11 @@
 /// ============================================================
 namespace Blazr.App.Presentation;
 
-public interface IGridState
+public interface IGridState<TRecord>
+    where TRecord : class
 {
     public int PageSize { get; }
     public int StartIndex { get;}
-    public FilterDefinition? Filter { get; }
-    public SortDefinition? Sorter { get;}
+    public bool SortDescending { get; }
+    public string? SortField { get; }
 }
-

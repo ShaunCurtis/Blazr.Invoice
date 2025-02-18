@@ -11,14 +11,11 @@ namespace Blazr.App.Presentation;
 public interface IGridPresenter<TRecord>
     where TRecord : class, new()
 {
-    public Guid ContextUid { get; }
+    public Guid StateContextUid { get; }
     public GridState<TRecord> GridState { get; }
     public IDataResult LastResult { get; }
 
     public void SetContext(Guid context);
     public ValueTask<GridItemsProviderResult<TRecord>> GetItemsAsync();
-    public Task<IDataResult> DispatchGridStateChange(UpdateGridFiltersRequest request);
-    public Task<IDataResult> DispatchGridStateChange(UpdateGridPagingRequest request);
-    public Task<IDataResult> DispatchGridStateChange(ResetGridRequest request);
-
+    public IDataResult DispatchGridStateChange(UpdateGridRequest<TRecord> request);
 }

@@ -39,8 +39,8 @@ public static class ApplicationServerServices
         // Add Custom Handlers
         services.AddScoped<ICommandBroker<InvoiceWrapper>, InvoiceCommandServerBroker<InMemoryInvoiceTestDbContext>>();
 
-        // GridState inMemory Store 
-        services.AddScoped<KeyedStateStore>();
+        // InMemory Scoped State Store 
+        services.AddScoped<ScopedStateProvider>();
 
         // Presenter Factories
         services.AddScoped<ILookupPresenterFactory, LookupPresenterFactory>();

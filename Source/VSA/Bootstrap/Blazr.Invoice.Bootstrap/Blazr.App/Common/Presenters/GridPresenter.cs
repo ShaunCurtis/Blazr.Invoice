@@ -3,11 +3,8 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Azure.Core;
 using Blazr.Gallium;
 using Microsoft.AspNetCore.Components.QuickGrid;
-using Microsoft.VisualBasic;
-using System;
 
 namespace Blazr.App.Presentation;
 
@@ -16,63 +13,56 @@ public abstract class GridPresenter<TRecord>
     where TRecord : class, new()
 {
     // Services
+    protected readonly IMediator _dataBroker;
     protected readonly IMessageBus _messageBus;
-    private readonly KeyedStateStore _gridStateStore;
+    private readonly ScopedStateProvider _gridStateStore;
 
-    public Guid ContextUid { get; private set; } = Guid.NewGuid();
-    public GridState GridState { get; private set; } = new();
-
-    public readonly Guid ComponentInstanceId = Guid.NewGuid();
-
+    public Guid StateContextUid { get; private set; } = Guid.NewGuid();
+    public GridState<TRecord> GridState { get; private set; } = new();
     public IDataResult LastResult { get; protected set; } = DataResult.Failure("New");
 
     public event EventHandler<EventArgs>? StateChanged;
 
-    public GridPresenter(IMediator mediator, IMessageBus messageBus, KeyedStateStore keyedFluxGateStore)
+    public GridPresenter(IMediator mediator, IMessageBus messageBus, ScopedStateProvider scopedStateProvider)
     {
         _dataBroker = mediator;
         _messageBus = messageBus;
-        _gridStateStore = keyedFluxGateStore;
+        _gridStateStore = scopedStateProvider;
 
         _messageBus.Subscribe<TRecord>(this.OnStateChanged);
     }
 
+    /// <summary>
+    /// Sets the State context for the Presenter and retrieves any saved GridState
+    /// </summary>
+    /// <param name="context"></param>
     public void SetContext(Guid context)
     {
-        this.ContextUid = context;
+        this.StateContextUid = context;
         if (_gridStateStore.TryGetState<GridState<TRecord>>(context, out GridState<TRecord>? state))
-        this.GridState = state;
+        {
+            this.GridState = state;
+            return;
+        }
 
         this.GridState = new GridState<TRecord>();
     }
 
-    public IDataResult DispatchGridStateChange(UpdateGridFilterRequest<TRecord> request)
+    /// <summary>
+    /// Applies a GridState change to the Presenter and saves the state
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public IDataResult DispatchGridStateChange(UpdateGridRequest<TRecord> request)
     {
-        var item = _gridStateStore.GetState<GridState<TRecord>>(this.ContextUid) ?? new();
-        var updatedItem = item with { Filter= request.Filter };
+        this.GridState = new() { PageSize = request.PageSize, StartIndex = request.StartIndex, SortField = request.SortField, SortDescending = request.SortDescending };
 
-        _gridStateStore.Dispatch(this.ContextUid, updatedItem);
+        _gridStateStore.Dispatch(this.StateContextUid, this.GridState);
 
-        return DataResult.Success() as;
+        return DataResult.Success();
     }
 
-    public async Task<IDataResult> DispatchGridStateChange(UpdateGridPagingRequest<TRecord> request)
-    {
-        var item = _store.GetState<GridState>(request.Key) ?? new();
-        var updatedItem = item with { PageSize = request.PageSize, StartIndex = request.StartIndex, Sorter = request.Sorter };
-
-        _store.Dispatch(request.Key, updatedItem);
-        return Task.FromResult(Result.Success());
-
-    }
-    public async Task<IDataResult> DispatchGridStateChange(ResetGridRequest request)
-    {
-        var result = await _dataBroker.Send(request);
-
-        return result.ToDataResult;
-    }
-
-    protected abstract Task<Result<ListResult<TRecord>>> GetItemsAsync(GridState state);
+    protected abstract Task<Result<ListResult<TRecord>>> GetItemsAsync(GridState<TRecord> state);
 
     public async ValueTask<GridItemsProviderResult<TRecord>> GetItemsAsync()
     {

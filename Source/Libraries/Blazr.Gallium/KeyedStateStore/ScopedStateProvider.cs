@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Blazr.Gallium;
 
-public interface IKeyedStateStore<TKey, TData>
+public interface IScopedStateProvider<TKey, TData>
      where TData : class
 {
     public void Dispatch(TKey key, TData data);
@@ -23,7 +23,7 @@ public interface IKeyedStateStore<TKey, TData>
     public bool TryGetState<T>(TKey key, out T? value) where T : class;
 }
 
-public class KeyedStateStore : IKeyedStateStore<Guid, object>
+public class ScopedStateProvider : IScopedStateProvider<Guid, object>
 {
     private readonly record struct StateSubscription(object Data)
     {
@@ -59,9 +59,10 @@ public class KeyedStateStore : IKeyedStateStore<Guid, object>
 
     public bool TryGetState<T>(Guid key, [NotNullWhen(true)] out T? value) where T : class
     {
-        value = _subscriptions.ContainsKey(key)
-            ? _subscriptions[key].Data as T
-            : default;
+        value = null;
+
+        if (_subscriptions.ContainsKey(key))
+            value = _subscriptions[key].Data as T;
 
         return value is not null;
     }

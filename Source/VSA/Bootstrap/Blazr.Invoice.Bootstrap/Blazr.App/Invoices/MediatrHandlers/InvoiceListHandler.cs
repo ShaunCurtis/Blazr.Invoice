@@ -46,7 +46,10 @@ public sealed class InvoiceListHandler : IRequestHandler<InvoiceListRequest, Res
     private Expression<Func<DvoInvoice, object>> GetSorter(string? field)
         => field switch
         {
-            "InvoiceID" => (Item) => Item.InvoiceID,
+            AppDictionary.Invoice.InvoiceID => (Item) => Item.InvoiceID,
+            AppDictionary.Invoice.Date => (Item) => Item.Date,
+            AppDictionary.Invoice.TotalAmount => (Item) => Item.TotalAmount,
+            AppDictionary.Customer.CustomerName => (Item) => Item.CustomerName,
             _ => (item) => item.Date
         };
 

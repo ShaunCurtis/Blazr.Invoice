@@ -1,0 +1,146 @@
+﻿@namespace Blazr.App.UI
+
+@using Blazr.Cadmium.QuickGrid
+@using Blazr.Cadmium.UI
+
+@inject FKProvider FKProvider
+
+<div class="modal-header">
+    <div class="h4">
+        @_formTitle
+    </div>
+</div>
+
+<LoadingSpinner Loading="_loading">
+
+    <EditForm EditContext=this.EditContext OnValidSubmit="this.OnSaveAsync">
+
+        <div class="modal-body px-3">
+
+            <BlazrFluentValidator TRecord="InvoiceRecordMutor" TValidator="InvoiceRecordMutorValidator" />
+            <BlazrEditStateTracker />
+
+            <div class="row">
+
+                <BlazrDateControl class="form-control mb-2"
+                                  ColumnCss="col-12 col-md-4 mb-2"
+                                  Label="Date"
+                                  @bind-Value="this.EditMutor.Date" />
+
+                <BlazrSelectControl class="form-control mb-2"
+                                    ColumnCss="col-12 col-md-6 mb-2"
+                                    Label="Customer"
+                                    TValue="Guid"
+                                    TListItem="FkoCustomer"
+                                    @bind-Value="this.EditMutor.CustomerId"
+                                    @bind-Value:after="this.OnCustomerUpdate"
+                                    DisplayOptionsItems="_customerList"
+                                    OptionValueDelegate="item => item.Id.Value.ToString()"
+                                    OptionTextDelegate="item => item.Name.Value"
+                                    PlaceholderText="Choose a Customer" />
+            </div>
+
+        </div>
+        <div class="modal-footer bg-light">
+
+            <EditFormButtons SaveOnSubmit
+                             ColumnCss="col-12 text-end"
+                             Options=_editFormButtonsOptions
+                             DirtyExit=this.OnExit
+                             Exit=this.OnExit
+                             IsNewRecord=false
+                             Reset=this.OnReset />
+
+        </div>
+
+    </EditForm>
+</LoadingSpinner>
+
+@code {
+    [CascadingParameter] private InvoiceEntityMutor EntityMutor { get; set; } = default!;
+    [CascadingParameter] private IModalDialog? ModalDialog { get; set; }
+
+    private string _formTitle => $"Edit The Invoice";
+
+    private InvoiceRecordMutor EditMutor { get; set; } = InvoiceRecordMutor.NewMutor();
+    protected EditContext EditContext { get; set; } = default!;
+
+    private EditFormButtonsOptions _editFormButtonsOptions = new();
+    private List<FkoCustomer> _customerList = new();
+
+    private bool _loading = true;
+    private bool _isDirty;
+    private bool _isClean => !_isDirty;
+
+    protected async override Task OnInitializedAsync()
+    {
+        ArgumentNullException.ThrowIfNull(EntityMutor);
+        ArgumentNullException.ThrowIfNull(this.ModalDialog);
+
+        this.EditMutor = InvoiceRecordMutor.Load(this.EntityMutor.InvoiceEntity.InvoiceRecord);
+        this.EditContext = new(EditMutor);
+
+        _customerList = (await this.FKProvider.GetCustomerFKAsync())
+            .Write(Enumerable.Empty<FkoCustomer>())
+            .ToList();
+
+        _loading = false;
+        this.EditContext.OnFieldChanged += OnEditStateMayHaveChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        _isDirty = this.EditContext.GetEditState();
+    }
+
+    /// <summary>
+    /// Set the customer when the customerId is changed
+    /// </summary>
+    private void OnCustomerUpdate()
+        => this.EditMutor.Customer = _customerList.FirstOrDefault(c => c.Id.Value.Equals(this.EditMutor.CustomerId)) ?? FkoCustomer.Default;
+
+    private void OnEditStateMayHaveChanged(object? sender, EventArgs e)
+    {
+        _isDirty = this.EditContext.GetEditState();
+        this.StateHasChanged();
+    }
+
+    private Task OnSaveAsync()
+    {
+        if (!this.EditContext.Validate())
+            return Task.CompletedTask;
+
+        var action = new UpdateInvoiceAction(EditMutor.Record);
+
+        var result = this.EntityMutor.Dispatch(action.Dispatcher);
+
+        OnExit();
+
+        return Task.CompletedTask;
+    }
+
+    protected void OnExit()
+        => ModalDialog?.Close(new ModalResult());
+
+    protected Task OnReset()
+    {
+        this.EditMutor.Reset();
+        this.EditContext = new EditContext(EditMutor);
+        this.EditContext.Validate();
+
+        return Task.CompletedTask;
+    }
+
+    private void OnLocationChanged(LocationChangingContext context)
+    {
+        var isdirty = this.EditContext.GetEditState();
+
+        if (isdirty)
+            context.PreventNavigation();
+    }
+
+    public void Dispose()
+    {
+        this.EditContext.OnFieldChanged -= OnEditStateMayHaveChanged;
+    }
+}

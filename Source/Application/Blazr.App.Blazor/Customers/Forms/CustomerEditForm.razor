@@ -1,0 +1,63 @@
+﻿@namespace Blazr.App.UI
+
+@using Blazr.Cadmium.UI
+@using Blazr.Indium
+
+@inherits EditorModalForm<DmoCustomer, CustomerRecordMutor, CustomerId>
+
+<PageTitle>@this.FormTitle</PageTitle>
+
+<div class="modal-header">
+    <div class="h4">
+        @this.FormTitle
+    </div>
+</div>
+
+@if (Loading)
+{
+    <div>Loading...</div>
+    return;
+}
+
+<EditForm EditContext=this.EditContext OnValidSubmit=this.OnSave>
+
+    <div class="modal-body px-3">
+
+        <BlazrFluentValidator TRecord="CustomerRecordMutor" TValidator="CustomerRecordMutorValidator" />
+        <BlazrEditStateTracker LockNavigation=this.LockNavigation />
+
+        <div class="row">
+
+            <div class="col-12 col-md-8 col-xl-4 mb-2">
+                <BlazrTextViewControl Label="Id" Value="@this.EditMutor.BaseRecord.Id" />
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <BlazrTextControl class="form-control mb-2"
+                              SetFirstFocus
+                              UpdateOnInput
+                              ColumnCss="col-12 col-md-8 col-xl-4 mb-2"
+                              Label="Name"
+                              @bind-Value="this.EditMutor.Name" />
+
+        </div>
+
+    </div>
+
+    <div class="modal-footer bg-light">
+
+        <EditFormButtons SaveOnSubmit
+                         ColumnCss="col-12 text-end"
+                         Options=this.editFormButtonsOptions
+                         DirtyExit=this.OnExit
+                         Exit=this.OnExit
+                         IsNewRecord=this.IsNewRecord
+                         Reset=this.OnReset />
+
+    </div>
+
+</EditForm>
+

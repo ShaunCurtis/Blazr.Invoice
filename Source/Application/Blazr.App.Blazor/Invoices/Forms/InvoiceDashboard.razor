@@ -1,0 +1,204 @@
+﻿@namespace Blazr.App.UI
+@using Blazr.App.Presentation
+
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+@inject InvoiceMutorFactory MutorFactory
+@inject IMessageBus MessageBus
+
+@implements IDisposable
+
+<PageTitle>Invoice Dashboard</PageTitle>
+
+<CascadingValue Value="this.Mutor">
+
+    <BsModalDialog @ref=_modalDialog />
+
+    @if (_loading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" style="width: 5rem; height: 5rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        return;
+    }
+
+    <div hidden="@_isClean">
+        <div class="alert alert-danger d-flex align-items-center my-2 p-2" role="alert">
+            @_message
+        </div>
+    </div>
+
+    <div hidden="@_showAddInvoiceForm">
+
+        <div class="d-flex flex-row mb-2 pt-1 border-bottom">
+
+            <div class="flex-fill justify-content-start h3">
+                Invoice Manager
+            </div>
+
+            <div class="justify-content-end">
+
+                <button class="btn btn-sm btn-primary ms-1" @onclick="this.EditInvoiceAsync">Edit Invoice Data</button>
+                <button hidden="@_isClean" class="btn btn-sm btn-success ms-1" @onclick="this.SaveAsync">Save Invoice</button>
+                <button hidden="@_isClean" class="btn btn-sm btn-success ms-1" @onclick="this.SaveAndExitAsync">Save And Exit</button>
+                <button hidden="@_isClean" class="btn btn-sm btn-danger ms-1" @onclick="this.ExitWithoutSavingAsync">Exit Without Saving</button>
+                <button hidden="@_isDirty" class="btn btn-sm btn-dark ms-1" @onclick="this.ExitAsync">Exit</button>
+
+            </div>
+
+        </div>
+    </div>
+    <div hidden="@_hideAddInvoiceForm" class="mt-3">
+        <InvoiceAddForm Cancelled="this.OnNewInvoiceClosed" />
+    </div>
+
+    <div hidden="@_showAddInvoiceForm" class="card bg-light rounded">
+
+        <div class="card-body p-4">
+            <InvoiceViewer />
+        </div>
+
+    </div>
+
+    <div hidden="@_showAddInvoiceForm" class="mt-3">
+        <InvoiceItemGrid />
+    </div>
+
+    <NavigationLock OnBeforeInternalNavigation="this.OnLocationChanging" ConfirmExternalNavigation="_isDirty" />
+
+</CascadingValue>
+
+@code {
+    [Parameter] public InvoiceId InvoiceId { get; set; } = InvoiceId.NewId;
+
+    private bool _loading = true;
+    //private bool _isError = false;
+    private bool _showAddInvoiceForm = false;
+    private IModalDialog _modalDialog = default!;
+
+    private bool _hideAddInvoiceForm => !_showAddInvoiceForm;
+    private bool _isDirty => this.Mutor.IsDirty;
+    private bool _isClean => !this.Mutor.IsDirty;
+    private bool _isNew => this.Mutor.IsNew;
+    private string _message => this.Mutor.LastResult.Failure 
+        ? this.Mutor.LastResult.Message 
+        : "Invoice changes are not currently saved to the data store!";
+
+    private InvoiceEntityMutor Mutor = default!;
+
+    protected async override Task OnInitializedAsync()
+    {
+        this.Mutor = await MutorFactory.GetInvoiceEntityMutorAsync(this.InvoiceId);
+
+        _showAddInvoiceForm = this.InvoiceId.IsNew;
+        _loading = false;
+        this.MessageBus.Subscribe<InvoiceEntity>(OnContextStateChanged);
+    }
+
+    /// <summary>
+    /// Edit Button Handler
+    /// </summary>
+    /// <returns></returns>
+    private async Task EditInvoiceAsync()
+    {
+        var options = new ModalOptions() { ModalDialogType = typeof(InvoiceEditForm) };
+
+        var result = await _modalDialog.ShowAsync(options);
+        // wait for the modal to close
+
+        // If we have cancelled the new invoice we need to exit back to the invoices page
+        if (result.ResultType != ModalResultType.OK && this.Mutor.State is RecordState.New)
+        {
+            this.ToastService.ShowInfo("You exited creating the new invoice.");
+            this.NavManager.NavigateTo($"/invoices");
+        }
+    }
+
+    /// <summary>
+    /// Save button handler
+    /// </summary>
+    /// <returns></returns>
+    private async Task SaveAsync()
+        => await this.Mutor.SaveAsync();
+
+    /// <summary>
+    /// Save and Exit button handler
+    /// </summary>
+    /// <returns></returns>
+    private async Task SaveAndExitAsync()
+        => (await this.Mutor.SaveAsync())
+        .Match(success: ExitWithoutSaving);
+
+    /// <summary>
+    /// Standard exit button handler - will abort if dirty
+    /// </summary>
+    /// <returns></returns>
+    private Task ExitAsync()
+    {
+        this.Exit();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Exit without save button handler
+    /// </summary>
+    /// <returns></returns>
+    private Task ExitWithoutSavingAsync()
+    {
+        this.Mutor.Reset();
+        this.Exit();
+        return Task.CompletedTask;
+    }
+
+    private Task OnLocationChanging(LocationChangingContext context)
+    {
+        // Need to check if the invoice is dirty before letting the user exit
+        if (_isDirty)
+        {
+            context.PreventNavigation();
+            this.ToastService.ShowError("You can't navigate away from an unsaved invoice.  Choose Save or Exit Without Saving.");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void OnContextStateChanged(object? sender)
+    {
+        if (sender is InvoiceId id && this.InvoiceId.Equals(id))
+            this.InvokeAsync(StateHasChanged);
+    }
+
+    private void OnNewInvoiceClosed(bool cancelled)
+    {
+        _showAddInvoiceForm = false;
+        if (cancelled)
+        {
+            this.ToastService.ShowInfo("You exited creating the new invoice.");
+            this.NavManager.NavigateTo($"/invoices");
+        }
+    }
+
+    // These are the internal code methods used by the button handlers
+
+    /// <summary>
+    /// Normal exit.  Will be aborted by the Navigation Locker if the composite is dirty
+    /// </summary>
+    private void Exit()
+        => this.NavManager.NavigateTo($"/invoices");
+
+    /// <summary>
+    /// Will exit regardless by resetting the mutor state
+    /// </summary>
+    private void ExitWithoutSaving()
+    {
+        this.Mutor.Reset();
+        this.Exit();
+    }
+
+    public void Dispose()
+    {
+        this.MessageBus.UnSubscribe<InvoiceEntity>(OnContextStateChanged);
+    }
+}

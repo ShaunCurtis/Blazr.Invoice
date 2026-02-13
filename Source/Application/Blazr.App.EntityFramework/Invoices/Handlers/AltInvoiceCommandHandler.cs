@@ -1,0 +1,110 @@
+﻿/// ============================================================
+/// Author: Shaun Curtis, Cold Elm Coders
+/// License: Use And Donate
+/// If you use it, donate something to a charity somewhere
+/// ============================================================
+namespace Blazr.App.EntityFramework;
+
+/// <summary>
+/// Mediator Handler for executing commands against a Invoice Entity in an Entity Framework Context
+/// 
+/// The basic premis is either:
+///  - Delete the whole data set if marked for deletion
+///  or
+///  - get a list of all the invoice items in the database
+///  - Add or update items in the Entity based on their ID state
+///  - remove each item from the all items list
+///  - remove any remaining items in th all items list from the database
+/// </summary>
+public sealed record AltInvoiceCommandHandler : IRequestHandler<InvoiceEntityCommandRequest, Result<InvoiceEntity>>
+{
+    private readonly IMessageBus _messageBus;
+    private readonly IDbContextFactory<InMemoryInvoiceTestDbContext> _factory;
+    private readonly IRequestHandler<InvoiceEntityRequest, Result<InvoiceEntity>> _recordRequestHandler;
+
+    public AltInvoiceCommandHandler(IDbContextFactory<InMemoryInvoiceTestDbContext> factory, IMessageBus messageBus, IRequestHandler<InvoiceEntityRequest, Result<InvoiceEntity>> requestHandler)
+    {
+        _factory = factory;
+        _messageBus = messageBus;
+        _recordRequestHandler = requestHandler;
+    }
+
+    public async Task<Result<InvoiceEntity>> HandleAsync(InvoiceEntityCommandRequest request, CancellationToken cancellationToken)
+    {
+        if (request.State is RecordState.Deleted)
+            return await this.DeleteEntityAsync(request.Item.InvoiceRecord.Id, cancellationToken);
+
+        return await this.SaveEntityAsync(request.Item, cancellationToken);
+    }
+
+    private async Task<Result<InvoiceEntity>> DeleteEntityAsync(InvoiceId id, CancellationToken cancellationToken)
+        => await _recordRequestHandler.HandleAsync(new InvoiceEntityRequest(id), cancellationToken)
+            .BindAsync(entity => this.DeleteEntityRecordsAsync(entity, cancellationToken));
+
+    private async Task<Result<InvoiceEntity>> DeleteEntityRecordsAsync(InvoiceEntity entity, CancellationToken cancellationToken)
+    {
+        using var dbContext = _factory.CreateDbContext();
+
+        dbContext.Remove<DboInvoice>(DboInvoice.Map(entity.InvoiceRecord));
+
+        foreach (var invoiceItem in entity.InvoiceItems)
+            dbContext.Remove<DboInvoiceItem>(DboInvoiceItem.Map(invoiceItem));
+
+        var addedItems = await dbContext.SaveChangesAsync(cancellationToken);
+
+        if (addedItems != entity.InvoiceItems.Count + 1)
+            return ResultT.Fail<InvoiceEntity>("The Invoice was not added corectly.  Check the result.");
+
+        return ResultT.Read(entity);
+    }
+
+
+    private async Task<Result<InvoiceEntity>> SaveEntityAsync(InvoiceEntity entity, CancellationToken cancellationToken)
+    {
+        var itemList = await this.GetInvoiceItemsAsync(entity.InvoiceRecord.Id);
+
+        using var dbContext = await _factory.CreateDbContextAsync();
+
+        if (entity.InvoiceRecord.Id.IsNew)
+            dbContext.Add<DboInvoice>(DboInvoice.Map(entity.InvoiceRecord));
+        else
+            dbContext.Update<DboInvoice>(DboInvoice.Map(entity.InvoiceRecord));
+
+        int transactionCount = 1;
+
+        foreach (var invoiceItem in entity.InvoiceItems)
+        {
+            if (invoiceItem.Id.IsNew)
+                dbContext.Add<DboInvoiceItem>(DboInvoiceItem.Map(invoiceItem));
+            else
+            {
+                dbContext.Update<DboInvoiceItem>(DboInvoiceItem.Map(invoiceItem));
+
+                var currentItem = itemList.First(item => item.InvoiceItemID == invoiceItem.Id.Value);
+                itemList.Remove(currentItem);
+            }
+            transactionCount++;
+        }
+
+        foreach (var invoiceItem in itemList)
+        {
+            dbContext.Remove<DboInvoiceItem>(invoiceItem);
+            transactionCount++;
+        }
+
+        var addedItems = await dbContext.SaveChangesAsync(cancellationToken);
+
+        if (addedItems != transactionCount)
+            return ResultT.Fail<InvoiceEntity>("The Invoice was not added correctly.  Check the result.");
+
+        return ResultT.Read(entity);
+    }
+
+    private async Task<List<DboInvoiceItem>> GetInvoiceItemsAsync(InvoiceId id)
+    {
+        using var dbContext = await _factory.CreateDbContextAsync();
+
+        var itemList = await dbContext.InvoiceItems.Where(item => item.InvoiceID == id.Value).ToListAsync();
+        return itemList;
+    }
+}

@@ -1,0 +1,151 @@
+﻿@namespace Blazr.App.UI
+
+@using Blazr.Cadmium.QuickGrid
+@using Blazr.Cadmium.UI
+
+@inject FKProvider FKProvider
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+@if (_loading)
+{
+    <div class="text-center">
+        <div class="spinner-border" style="width: 5rem; height: 5rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    return;
+}
+
+<div class="modal show" style="display: block;" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                @_formTitle
+            </div>
+            <div class="modal-body">
+
+                <ResultAlert Result="this.LastResult" />
+
+                <EditForm EditContext="this.EditContext" OnValidSubmit="this.OnSaveAsync">
+                    <BlazrFluentValidator TRecord="InvoiceRecordMutor" TValidator="InvoiceRecordMutorValidator" />
+                    <BlazrEditStateTracker />
+
+                    <div class="row">
+
+                        <BlazrDateControl class="form-control mb-2"
+                                          ColumnCss="col-12 col-md-4 mb-2"
+                                          Label="Date"
+                                          @bind-Value="this.EditMutor.Date" />
+
+                        <BlazrSelectControl class="form-control mb-2"
+                                            ColumnCss="col-12 col-md-6 mb-2"
+                                            Label="Customer"
+                                            TValue="Guid"
+                                            TListItem="FkoCustomer"
+                                            @bind-Value="this.EditMutor.CustomerId"
+                                            @bind-Value:after="this.OnCustomerUpdate"
+                                            DisplayOptionsItems="_customerList"
+                                            OptionValueDelegate="item => item.Id.Value.ToString()"
+                                            OptionTextDelegate="item => item.Name.Value"
+                                            PlaceholderText="Choose a Customer" />
+
+                    </div>
+
+                    <div class="row">
+                        <div class="text-end">
+                            <UIButton Type="button" ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Exit ClickEvent=this.OnCancel>Cancel</UIButton>
+                            <UIButton Type="submit" Hidden=@_isClean ButtonSize=UIButtonSize.Small ButtonColourType=UIButtonColourType.Save>Continue</UIButton>
+                        </div>
+                    </div>
+
+                </EditForm>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] private InvoiceEntityMutor EntityMutor { get; set; } = default!;
+    [Parameter] public EventCallback<bool> Cancelled { get; set; }
+    private string _formTitle => $"Create A New Invoice";
+
+    private InvoiceRecordMutor EditMutor { get; set; } = InvoiceRecordMutor.NewMutor();
+    protected EditContext EditContext { get; set; } = default!;
+
+    private EditFormButtonsOptions _editFormButtonsOptions = new();
+    private List<FkoCustomer> _customerList = new();
+
+    private bool _isDirty;
+    private bool _isClean => !_isDirty;
+    private bool _loading = true;
+    private Result LastResult = Result.Succeeded;
+
+    protected async override Task OnInitializedAsync()
+    {
+        ArgumentNullException.ThrowIfNull(this.EntityMutor);
+        this.EditContext = new(EditMutor);
+
+        var result = await this.FKProvider.GetCustomerFKAsync();
+
+        result.Match(failure: exception => this.ToastService.ShowError(exception.Message));
+
+        LastResult = result.ToResult();
+
+        _customerList = result
+            .Write(Enumerable.Empty<FkoCustomer>())
+            .ToList();
+
+        _loading = false;
+
+        this.EditContext.OnFieldChanged += OnEditStateMayHaveChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        _isDirty = this.EditContext.GetEditState();
+    }
+
+    /// <summary>
+    /// Set the Fko customer on the Mutor when the customerId is changed
+    /// </summary>
+    private void OnCustomerUpdate()
+        => this.EditMutor.Customer = _customerList.FirstOrDefault(c => c.Id.Value.Equals(this.EditMutor.CustomerId)) ?? FkoCustomer.Default;
+
+    private void OnEditStateMayHaveChanged(object? sender, EventArgs e)
+    {
+        _isDirty = this.EditMutor.IsDirty;
+        this.StateHasChanged();
+    }
+
+    private Task OnSaveAsync()
+    {
+        if (!this.EditContext.Validate())
+            return Task.CompletedTask;
+
+        var action = new UpdateInvoiceAction(EditMutor.Record);
+        var result = this.EntityMutor.Dispatch(action.Dispatcher);
+
+        OnExit(false);
+
+        return Task.CompletedTask;
+    }
+
+    private void OnExit(bool cancelled = false)
+        => Cancelled.InvokeAsync(cancelled);
+
+    private void OnCancel()
+        => Cancelled.InvokeAsync(true);
+
+    private void OnLocationChanged(LocationChangingContext context)
+    {
+        var isdirty = this.EditContext.GetEditState();
+
+        if (isdirty)
+            context.PreventNavigation();
+    }
+
+    public void Dispose()
+        => this.EditContext.OnFieldChanged -= OnEditStateMayHaveChanged;
+}

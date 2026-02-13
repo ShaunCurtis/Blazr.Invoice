@@ -1,0 +1,19 @@
+﻿@if (!LastResult.Success)
+{
+    <div class="row">
+
+        <div class="col-12 col-lg-6 mb-2">
+            <div class="alert alert-danger">@LastResult.Message</div>
+        </div>
+
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public Result LastResult { get; set; } = Result.Succeeded;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,36 @@
+﻿@namespace Blazr.App.UI
+
+@using Blazr.Cadmium.UI
+@inherits ViewerModalForm<DmoCustomer, CustomerId>
+
+ <PageTitle>@this.FormTitle</PageTitle> 
+
+<div class="modal-header">
+    <div class="h4">
+        @this.FormTitle
+    </div>
+</div>
+
+<div class="modal-body px-3">
+
+    <div class="row">
+
+        <div class="col-12 col-lg-6 mb-2">
+            <BlazrTextViewControl Label="Id" Value="@this.Item.Id" />
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-12 col-lg-8 mb-2">
+            <BlazrTextViewControl Label="Date" Value="@this.Item.Name" />
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal-footer bg-light text-end">
+    <UIButton ButtonColourType=UIButtonColourType.Exit ClickEvent=this.OnExit>Exit</UIButton>
+</div>

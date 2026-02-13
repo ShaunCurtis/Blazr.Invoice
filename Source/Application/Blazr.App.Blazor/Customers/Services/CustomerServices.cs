@@ -1,0 +1,19 @@
+﻿/// ============================================================
+/// Author: Shaun Curtis, Cold Elm Coders
+/// License: Use And Donate
+/// If you use it, donate something to a charity somewhere
+/// ============================================================
+
+using Blazr.App.Presentation;
+using Blazr.Cadmium.Presentation;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Blazr.App;
+
+public static class CustomerServices
+{
+    public static void AddCustomerServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUIConnector<DmoCustomer, CustomerId>, CustomerUIConnector>();
+    }
+}

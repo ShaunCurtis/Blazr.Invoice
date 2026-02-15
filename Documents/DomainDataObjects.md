@@ -31,7 +31,22 @@ Even though it's extemely basic consider state.  Is `Guid.Empty` a valid state f
 
 ### The New Customer 
 
-First some value objects.
+```csharp
+public sealed record DmoCustomer
+{
+    public CustomerId Id { get; init; }
+    public Title Name { get; init; }
+
+    public static DmoCustomer NewCustomer()
+        => new DmoCustomer() { Id = CustomerId.NewId };
+}
+```
+
+1. It's immutable and sealed: there's no valid reason to inherit from or modify this object.  
+1. Fields are now value objects that represents a real world things.
+1. State is tightly controlled.  No more defensive code, or bugs caused by invalid state.   
+
+The value objects.
 
 `CustomerId` looks like this.
 
@@ -113,22 +128,6 @@ public readonly record struct Title
         => Value.ToString();
 }
 ```
-
-Anf finally `DmoCustomer`
-
-```csharp
-public sealed record DmoCustomer : ICommandEntity
-{
-    public CustomerId Id { get; init; }
-    public Title Name { get; init; }
-
-    public static DmoCustomer NewCustomer()
-        => new DmoCustomer() { Id = CustomerId.NewId };
-}
-```
-
-1. It's immutable and sealed: there's no valid reason to inherit from this object.  1. Everything is now a value object that represents a real world thing.
-1. It has constrolled state.  No more defensive code, or bugs caused by invalid state.   
 
 ## Primitive Obsession
 
@@ -292,6 +291,6 @@ Notes:
 1. `[TrackState]` is a Blazor UI `EditStateTracker` Component attribute.
 1. It can only be created through one of two static methods.
 1. It tracks overall state.
-1. It has an interface soit can be used in boilerplate generic forms.
+1. It has an interface so it can be used in boilerplate generic forms.
 
-Whle it's not *Pure*, it basically follows the same pattern as a *FP* `Map` function.  It takes in a `DmoCustomer` and outputs a `DmoCustomer`.
+It's not *Pure*, but it does follow the same pattern as a *FP* `Map` function.  It takes in a `DmoCustomer` and outputs a new `DmoCustomer` containing the updates provided by the user.

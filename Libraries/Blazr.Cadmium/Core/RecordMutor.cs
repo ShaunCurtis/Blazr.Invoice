@@ -14,6 +14,7 @@ public abstract class RecordMutor<TRecord>
     public bool IsDirty => !this.Record.Equals(BaseRecord);
     public virtual bool IsNew { get; }
     public virtual TRecord Record { get; } = default!;
+    public abstract void Reset();
 
     public RecordState State => (this.IsNew, this.IsDirty) switch
     {

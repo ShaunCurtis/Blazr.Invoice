@@ -26,7 +26,7 @@ public sealed class CustomerRecordMutor : RecordMutor<DmoCustomer>, IRecordMutor
         Name = new(this.Name ?? "No Name Set")
     };
 
-    public void Reset()
+    public override void Reset()
         => this.SetFields();
 
     public static CustomerRecordMutor Load(DmoCustomer record)

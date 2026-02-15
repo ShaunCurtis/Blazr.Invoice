@@ -16,13 +16,15 @@ public readonly record struct InvoiceItemId : IEntityId, IEquatable<InvoiceItemI
         IsNew = true;
     }
 
-    private InvoiceItemId(Guid value)
-        => Value = value;
+    public InvoiceItemId(Guid guid)
+        => Value = guid == Guid.Empty
+            ? throw new InvalidGuidIdException()
+            : guid;
 
     public static InvoiceItemId Load(Guid id)
         => id == Guid.Empty
-        ? throw new InvalidGuidIdException()
-        : new InvoiceItemId(id);
+            ? throw new InvalidGuidIdException()
+            : new InvoiceItemId(id);
 
     public static InvoiceItemId NewId => new() { IsNew = true };
 

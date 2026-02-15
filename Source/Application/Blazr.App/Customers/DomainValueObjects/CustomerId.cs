@@ -8,26 +8,20 @@ namespace Blazr.App.Core;
 /// <summary>
 /// 
 /// CustomerId is a Strongly Typed Id
-/// It has three "States":
+/// It has two "States":
 ///   - New - where it has an Id that it has created.  This signals the data store that saving is an Add operation
 ///   - Existing - where the Id was inserted as part of the data pipeline read process.
 ///          This signals the data store that saving is an Update operation
-///   - Default - where the id was newed up and has the default Guid Value
-///          The data pipeline will need to create a new Id when it stores the record
 ///   
 /// It implements custom:
 /// -  ToString methods
 /// -  Equality checking to compare only the Guids and ignore IsNew.
 /// 
 /// </summary>
-/// <param name="Value"></param>
 public readonly record struct CustomerId : IEntityId, IEquatable<CustomerId>
 {
     public Guid Value { get; private init; }
     public bool IsNew { get; private init; }
-
-    private CustomerId(Guid value)
-        => Value = value;
 
     public CustomerId()
     {
@@ -35,12 +29,17 @@ public readonly record struct CustomerId : IEntityId, IEquatable<CustomerId>
         IsNew = true;
     }
 
+    public CustomerId(Guid guid)
+        => Value = guid == Guid.Empty
+            ? throw new InvalidGuidIdException()
+            : guid;
+
     public static CustomerId Load(Guid id)
         => id == Guid.Empty
             ? throw new InvalidGuidIdException()
             : new CustomerId(id);
 
-    public static CustomerId NewId => new() { IsNew = true };
+    public static CustomerId NewId => new(Guid.CreateVersion7()) { IsNew = true };
 
     public override string ToString()
         => Value.ToString();

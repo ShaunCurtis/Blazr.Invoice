@@ -97,7 +97,7 @@
         {
             var dispatcher = DeleteInvoiceItemAction
                 .Create(EditMutor.Record)
-                .Dispatcher;
+                .ExecuteAction;
 
             this.LastResult = EntityMutor.Dispatch(dispatcher);
         }
@@ -115,7 +115,7 @@
     {
         var dispatcher = SaveInvoiceItemAction
             .Create(EditMutor.Record)
-            .Dispatcher;
+            .ExecuteAction;
 
         this.LastResult = EntityMutor.Dispatch(dispatcher)
             .Match(success: this.OnExit);

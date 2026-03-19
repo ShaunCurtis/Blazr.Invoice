@@ -3,8 +3,6 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-
-using Blazr.App.Core.Invoices;
 using Blazr.Diode.Mediator;
 using Blazr.Gallium;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,6 +57,7 @@ public sealed class InvoiceEntityMutor
     {
         _mediator = mediator;
         _messageBus = messageBus;
+        //Set some initial values so the mutor is in a valid state until the LoadAsync finishes
         this.BaseEntity = InvoiceEntity.Create();
         this.InvoiceEntity = this.BaseEntity;
         this.LoadTask = this.LoadAsync(id);
@@ -75,7 +74,7 @@ public sealed class InvoiceEntityMutor
     {
         var result = dispatcher.Invoke(InvoiceEntity);
 
-        result.Match(entity => 
+        result.Match(entity =>
         {
             this.InvoiceEntity = entity;
             _messageBus.Publish<InvoiceEntity>(entity.InvoiceRecord.Id);
@@ -111,7 +110,7 @@ public sealed class InvoiceEntityMutor
 
         return this.LastResult;
     }
-    
+
     public async Task<Result> DeleteAsync()
     {
         var result = await _mediator.DispatchAsync(new InvoiceEntityCommandRequest(this.InvoiceEntity, RecordState.DeletedState, Guid.NewGuid()));

@@ -3,8 +3,6 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Blazr.App.Core.Invoices;
-
 namespace Blazr.App.Core;
 
 public record SaveInvoiceItemAction
@@ -14,7 +12,7 @@ public record SaveInvoiceItemAction
     public SaveInvoiceItemAction(DmoInvoiceItem invoiceItem)
         => _invoiceItem = invoiceItem;
 
-    public Result<InvoiceEntity> Dispatcher(InvoiceEntity entity)
+    public Result<InvoiceEntity> ExecuteAction(InvoiceEntity entity)
         => entity.InvoiceItems.Any(_item => _invoiceItem.Id.Equals(_item.Id))
             // if the item exists, update it
             ? Update(entity, _invoiceItem)
@@ -22,8 +20,9 @@ public record SaveInvoiceItemAction
             : Add(entity, _invoiceItem);
 
     private static Result<InvoiceEntity> Add(InvoiceEntity entity, DmoInvoiceItem invoiceItem)
-        => ResultT.Read(entity.InvoiceItems.Add(invoiceItem))
-            .Map(items => entity.Mutate(items));
+        => entity.InvoiceItems.Add(invoiceItem)
+        .ToResult
+        .Map(items => entity.Mutate(items));
 
     private static Result<InvoiceEntity> Update(InvoiceEntity entity, DmoInvoiceItem invoiceItem)
         => entity.GetInvoiceItem(invoiceItem.Id)
@@ -31,5 +30,5 @@ public record SaveInvoiceItemAction
             .Map(items => entity.Mutate(items));
 
     public static SaveInvoiceItemAction Create(DmoInvoiceItem invoiceItem)
-        => (new SaveInvoiceItemAction(invoiceItem));
+        => new SaveInvoiceItemAction(invoiceItem);
 }

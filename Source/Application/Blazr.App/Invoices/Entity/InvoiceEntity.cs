@@ -38,7 +38,7 @@ public sealed record InvoiceEntity : IEquatable<InvoiceEntity>
 
     public Result<InvoiceEntity> CheckEntityRules()
     => this.InvoiceItems.Sum(item => item.Amount.Value) == this.InvoiceRecord.TotalAmount.Value
-        ? ResultT.Read(this)
+        ? this.ToResult
         : ResultT.Fail<InvoiceEntity>("The Invoice Total Amount is incorrect.");
 
     public InvoiceEntity ApplyEntityRules()

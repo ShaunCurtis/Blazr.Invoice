@@ -112,7 +112,7 @@
 
         var action = new UpdateInvoiceAction(EditMutor.Record);
 
-        var result = this.EntityMutor.Dispatch(action.Dispatcher);
+        var result = this.EntityMutor.Dispatch(action.ExecuteAction);
 
         OnExit();
 

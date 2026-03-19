@@ -36,7 +36,7 @@ public partial class InvoiceTests
 
         // Create a Delete Item action and dispatch it through the entity mutor.
         var action = DeleteInvoiceItemAction.Create(itemToDelete);
-        var deleteActionResult = entityMutor.Dispatch(action.Dispatcher);
+        var deleteActionResult = entityMutor.Dispatch(action.ExecuteAction);
 
         Assert.True(deleteActionResult.Success);
 

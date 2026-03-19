@@ -5,11 +5,10 @@
 /// ============================================================
 
 using Blazr.App.Core;
-using Blazr.App.Core.Invoices;
 using Blazr.App.Presentation;
 using Blazr.Diode.Mediator;
-using Microsoft.Extensions.DependencyInjection;
 using Blazr.Manganese;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazr.Test;
 
@@ -38,7 +37,6 @@ public partial class InvoiceTests
 
         // Update the Entity Mutor by dispatching the itemMutor's Dispatcher
         var actionResult = entityMutor.Dispatch(itemMutor.Dispatcher);
-
         Assert.True(actionResult.Success);
 
         // Commit the changes to the data store
@@ -53,7 +51,7 @@ public partial class InvoiceTests
 
         // Get the Mutor Entities
         var updatedEntity = entityMutor.InvoiceEntity;
-        var dbEntity = entityResult.Write(InvoiceEntityFactory.Create());
+        var dbEntity = entityResult.Write(InvoiceEntity.Create());
 
         // Check the stored data is the same as the edited entity
         Assert.Equal(updatedEntity, dbEntity);

@@ -3,8 +3,6 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Blazr.App.Core.Invoices;
-
 namespace Blazr.App.EntityFramework;
 
 /// <summary>
@@ -30,25 +28,25 @@ public sealed class InvoiceEntityHandler : IRequestHandler<InvoiceEntityRequest,
 
         // if we failed convert the result to the corrrect return type and exit.  This will pass through the error or exception
         if (invoiceResult.HasNotSucceeded)
-            return invoiceResult.Convert(InvoiceEntityFactory.Create());
+            return invoiceResult.Convert(InvoiceEntity.Create());
 
         // Get the invoice items associated with the invoice
         var invoiceItemsResult = await dbContext
             .GetItemsAsync(new ListQueryRequest<DvoInvoiceItem>()
-                {
-                    FilterExpression = item => item.InvoiceID == request.Id.Value, 
-                })
+            {
+                FilterExpression = item => item.InvoiceID == request.Id.Value,
+            })
             .MapAsync(provider => provider.Items.Select(item => item.MapToDmo));
 
         // if we failed convert the result to the corrrect return type and exit.  This will pass through the error or exception
         if (invoiceItemsResult.HasNotSucceeded)
-            return invoiceResult.Convert(InvoiceEntityFactory.Create());
+            return invoiceResult.Convert(InvoiceEntity.Create());
 
         // We have all we need now to build and invoice entity
         // We load it bypassing the entity rules.  The Mutor will take care of any updates required.
         var invoice = invoiceResult.Write<DmoInvoice>(DmoInvoice.CreateNew());
         var items = invoiceItemsResult.Write(Enumerable.Empty<DmoInvoiceItem>());
-        var entity = InvoiceEntityFactory.Load(invoice, items);
+        var entity = InvoiceEntity.Load(invoice, items);
 
         return ResultT.Read(entity);
     }

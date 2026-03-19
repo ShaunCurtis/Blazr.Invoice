@@ -8,18 +8,19 @@ namespace Blazr.App.EntityFramework;
 public sealed class InMemoryInvoiceTestDbContext
     : DbContext
 {
-    public DbSet<DboCustomer> Customers { get; set; } = default!;
+    internal DbSet<DboCustomer> Customers { get; set; } = default!;
 
-    public DbSet<DvoCustomer> DvoCustomers { get; set; } = default!;
+    internal DbSet<DvoCustomer> DvoCustomers { get; set; } = default!;
 
-    public DbSet<FkCustomer> FkCustomers { get; set; } = default!;
+    internal DbSet<FkCustomer> FkCustomers { get; set; } = default!;
 
-    public DbSet<DboInvoice> Invoices { get; set; } = default!;
+    internal DbSet<DboInvoice> Invoices { get; set; } = default!;
 
-    public DbSet<DvoInvoice> DvoInvoices { get; set; } = default!;
+    internal DbSet<DvoInvoice> DvoInvoices { get; set; } = default!;
 
-    public DbSet<DboInvoiceItem> InvoiceItems { get; set; } = default!;
-    public DbSet<DvoInvoiceItem> DvoInvoiceItems { get; set; } = default!;
+    internal DbSet<DboInvoiceItem> InvoiceItems { get; set; } = default!;
+    
+    internal DbSet<DvoInvoiceItem> DvoInvoiceItems { get; set; } = default!;
 
     public InMemoryInvoiceTestDbContext(DbContextOptions<InMemoryInvoiceTestDbContext> options) : base(options) { }
 

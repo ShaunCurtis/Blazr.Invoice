@@ -7,15 +7,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Blazr.App.Infrastructure;
 
-public sealed record DboCustomer : ICommandEntity
+internal sealed record DboCustomer : ICommandEntity
 {
     [Key] public Guid CustomerID { get; init; } = Guid.Empty;
     public string CustomerName { get; init; } = string.Empty;
-
-    public static DboCustomer Map(DmoCustomer item)
-        => new()
-        {
-            CustomerID = item.Id.Value,
-            CustomerName = item.Name.Value
-        };
 }

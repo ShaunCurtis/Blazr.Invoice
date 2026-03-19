@@ -6,7 +6,6 @@
 
 using Blazr.App.Core;
 using Blazr.App.EntityFramework;
-using Blazr.App.Infrastructure;
 using Blazr.Diode.Mediator;
 using Blazr.Gallium;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +14,6 @@ using Microsoft.Extensions.Logging;
 using System.Reflection;
 namespace Blazr.Test;
 
-using Blazr.App.Core.Invoices;
 using Blazr.Manganese;
 
 public partial class InvoiceTests
@@ -56,56 +54,30 @@ public partial class InvoiceTests
 
     private async Task<InvoiceEntity> GetASampleEntityAsync(IMediatorBroker mediator)
     {
-
         // Get a test item and it's Id from the Test Provider
-        var controlId = InvoiceId.Load(_testDataProvider.Invoices.Skip(Random.Shared.Next(3)).First().InvoiceID);
+        var testInvoice = _testDataProvider.GetTestInvoice();
+        var controlId = testInvoice.Id;
 
         // Get the Invoice Entity
         var entityResult = await mediator.DispatchAsync(new InvoiceEntityRequest(controlId));
 
         Assert.True(entityResult.HasSucceeded);
 
-        return entityResult.Write(InvoiceEntityFactory.Create());
+        return entityResult.Write(InvoiceEntity.Create());
     }
 
     private async Task<InvoiceEntity> GetASampleDirtyEntityAsync(IMediatorBroker mediator)
     {
 
-        var controlId = InvoiceId.Load(_testDataProvider.Invoices.Skip(3).First().InvoiceID);
+        // Get a test item and it's Id from the Test Provider
+        var testInvoice = _testDataProvider.GetTestInvoice();
+        var controlId = testInvoice.Id;
 
         // Get the Invoice Entity
         var entityResult = await mediator.DispatchAsync(new InvoiceEntityRequest(controlId));
 
         Assert.True(entityResult.HasSucceeded);
 
-        return entityResult.Write(InvoiceEntityFactory.Create());
+        return entityResult.Write(InvoiceEntity.Create());
     }
-
-    private DmoInvoice AsDmoInvoice(DboInvoice invoice)
-    {
-        var customer = _testDataProvider.Customers.First(item => item.CustomerID == invoice.CustomerID);
-        return new DmoInvoice
-        {
-            Id = InvoiceId.Load(invoice.InvoiceID),
-            Customer = AsCustomer(customer),
-            Date = new Date(invoice.Date),
-            TotalAmount = new Money(invoice.TotalAmount),
-        };
-    }
-
-    private DmoInvoiceItem AsDmoInvoiceItem(DboInvoiceItem invoiceItem)
-        => new DmoInvoiceItem
-        {
-            Id = InvoiceItemId.Load(invoiceItem.InvoiceItemID),
-            InvoiceId = InvoiceId.Load(invoiceItem.InvoiceID),
-            Description = new(invoiceItem.Description),
-            Amount = new Money(invoiceItem.Amount),
-        };
-
-    private FkoCustomer AsCustomer(DboCustomer customer)
-        => new FkoCustomer
-        (
-             CustomerId.Load(customer.CustomerID),
-             new(customer.CustomerName)
-        );
 }

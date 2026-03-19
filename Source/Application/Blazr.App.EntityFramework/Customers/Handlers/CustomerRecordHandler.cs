@@ -21,6 +21,6 @@ public sealed class CustomerRecordHandler : IRequestHandler<CustomerRecordReques
 
         return await dbContext
             .GetRecordFromDatastoreAsync<DvoCustomer>(new RecordQueryRequest<DvoCustomer>(item => item.CustomerID == request.Id.Value))
-            .MapAsync(DvoCustomer.MapToDomainEntity);
+            .MapAsync(item => item.MapToDmo);
     }
 }

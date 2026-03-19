@@ -45,10 +45,10 @@ public sealed record AltInvoiceCommandHandler : IRequestHandler<InvoiceEntityCom
     {
         using var dbContext = _factory.CreateDbContext();
 
-        dbContext.Remove<DboInvoice>(DboInvoice.Map(entity.InvoiceRecord));
+        dbContext.Remove<DboInvoice>(entity.InvoiceRecord.MapToDbo);
 
         foreach (var invoiceItem in entity.InvoiceItems)
-            dbContext.Remove<DboInvoiceItem>(DboInvoiceItem.Map(invoiceItem));
+            dbContext.Remove<DboInvoiceItem>(invoiceItem.MapToDbo);
 
         var addedItems = await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -66,19 +66,19 @@ public sealed record AltInvoiceCommandHandler : IRequestHandler<InvoiceEntityCom
         using var dbContext = await _factory.CreateDbContextAsync();
 
         if (entity.InvoiceRecord.Id.IsNew)
-            dbContext.Add<DboInvoice>(DboInvoice.Map(entity.InvoiceRecord));
+            dbContext.Add<DboInvoice>(entity.InvoiceRecord.MapToDbo);
         else
-            dbContext.Update<DboInvoice>(DboInvoice.Map(entity.InvoiceRecord));
+            dbContext.Update<DboInvoice>(entity.InvoiceRecord.MapToDbo);
 
         int transactionCount = 1;
 
         foreach (var invoiceItem in entity.InvoiceItems)
         {
             if (invoiceItem.Id.IsNew)
-                dbContext.Add<DboInvoiceItem>(DboInvoiceItem.Map(invoiceItem));
+                dbContext.Add<DboInvoiceItem>(invoiceItem.MapToDbo);
             else
             {
-                dbContext.Update<DboInvoiceItem>(DboInvoiceItem.Map(invoiceItem));
+                dbContext.Update<DboInvoiceItem>(invoiceItem.MapToDbo);
 
                 var currentItem = itemList.First(item => item.InvoiceItemID == invoiceItem.Id.Value);
                 itemList.Remove(currentItem);

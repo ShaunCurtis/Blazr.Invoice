@@ -3,7 +3,7 @@
 @using Blazr.Cadmium.UI
 @inherits ViewerModalForm<DmoCustomer, CustomerId>
 
- <PageTitle>@this.FormTitle</PageTitle> 
+<PageTitle>@this.FormTitle</PageTitle>
 
 <div class="modal-header">
     <div class="h4">
@@ -12,6 +12,14 @@
 </div>
 
 <div class="modal-body px-3">
+
+    <div class="row" hidden="@LastResult.Success">
+
+        <div class="col-12 mb-2">
+            <ResultAlert Result="LastResult" />
+        </div>
+
+    </div>
 
     <div class="row">
 

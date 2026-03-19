@@ -27,10 +27,41 @@ Much of the code is written in *Functional Programming style*.  You will see a l
 
 ### Invoice Entity
 
-The first step is to define the container and it's data objects.
+The `InvoiceEntity` code skeleton:
 
 ```csharp
-public sealed record InvoiceEntity
+public sealed record InvoiceEntity : IEquatable<InvoiceEntity>
+{
+    public DmoInvoice InvoiceRecord { get; private init; }
+    public ImmutableList<DmoInvoiceItem> InvoiceItems { get; private init; }
+
+    private InvoiceEntity(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceInvoiceItems);
+
+    public bool IsDirty(InvoiceEntity control);
+    public Result<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id);
+    public InvoiceEntity Mutate(DmoInvoice invoice);
+    public InvoiceEntity Mutate(IEnumerable<DmoInvoiceItem> invoiceItems);
+    public Result<InvoiceEntity> CheckEntityRules();
+    public InvoiceEntity ApplyEntityRules();
+    public bool Equals(InvoiceEntity? other);
+    public override int GetHashCode();
+    public static InvoiceEntity Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems);
+    public static Result<InvoiceEntity> TryLoad(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems);
+    public static InvoiceEntity Create();
+    public static InvoiceEntity Create(DmoInvoice invoice);
+}
+```
+
+The objects data is immutable: `records` and an `ImmutableList` of `records`.
+
+The constructor is private.  Object instances must be created using one of the static factory methods.
+
+THe object defines custom Equality checking.
+
+
+
+```csharp
+public sealed record InvoiceEntity : IEquatable<InvoiceEntity>
 {
     public DmoInvoice InvoiceRecord { get; private init; }
     public ImmutableList<DmoInvoiceItem> InvoiceItems { get; private init; }
@@ -41,113 +72,163 @@ public sealed record InvoiceEntity
         this.InvoiceItems = invoiceInvoiceItems.ToImmutableList();
     }
 
-    internal static InvoiceEntity Read(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems) 
+    public static InvoiceEntity Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems) 
         => new InvoiceEntity(invoice, invoiceItems);
+
+    public bool Equals(InvoiceEntity? other)
+        => other is not null 
+            && this.InvoiceItems.OrderBy(e => e.Id.Value).SequenceEqual(other.InvoiceItems.OrderBy(e => e.Id.Value))
+            && this.InvoiceRecord.Equals(other.InvoiceRecord);
+
+    public override int GetHashCode()
+        => base.GetHashCode();
 }
 ```
 
-Everything is immutable, and the `inits` and primary constructor are private.  There's a single static `Read` to initialize an instance. 
+It's locked down: everything is immutable, with property private `inits` and a private primary constructor.  It has:
+
+1. A single static `Load` to initialize an instance.
+2. Custom equality checking.
+
+The public interface looks like this:
+
+```csharp
+public InvoiceEntity
+{
+    public DmoInvoice InvoiceRecord { get; }
+    public ImmutableList<DmoInvoiceItem> InvoiceItems { get; }
+
+    public static InvoiceEntity Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems) ;
+    public bool Equals(InvoiceEntity? other);
+    public override int GetHashCode();
+}
+```
 
 Invoice Entities are obtained from the static `InvoiceEntityFactory`.
 
-
 ```csharp
-internal static InvoiceEntity Create();
-
-internal static InvoiceEntity Create(DmoInvoice invoice);
-
-public static Return<InvoiceEntity> TryLoad(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems);
-
-public static Return<InvoiceEntity> Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems);
-
-internal static Return<InvoiceEntity> CheckEntityRules(InvoiceEntity entity);
-
-internal static InvoiceEntity ApplyEntityRules(InvoiceEntity entity);
-```
-
-Note the *Entity Rules*.
-
- - The first attempts to load an invoice entity from the specified invoice and its associated items, It returns a `Return` in failure state if validation fails.
-
- - The second creates an invoice entity from the specified invoice and its items, applies the business rules and updates the entity if necessary.
-
-```csharp
-internal static Return<InvoiceEntity> CheckEntityRules(InvoiceEntity entity)
-    => entity.InvoiceItems.Sum(item => item.Amount.Value) == entity.InvoiceRecord.TotalAmount.Value
-        ? Return<InvoiceEntity>.Success(entity)
-        : Return<InvoiceEntity>.Failure("The Invoice Total Amount is incorrect.");
-
-internal static InvoiceEntity ApplyEntityRules(InvoiceEntity entity)
-    => InvoiceEntity.Read(
-        invoice: entity.InvoiceRecord with { TotalAmount = new(entity.InvoiceItems.Sum(item => item.Amount.Value)) },
-        invoiceItems: entity.InvoiceItems);
+public static class InvoiceEntityFactory
+{
+    public static InvoiceEntity Create();
+    public static InvoiceEntity Create(DmoInvoice invoice);
+    public static Result<InvoiceEntity> TryLoad(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems);
+    public static InvoiceEntity Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems);
+}
 ```
 
 #### Mutation
 
-Mutation happens by creating a new `InvoiceEntity` with the mutation applied.
+Mutation creates a new `InvoiceEntity` with the changes applied.  Mutations are defined as extension methods on `InvoiceEntity` in a separate namespace *Blazr.App.Core.Invoices*.
 
-Mutations are defined as extension methods on `InvoiceEntity` in a separate namespace *Blazr.App.Core.Invoices*.  
-
+First we need to create some extension methods to `InvoiceEntity`.
+  
 ```csharp
-extension(InvoiceEntity @this)
+public static class InvoiceEntityExtensions
 {
-    internal Return<InvoiceEntity> AddInvoiceItem(DmoInvoiceItem item);
-
-    internal Return<InvoiceEntity> DeleteInvoiceItem(DmoInvoiceItem record);
-
-    internal Return<InvoiceEntity> ReplaceInvoiceItem(DmoInvoiceItem record);
-
-    internal Return<InvoiceEntity> ReplaceInvoice(DmoInvoice record);
-
-    internal Return<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id);
-
-    private Return<DmoInvoiceItem> GetInvoiceItem(DmoInvoiceItem item);
-
-    private Return<InvoiceEntity> MutateWithEntityRulesApplied(DmoInvoice invoice);
-
-    private Return<InvoiceEntity> MutateWithEntityRulesApplied(IEnumerable<DmoInvoiceItem> invoiceItems) ;
+    extension(InvoiceEntity @this)
+    {
+        public bool IsDirty(InvoiceEntity control);
+        public InvoiceEntity Map(Func<InvoiceEntity, InvoiceEntity> func);
+        public InvoiceEntity Mutate(DmoInvoice invoice);
+        public InvoiceEntity Mutate(IEnumerable<DmoInvoiceItem> invoiceItems);
+        public Result<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id);
+        public Result<InvoiceEntity> CheckEntityRules();
+        public InvoiceEntity ApplyEntityRules();
+    }
 }
 ```
 
-And two utility methods.
+`Map` is a *Functor* and provides chaining functionality.
 
 ```csharp
-internal Return<InvoiceEntity> ToReturnT => Return<InvoiceEntity>.Read(@this);
-
-internal bool IsDirty(InvoiceEntity control) => !@this.Equals(control);
+public InvoiceEntity Map(Func<InvoiceEntity, InvoiceEntity> func)
+    => func.Invoke(@this);
 ```
 
-### Invoice Mutor
+The two `Mutation` methods that create a new `InvoiceEntity` and applies the entity rules.
 
-A mutable object.
+```csharp
+public InvoiceEntity Mutate(DmoInvoice invoice)
+    => InvoiceEntityFactory.Load(invoice, @this.InvoiceItems)
+        .Map(InvoiceEntityFactory.ApplyEntityRules);
+
+public InvoiceEntity Mutate(IEnumerable<DmoInvoiceItem> invoiceItems)
+    => InvoiceEntityFactory.Load(@this.InvoiceRecord, invoiceItems)
+        .Map(InvoiceEntityFactory.ApplyEntityRules);
+    }
+```
+
+`GetInvoiceItem` provides a method to get an InvoiceItem from the entity.
+
+```csharp
+public Result<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id)
+    => ResultT.Read(
+        value: @this.InvoiceItems.SingleOrDefault(_item => _item.Id == id),
+        exceptionMessage: $"The record with id {id} does not exist in the Invoice Items");
+```
+
+
+`IsDirty` is an equality checker.
+
+```csharp
+// Compares the provided `control` against the current InvoiceEntity
+public bool IsDirty(InvoiceEntity control) => !@this.Equals(control);
+```
+
+`GetInvoiceItem` is a helper to get a Invoice Item.
+
+```csharp
+public Result<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id)
+    => ResultT.Read(
+        value: @this.InvoiceItems.SingleOrDefault(_item => _item.Id == id),
+        exceptionMessage: $"The record with id {id} does not exist in the Invoice Items");
+```
+
+Note the *Entity Rules*.
+
+ - The first validates an invoice entity. It returns a `Result` in failure state if validation fails.
+
+ - The second applies the business rules to the current entity and returns a new entity.
+
+```csharp
+public Result<InvoiceEntity> CheckEntityRules()
+=> @this.InvoiceItems.Sum(item => item.Amount.Value) == @this.InvoiceRecord.TotalAmount.Value
+    ? ResultT.Read(@this)
+    : ResultT.Fail<InvoiceEntity>("The Invoice Total Amount is incorrect.");
+
+public InvoiceEntity ApplyEntityRules()
+    => InvoiceEntity.Load(
+        invoice: @this.InvoiceRecord with { TotalAmount = new(@this.InvoiceItems.Sum(item => item.Amount.Value)) },
+        invoiceItems: @this.InvoiceItems);
+```
+
+### Invoice Entity Mutor
+
+`InvoiceEntityMutor` is the mutable object we use to manage Invoice mutation.
 
 ```csharp
 public sealed class InvoiceEntityMutor
 {
-    private readonly IMediatorBroker _mediator;
-    private readonly IMessageBus _messageBus;
-
     public InvoiceEntity BaseEntity { get; private set; }
     public InvoiceEntity InvoiceEntity { get; private set; }
-    public Return LastResult { get; private set; } = Return.Success();
-    public bool IsNew { get; private set; } = true;
-    public Task LoadTask { get; private set; } = Task.CompletedTask;
+    public Result LastResult { get; private set; }
+    public bool IsNew  {get;}
+    public Task LoadTask { get; private set; }
+    public bool IsDirty  {get;}
+    public RecordState State {get;}
 
-    public InvoiceEntityMutor(IMediatorBroker mediator, IMessageBus messageBus, InvoiceId id)
-    {
-        _mediator = mediator;
-        _messageBus = messageBus;
-        this.BaseEntity = InvoiceEntityFactory.Create();
-        this.InvoiceEntity = this.BaseEntity;
-        this.LoadTask  = this.LoadAsync(id);
-    }
+    public InvoiceEntityMutor(IMediatorBroker mediator, IMessageBus messageBus, InvoiceId id);
 
-    //....
+    public Result Dispatch(Func<InvoiceEntity, Result<InvoiceEntity>> dispatcher);
+    public async Task<Result> SaveAsync();
+    public async Task<Result> DeleteAsync();
+    public InvoiceItemRecordMutor GetInvoiceItemRecordMutor(InvoiceItemId id);
+    public InvoiceItemRecordMutor GetNewInvoiceItemRecordMutor();
+    public Result Reset();
 }
 ```
 
-Note the heavy duty constructor.  `InvoiceEntityMutor` instances are only meant to be obtained from a DI registered `InvoiceMutorFactory`. 
+Note the complex constructor.  `InvoiceEntityMutor` instances should only be obtained from the DI registered `InvoiceMutorFactory`. 
 
 ```csharp
 public sealed class InvoiceMutorFactory
@@ -159,30 +240,20 @@ public sealed class InvoiceMutorFactory
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<InvoiceEntityMutor> CreateInvoiceEntityMutorAsync(InvoiceId id)
+    public async Task<InvoiceEntityMutor> GetInvoiceEntityMutorAsync(InvoiceId id)
     {
         var mutor = ActivatorUtilities.CreateInstance<InvoiceEntityMutor>(_serviceProvider, new object[] { id });
         await mutor.LoadTask;
         return mutor;
     }
+
+    public async Task<InvoiceEntityMutor> CreateInvoiceEntityMutorAsync()
+    {
+        var mutor = ActivatorUtilities.CreateInstance<InvoiceEntityMutor>(_serviceProvider, new object[] { InvoiceId.NewId });
+        await mutor.LoadTask;
+        return mutor;
+    }
 }
-```
-
-The skeleton methods:
-
-```csharp
-    public bool IsDirty;
-    public EditState State;
-
-    public Return Dispatch(Func<InvoiceEntity, Return<InvoiceEntity>> dispatcher);
-
-    private async Task LoadAsync(InvoiceId id);
-
-    public async Task<Return> SaveAsync();
-
-    public InvoiceItemRecordMutor GetInvoiceItemRecordMutor(InvoiceItemId id);
-
-    public Return Reset();
 ```
 
 The key mutation method is `Dispatch`.  It's a *Monadic Function* and `Dispatch` is a `Bind` operation. 

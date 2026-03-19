@@ -39,7 +39,7 @@ public sealed class InvoiceRecordMutor : RecordMutor<DmoInvoice>, IRecordMutor<D
         Customer = this.Customer
     };
 
-    public void Reset()
+    public override void Reset()
         => this.SetFields();
 
     public override bool IsNew => BaseRecord.Id.IsNew;

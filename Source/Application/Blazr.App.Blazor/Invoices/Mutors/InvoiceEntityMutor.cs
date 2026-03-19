@@ -59,7 +59,7 @@ public sealed class InvoiceEntityMutor
     {
         _mediator = mediator;
         _messageBus = messageBus;
-        this.BaseEntity = InvoiceEntityFactory.Create();
+        this.BaseEntity = InvoiceEntity.Create();
         this.InvoiceEntity = this.BaseEntity;
         this.LoadTask = this.LoadAsync(id);
     }
@@ -90,7 +90,7 @@ public sealed class InvoiceEntityMutor
     {
         if (id.IsNew)
         {
-            this.Set(InvoiceEntityFactory.Create());
+            this.Set(InvoiceEntity.Create());
             return;
         }
 
@@ -111,6 +111,7 @@ public sealed class InvoiceEntityMutor
 
         return this.LastResult;
     }
+    
     public async Task<Result> DeleteAsync()
     {
         var result = await _mediator.DispatchAsync(new InvoiceEntityCommandRequest(this.InvoiceEntity, RecordState.DeletedState, Guid.NewGuid()));
@@ -130,6 +131,9 @@ public sealed class InvoiceEntityMutor
     public InvoiceItemRecordMutor GetNewInvoiceItemRecordMutor()
         => InvoiceItemRecordMutor.NewMutor(this.BaseEntity.InvoiceRecord.Id);
 
+    public InvoiceRecordMutor GetInvoiceRecordMutor()
+        => InvoiceRecordMutor.Load(this.InvoiceEntity.InvoiceRecord);
+
     public Result Reset()
     {
         this.Set(this.BaseEntity);
@@ -139,7 +143,7 @@ public sealed class InvoiceEntityMutor
     private void Set(InvoiceEntity entity)
     {
         this.BaseEntity = entity;
-        this.InvoiceEntity = InvoiceEntityFactory.ApplyEntityRules(entity);
+        this.InvoiceEntity = entity.ApplyEntityRules();
 
         // Checks the entity business rules and applies any changes which changes the state of the mutor
         this.LastResult = this.IsDirty
@@ -149,7 +153,7 @@ public sealed class InvoiceEntityMutor
 
     private void SetAsNew()
     {
-        this.InvoiceEntity = InvoiceEntityFactory.Create();
+        this.InvoiceEntity = InvoiceEntity.Create();
         this.BaseEntity = this.InvoiceEntity;
     }
 }

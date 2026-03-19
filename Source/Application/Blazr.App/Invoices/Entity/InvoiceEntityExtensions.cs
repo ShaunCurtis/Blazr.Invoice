@@ -13,12 +13,10 @@ public static class InvoiceEntityExtensions
 {
     extension(InvoiceEntity @this)
     {
-        public Result<InvoiceEntity> ToResultT => ResultT.Read(@this);
+        public bool IsDirty(InvoiceEntity control) => !@this.Equals(control);
 
         public InvoiceEntity Map(Func<InvoiceEntity, InvoiceEntity> func)
             => func.Invoke(@this);
-
-        public bool IsDirty(InvoiceEntity control) => !@this.Equals(control);
 
         public Result<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id)
             => ResultT.Read(
@@ -26,11 +24,21 @@ public static class InvoiceEntityExtensions
                 exceptionMessage: $"The record with id {id} does not exist in the Invoice Items");
 
         public InvoiceEntity Mutate(DmoInvoice invoice)
-            => InvoiceEntityFactory.Load(invoice, @this.InvoiceItems)
-                .Map(InvoiceEntityFactory.ApplyEntityRules);
+            => InvoiceEntity.Load(invoice, @this.InvoiceItems)
+                .Map(ApplyEntityRules);
 
         public InvoiceEntity Mutate(IEnumerable<DmoInvoiceItem> invoiceItems)
-            => InvoiceEntityFactory.Load(@this.InvoiceRecord, invoiceItems)
-                .Map(InvoiceEntityFactory.ApplyEntityRules);
+            => InvoiceEntity.Load(@this.InvoiceRecord, invoiceItems)
+                .Map(ApplyEntityRules);
+
+        public Result<InvoiceEntity> CheckEntityRules()
+        => @this.InvoiceItems.Sum(item => item.Amount.Value) == @this.InvoiceRecord.TotalAmount.Value
+            ? ResultT.Read(@this)
+            : ResultT.Fail<InvoiceEntity>("The Invoice Total Amount is incorrect.");
+
+        public InvoiceEntity ApplyEntityRules()
+            => InvoiceEntity.Load(
+                invoice: @this.InvoiceRecord with { TotalAmount = new(@this.InvoiceItems.Sum(item => item.Amount.Value)) },
+                invoiceItems: @this.InvoiceItems);
     }
 }

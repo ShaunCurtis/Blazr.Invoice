@@ -59,10 +59,10 @@ public sealed record InvoiceCommandHandler : IRequestHandler<InvoiceEntityComman
     {
         using var dbContext = _factory.CreateDbContext();
 
-        dbContext.Remove<DboInvoice>(DboInvoice.Map(entity.InvoiceRecord));
+        dbContext.Remove<DboInvoice>((entity.InvoiceRecord).MapToDbo);
 
         foreach (var invoiceItem in entity.InvoiceItems)
-            dbContext.Remove<DboInvoiceItem>(DboInvoiceItem.Map(invoiceItem));
+            dbContext.Remove<DboInvoiceItem>(invoiceItem.MapToDbo);
 
         var addedItems = await dbContext.SaveChangesAsync(_cancellationToken);
 
@@ -76,10 +76,10 @@ public sealed record InvoiceCommandHandler : IRequestHandler<InvoiceEntityComman
     {
         using var dbContext = _factory.CreateDbContext();
 
-        dbContext.Add<DboInvoice>(DboInvoice.Map(entity.InvoiceRecord));
+        dbContext.Add<DboInvoice>((entity.InvoiceRecord).MapToDbo);
 
         foreach (var invoiceItem in entity.InvoiceItems)
-            dbContext.Add<DboInvoiceItem>(DboInvoiceItem.Map(invoiceItem));
+            dbContext.Add<DboInvoiceItem>(invoiceItem.MapToDbo);
 
         var addedItems = await dbContext.SaveChangesAsync(cancellationToken);
 

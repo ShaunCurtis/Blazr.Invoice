@@ -3,6 +3,8 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
+using Blazr.App.Core.Invoices;
+
 namespace Blazr.App.Presentation;
 
 public sealed class InvoiceItemRecordMutor : RecordMutor<DmoInvoiceItem> ,IRecordMutor<DmoInvoiceItem>
@@ -28,7 +30,7 @@ public sealed class InvoiceItemRecordMutor : RecordMutor<DmoInvoiceItem> ,IRecor
         Amount = new(this.Amount)
     };
 
-    public void Reset()
+    public override void Reset()
         => this.SetFields();
 
     public Func<InvoiceEntity, Result<InvoiceEntity>> Dispatcher =>
@@ -40,6 +42,11 @@ public sealed class InvoiceItemRecordMutor : RecordMutor<DmoInvoiceItem> ,IRecor
 
     public static InvoiceItemRecordMutor Load(DmoInvoiceItem record)
         => new InvoiceItemRecordMutor(record);
+
+    public static InvoiceItemRecordMutor Load(InvoiceEntity entity, InvoiceItemId id)
+        => entity.GetInvoiceItem(id)
+            .Map(value => InvoiceItemRecordMutor.Load(value))
+            .Write(failureValue: InvoiceItemRecordMutor.NewMutor(entity.InvoiceRecord.Id));
 
     public static InvoiceItemRecordMutor NewMutor(InvoiceId invoiceId)
         => new InvoiceItemRecordMutor(DmoInvoiceItem.CreateNew(invoiceId));

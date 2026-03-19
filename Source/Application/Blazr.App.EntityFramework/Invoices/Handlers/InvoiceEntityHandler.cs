@@ -26,7 +26,7 @@ public sealed class InvoiceEntityHandler : IRequestHandler<InvoiceEntityRequest,
         // Get the Invoice
         var invoiceResult = await dbContext
             .GetRecordFromDatastoreAsync<DvoInvoice>(new RecordQueryRequest<DvoInvoice>(item => item.InvoiceID == request.Id.Value))
-            .BindAsync(DvoInvoice.MapToResult);
+            .BindAsync(item => item.MapToResultT);
 
         // if we failed convert the result to the corrrect return type and exit.  This will pass through the error or exception
         if (invoiceResult.HasNotSucceeded)
@@ -38,7 +38,7 @@ public sealed class InvoiceEntityHandler : IRequestHandler<InvoiceEntityRequest,
                 {
                     FilterExpression = item => item.InvoiceID == request.Id.Value, 
                 })
-            .MapAsync(provider => provider.Items.Select(item => DvoInvoiceItem.Map(item)));
+            .MapAsync(provider => provider.Items.Select(item => item.MapToDmo));
 
         // if we failed convert the result to the corrrect return type and exit.  This will pass through the error or exception
         if (invoiceItemsResult.HasNotSucceeded)

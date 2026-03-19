@@ -4,7 +4,6 @@
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
 using Blazr.App.Core.Invoices;
-using System.Collections.Immutable;
 
 namespace Blazr.App.Core;
 
@@ -20,7 +19,7 @@ public record DeleteInvoiceItemAction
                 // Get the invoice Item
                 .GetInvoiceItem(_invoiceItem.Id)
                 // Create a new list with the item removed
-                .Map(item =>  entity.InvoiceItems.Remove(item))
+                .Map(item => entity.InvoiceItems.Remove(item))
                 // Create and return a new Entity with the new list
                 .Map(items => entity.Mutate(items));
 

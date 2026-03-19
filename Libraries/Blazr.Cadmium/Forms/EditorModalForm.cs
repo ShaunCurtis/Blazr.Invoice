@@ -44,6 +44,7 @@ public abstract class EditorModalForm<TRecord, TRecordMutor, TKey>
     {
         // Check we have a Uid.  If not then we can't proceed so throw an exception
         ArgumentNullException.ThrowIfNull(Uid);
+        ArgumentNullException.ThrowIfNull(ModalDialog);
 
         var result = await this.UIConnector.RecordRequestAsync(this.Uid);
 

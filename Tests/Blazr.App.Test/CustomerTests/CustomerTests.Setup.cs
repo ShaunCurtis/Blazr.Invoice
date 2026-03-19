@@ -52,12 +52,4 @@ public partial class CustomerTests
 
         return provider!;
     }
-
-    private DmoCustomer AsDmoCustomer(DboCustomer customer)
-        => new DmoCustomer
-        {
-            Id = CustomerId.Load(customer.CustomerID),
-            Name = new Title(customer.CustomerName ?? string.Empty)
-        };
-
 }

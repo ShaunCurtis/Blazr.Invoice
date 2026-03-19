@@ -7,20 +7,65 @@ namespace Blazr.App.EntityFramework;
 
 public sealed class InvoiceTestDataProvider
 {
-    public IEnumerable<DboCustomer> Customers => _customers.AsEnumerable();
-    public IEnumerable<DboInvoice> Invoices => _invoices.AsEnumerable();
-    public IEnumerable<DboInvoiceItem> InvoiceItems => _invoiceItems.AsEnumerable();
+    private IEnumerable<DboCustomer> Customers => _customers.AsEnumerable();
+    private IEnumerable<DboInvoice> Invoices => _invoices.AsEnumerable();
+    private IEnumerable<DboInvoiceItem> InvoiceItems => _invoiceItems.AsEnumerable();
 
     private List<DboCustomer> _customers = new List<DboCustomer>();
     private List<DboInvoice> _invoices = new List<DboInvoice>();
     private List<DboInvoiceItem> _invoiceItems = new List<DboInvoiceItem>();
 
-    public InvoiceTestDataProvider()
+    public FkoCustomer GetFkoCustomer(CustomerId id)
+        => this.Customers.First(item => item.CustomerID == id.Value).MapToFko;
+
+    public InvoiceEntity GetTestInvoiceEntity()
     {
-        this.Load();
+        var invoice = this.Invoices.Skip(Random.Shared.Next(_invoices.Count)).First();
+        var customer = this.Customers.First(item => item.CustomerID == invoice.CustomerID).MapToFko;
+        var invoiceItems = this.InvoiceItems.Where(item => item.InvoiceID == invoice.InvoiceID).Select(item => item.MapToDvo.MapToDmo);
+        return InvoiceEntity.Load(new DmoInvoice
+        {
+            Id = InvoiceId.Load(invoice.InvoiceID),
+            Customer = customer,
+            Date = new Date(invoice.Date),
+            TotalAmount = new Money(invoice.TotalAmount),
+        }, invoiceItems);
     }
 
-    private void Load()
+    public DmoCustomer GetTestCustomer()
+        => this.Customers.Skip(Random.Shared.Next(_customers.Count)).First().MapToDmo;
+
+    public InvoiceId GetTestInvoiceId()
+        => InvoiceId.Load(this.Invoices.Skip(Random.Shared.Next(_invoices.Count)).First().InvoiceID);
+
+    public DmoInvoice GetTestInvoice()
+    {
+        var invoice = this.Invoices.Skip(Random.Shared.Next(_invoices.Count)).First();
+        var customer = this.Customers.First(item => item.CustomerID == invoice.CustomerID).MapToFko;
+        return new DmoInvoice
+        {
+            Id = InvoiceId.Load(invoice.InvoiceID),
+            Customer = customer,
+            Date = new Date(invoice.Date),
+            TotalAmount = new Money(invoice.TotalAmount),
+        };
+    }
+
+    public IEnumerable<DmoInvoiceItem> GetInvoiceItems(InvoiceId id)
+        => this.InvoiceItems.Where(item => item.InvoiceID == id.Value).Select(item => item.MapToDvo.MapToDmo);
+
+    internal FkoCustomer AsFkoCustomer(DboCustomer customer)
+        => new FkoCustomer(
+             CustomerId.Load(customer.CustomerID),
+             new(customer.CustomerName)
+        );
+
+    public InvoiceTestDataProvider()
+    {
+        this.Loader();
+    }
+
+    private void Loader()
     {
         _customers = new();
 

@@ -31,7 +31,7 @@ public sealed class InvoiceListHandler : IRequestHandler<InvoiceListRequest, Res
 
         return await dbContext.GetItemsAsync<DvoInvoice>(query)
            .MapAsync((provider) => new ListItemsProvider<DmoInvoice>(
-                        Items: provider.Items.Select(item => DvoInvoice.Map(item)),
+                        Items: provider.Items.Select(item => item.MapToDmo),
                         TotalCount: provider.TotalCount)
             );
 

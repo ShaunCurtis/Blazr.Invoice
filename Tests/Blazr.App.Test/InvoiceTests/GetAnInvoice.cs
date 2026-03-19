@@ -24,15 +24,16 @@ public partial class InvoiceTests
         var mediator = provider.GetRequiredService<IMediatorBroker>()!;
 
         // Get the test item and it's Id from the Test Provider
-        var controlItem = _testDataProvider.Invoices.Skip(Random.Shared.Next(3)).First();
-        var controlRecord = this.AsDmoInvoice(controlItem);
-        var controlId = controlRecord.Id;
-        var _controlInvoiceItems = _testDataProvider.InvoiceItems.Where(item => item.InvoiceID == controlItem.InvoiceID);
-        var controlInvoiceItems = _controlInvoiceItems.Select(item => this.AsDmoInvoiceItem(item)).ToList();
+
+        // Get a test item and it's Id from the Test Provider
+        var controlInvoice = _testDataProvider.GetTestInvoice();
+        var controlId = controlInvoice.Id;
+
+        var controlInvoiceItems = _testDataProvider.GetInvoiceItems(controlId).ToList();
 
         var entityResult = await mediator.DispatchAsync(new InvoiceEntityRequest(controlId));
 
-        var entity = entityResult.Write(InvoiceEntityFactory.Create());
+        var entity = entityResult.Write(InvoiceEntity.Create());
         
         Assert.True(entityResult.HasSucceeded);
         Assert.Equal(controlInvoiceItems.Count, entity.InvoiceItems.Count);

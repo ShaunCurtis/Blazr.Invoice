@@ -37,7 +37,7 @@ public sealed class CustomerListHandler : IRequestHandler<CustomerListRequest, R
 
     private static ListItemsProvider<DmoCustomer> MapToDomainEntitiyListProvider(ListItemsProvider<DvoCustomer> provider)
         => new ListItemsProvider<DmoCustomer>(
-            Items: provider.Items.Select(item => DvoCustomer.MapToDomainEntity(item)),
+            Items: provider.Items.Select(item => item.MapToDmo),
             TotalCount: provider.TotalCount);
 
     private Expression<Func<DvoCustomer, object>> GetSorter(string? field)

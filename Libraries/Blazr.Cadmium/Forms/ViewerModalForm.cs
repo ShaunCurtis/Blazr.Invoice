@@ -16,7 +16,7 @@ namespace Blazr.Cadmium.UI;
 /// </summary>
 /// <typeparam name="TRecord"></typeparam>
 /// <typeparam name="TKey"></typeparam>
-public abstract partial class ViewerModalForm<TRecord, TKey> : ComponentBase, IDisposable
+public abstract class ViewerModalForm<TRecord, TKey> : ComponentBase, IDisposable
     where TRecord : class, new()
     where TKey : notnull, IEntityId
 {
@@ -50,12 +50,12 @@ public abstract partial class ViewerModalForm<TRecord, TKey> : ComponentBase, ID
 
         this.LastResult = result.ToResult();
 
-        this.Item =result
+        this.Item = result
              .Write(failureValue: new TRecord());
     }
 
     protected virtual async void OnRecordChanged(object? sender)
-    { 
+    {
         // Check to see if the changed record is the one we are viewing
         // if so, reload it
         if (sender is TKey key && this.Uid.Equals(key))

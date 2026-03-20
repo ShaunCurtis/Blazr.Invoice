@@ -41,12 +41,10 @@ public partial class InvoiceTests
 
         // Commit the changes to the data store
         var commandResult = await entityMutor.SaveAsync();
-
         Assert.True(commandResult.Success);
 
         // Get the Invoice Entity from the Data Store
         var entityResult = await mediator.DispatchAsync(new InvoiceEntityRequest(Id));
-
         Assert.True(entityResult.HasSucceeded);
 
         // Get the Mutor Entities

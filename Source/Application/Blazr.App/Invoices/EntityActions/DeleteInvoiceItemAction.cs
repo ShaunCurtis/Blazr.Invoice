@@ -19,7 +19,7 @@ public record DeleteInvoiceItemAction
             // Create a new immutable list with the item removed
             .Map(item => entity.InvoiceItems.Remove(item))
             // Create and return a new Entity with the new list
-            .Map(items => entity.Mutate(items));
+            .Map(items => InvoiceEntity.Load(entity.InvoiceRecord, items));
 
     public static DeleteInvoiceItemAction Create(DmoInvoiceItem invoiceItem)
         => new DeleteInvoiceItemAction(invoiceItem);

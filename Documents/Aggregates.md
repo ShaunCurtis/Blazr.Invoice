@@ -27,38 +27,31 @@ Much of the code is written in *Functional Programming style*.  You will see a l
 
 ### Invoice Entity
 
-The `InvoiceEntity` code skeleton:
+The `InvoiceEntity` skeleton:
 
 ```csharp
 public sealed record InvoiceEntity : IEquatable<InvoiceEntity>
 {
     public DmoInvoice InvoiceRecord { get; private init; }
     public ImmutableList<DmoInvoiceItem> InvoiceItems { get; private init; }
+    public bool IsValid { get; };
 
     private InvoiceEntity(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceInvoiceItems);
 
-    public bool IsDirty(InvoiceEntity control);
-    public Result<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id);
-    public InvoiceEntity Mutate(DmoInvoice invoice);
-    public InvoiceEntity Mutate(IEnumerable<DmoInvoiceItem> invoiceItems);
-    public Result<InvoiceEntity> CheckEntityRules();
-    public InvoiceEntity ApplyEntityRules();
     public bool Equals(InvoiceEntity? other);
     public override int GetHashCode();
+
     public static InvoiceEntity Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems);
-    public static Result<InvoiceEntity> TryLoad(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems);
     public static InvoiceEntity Create();
     public static InvoiceEntity Create(DmoInvoice invoice);
 }
 ```
 
-The objects data is immutable: `records` and an `ImmutableList` of `records`.
-
 Most of the code is self explanatory. Notes:
 
+1. It's a immutable object containing immutable data.
 1. The constructor is private.  Object instances must be created using one of the static `Load` or `Create` factory methods.
-2. `TryLoad` applies the entity rules and returns a `FailureResult` if the rule check fails.
-3. The custom `Equals` uses `SequenceEqual` with two ordered collections to test equality.
+1. The custom `Equals` uses `SequenceEqual` with two ordered collections to test equality.
 
 ### Invoice Entity Mutor
 
@@ -88,7 +81,7 @@ public sealed class InvoiceEntityMutor
 }
 ```
 
-Note the complex constructor.  `InvoiceEntityMutor` instances should only be obtained from the DI registered `InvoiceMutorFactory`. 
+It has a complex constructor.  Instances can only be created through the DI registered `InvoiceMutorFactory`. 
 
 ```csharp
 public sealed class InvoiceMutorFactory
@@ -116,20 +109,54 @@ public sealed class InvoiceMutorFactory
 }
 ```
 
-The key mutation method is `Dispatch`.  It's a *Monadic Function* and `Dispatch` is a `Bind` operation. 
+Most of the code is self explanatory. `LoadAsync`, `SaveAsync` and `DeleteAsync` all dispatch their requests through *Mediator*.
+
+The key mutation method is `Dispatch`.  It's a *Monadic Function*: `Dispatch` is a `Bind` operation. 
 
 ```csharp
-public Return Dispatch(Func<InvoiceEntity, Return<InvoiceEntity>> dispatcher)
+public Result Dispatch(Func<InvoiceEntity, Result<InvoiceEntity>> dispatcher)
 {
-    InvoiceEntity = dispatcher.Invoke(InvoiceEntity)
-        .WriteReturn(ret => LastResult = ret)
-        .Write(defaultValue: this.InvoiceEntity);
+    var result = dispatcher.Invoke(InvoiceEntity);
 
-    _messageBus.Publish<InvoiceEntity>(this.InvoiceEntity.InvoiceRecord.Id);
+    result.Match(entity =>
+    {
+        this.InvoiceEntity = entity;
+        _messageBus.Publish<InvoiceEntity>(entity.InvoiceRecord.Id);
+    });
+
+    this.LastResult = result.ToResult();
 
     return this.LastResult;
 }
 ```
+
+### Entity Actions
+
+Entities are updated through Entity Actions.  The `InvoiceEntity` has three actions:
+
+1. `DeleteInvoiceItemAction`
+1. `SaveInvoiceItemAction`
+1. `UpdateInvoiceAction`
+
+Here's the `UpdateInvoiceAction`:
+
+```csharp
+public record UpdateInvoiceAction
+{
+    private readonly DmoInvoice _invoice;
+
+    public UpdateInvoiceAction(DmoInvoice invoice)
+        => _invoice = invoice;
+
+    public Result<InvoiceEntity> ExecuteAction(InvoiceEntity entity)
+        => InvoiceEntity.Load(_invoice, entity.InvoiceItems).ToResult;
+
+    public static UpdateInvoiceAction Create(DmoInvoice invoice)
+            => new UpdateInvoiceAction(invoice);
+}
+```
+
+It contains the data it requires to execute the action.  In this case it's provided with a new invoice it uses to replace the existing invoice in a new `InvoiceEntity` instance.  Ehile it's not a *Pure Function* in the strictest definition, it's a *Pure Object Function*.
 
 ## Usage
 
@@ -159,7 +186,7 @@ Get the entity Mutor for the Invoice Id.
 var entityMutor = await mutorFactory.GetInvoiceEntityMutorAsync(entity.InvoiceRecord.Id);
 ```
 
-This uses the factory to instanciate the `InvoiceEntityMutor` and load the data from the data pipeline asynchronously. 
+This uses the `InvoiceMutorFactory` instance from DI to instanciate the `InvoiceEntityMutor` and load the data from the data pipeline asynchronously. 
 
 ```csharp
 public async Task<InvoiceEntityMutor> GetInvoiceEntityMutorAsync(InvoiceId id)
@@ -169,7 +196,8 @@ public async Task<InvoiceEntityMutor> GetInvoiceEntityMutorAsync(InvoiceId id)
     return mutor;
 }
 ```
-Next we create an `InvoiceItemRecordMutor` from the first item record
+
+Next we create an `InvoiceItemRecordMutor` from the first item record:
 
 ```csharp
 var itemMutor = InvoiceItemRecordMutor.Load(entityMutor.InvoiceEntity.InvoiceItems.First());
@@ -232,6 +260,7 @@ When save the entity by calling `SaveAsync` on the entity mutor:
 
 ```csharp
 var commandResult = await entityMutor.SaveAsync();
+Assert.True(commandResult.Success);
 ```
 
 This dispatches an `InvoiceCommandRequest` to Mediator.
@@ -242,71 +271,21 @@ public async Task<Return> SaveAsync()
         .WriteReturnAsync(ret => this.LastResult = ret);
 ```
 
-Finally we test by getting the entity from the data store and comparing it against the new entity.
+We then get the Invoice Entity from the data store 
 
 ```csharp
 var entityResult = await mediator.DispatchAsync(new InvoiceEntityRequest(Id));
+Assert.True(entityResult.HasSucceeded);
+```
 
-Assert.True(entityResult.HasValue);
+And compare it against the new entity.
 
+```csharp
 // Get the Mutor Entities
 var updatedEntity = entityMutor.InvoiceEntity;
-var dbEntity = entityResult.Value!;
+var dbEntity = entityResult.Write(InvoiceEntity.Create());
 
 // Check the stored data is the same as the edited entity
-Assert.Equivalent(updatedEntity, dbEntity);
+Assert.Equal(updatedEntity, dbEntity);
+Assert.Equal(dbEntity.InvoiceRecord.TotalAmount.Value, dbEntity.InvoiceItems.Sum(item => item.Amount.Value));
 ```
-
-### UpdateInvoiceItemAction in Detail
-
-`UpdateInvoiceItemAction` is a simple record:
-
-```csharp
-using Blazr.App.Core.Invoices;
-namespace Blazr.App.Core;
-public record UpdateInvoiceItemAction
-{
-    private readonly DmoInvoiceItem _invoiceItem;
-
-    public UpdateInvoiceItemAction(DmoInvoiceItem invoiceItem)
-        => _invoiceItem = invoiceItem;
-
-    public Return<InvoiceEntity> Dispatcher(InvoiceEntity entity)
-        => entity.ReplaceInvoiceItem(_invoiceItem);
-
-    public static UpdateInvoiceItemAction Create(DmoInvoiceItem invoiceItem)
-        => (new UpdateInvoiceItemAction(invoiceItem));
-}
-```
-
-The relevant `InvoiceEntity` extension methods:
-
-```csharp
-internal Return<InvoiceEntity> ReplaceInvoiceItem(DmoInvoiceItem record)
-    => @this.GetInvoiceItem(record)
-        .Bind(item => @this.MutateWithEntityRulesApplied(@this.InvoiceItems.Replace(item, record)));
-
-private Return<DmoInvoiceItem> GetInvoiceItem(DmoInvoiceItem item)
-    => @this.GetInvoiceItem(item.Id);
-
-internal Return<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id)
-    => Return<DmoInvoiceItem>.Read(
-        value: @this.InvoiceItems.SingleOrDefault(_item => _item.Id == id),
-        errorMessage: "The record does not exist in the Invoice Items");
-
-private Return<InvoiceEntity> MutateWithEntityRulesApplied(IEnumerable<DmoInvoiceItem> invoiceItems) 
-    => InvoiceEntityFactory.ApplyEntityRules(InvoiceEntity.Read(@this.InvoiceRecord, invoiceItems)).ToReturnT;
-
-```
-
-And Factory methods:
-
-```csharp
-internal static InvoiceEntity ApplyEntityRules(InvoiceEntity entity)
-    => InvoiceEntity.Read(
-        invoice: entity.InvoiceRecord with { TotalAmount = new(entity.InvoiceItems.Sum(item => item.Amount.Value)) },
-        invoiceItems: entity.InvoiceItems);
-```
-
-Note that many of the methods are `Internal` to hide them from the UI projects assemblies.
-

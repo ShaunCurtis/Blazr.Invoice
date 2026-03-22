@@ -28,11 +28,11 @@ public sealed class InvoiceEntityHandler : IRequestHandler<InvoiceEntityRequest,
 
         // if we failed convert the result to the corrrect return type and exit.  This will pass through the error or exception
         if (invoiceResult.HasNotSucceeded)
-            return invoiceResult.Convert(InvoiceEntity.Create());
+            return invoiceResult.Convert(InvoiceEntity.Factory.Create());
 
         // Get the invoice items associated with the invoice
         var invoiceItemsResult = await dbContext
-            .GetItemsAsync(new ListQueryRequest<DvoInvoiceItem>()
+            .GetItemsFromDatastoreAsync(new ListQueryRequest<DvoInvoiceItem>()
             {
                 FilterExpression = item => item.InvoiceID == request.Id.Value,
             })
@@ -40,13 +40,13 @@ public sealed class InvoiceEntityHandler : IRequestHandler<InvoiceEntityRequest,
 
         // if we failed convert the result to the corrrect return type and exit.  This will pass through the error or exception
         if (invoiceItemsResult.HasNotSucceeded)
-            return invoiceResult.Convert(InvoiceEntity.Create());
+            return invoiceResult.Convert(InvoiceEntity.Factory.Create());
 
         // We have all we need now to build and invoice entity
         // We load it bypassing the entity rules.  The Mutor will take care of any updates required.
         var invoice = invoiceResult.Write<DmoInvoice>(DmoInvoice.CreateNew());
         var items = invoiceItemsResult.Write(Enumerable.Empty<DmoInvoiceItem>());
-        var entity = InvoiceEntity.Load(invoice, items);
+        var entity = InvoiceEntity.Factory.Load(invoice, items);
 
         return ResultT.Read(entity);
     }

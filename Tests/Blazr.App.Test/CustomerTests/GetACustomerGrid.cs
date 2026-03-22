@@ -27,6 +27,7 @@ public partial class CustomerTests
         var testCount = _testDataProvider.Customers.Count();
         var testFirstRecord = _testDataProvider.Customers.Skip(startIndex).First();
 
+        //
         var customerListResult = await mediator.DispatchAsync(new CustomerListRequest()
         {
             PageSize = pageSize,
@@ -34,10 +35,9 @@ public partial class CustomerTests
             SortColumn = null,
             SortDescending = false
         });
+        Assert.IsType<SuccessResult<ListItemsProvider<DmoCustomer>>>(customerListResult);
+        var listResult = ((SuccessResult<ListItemsProvider<DmoCustomer>>)customerListResult).Value;
 
-        var listResult = customerListResult.Write(new ListItemsProvider<DmoCustomer>(Enumerable.Empty<DmoCustomer>(), 0));
-
-        Assert.True(customerListResult.HasSucceeded);
         Assert.Equal(testCount, listResult.TotalCount);
         Assert.Equal(pageSize, listResult.Items.Count());
     }

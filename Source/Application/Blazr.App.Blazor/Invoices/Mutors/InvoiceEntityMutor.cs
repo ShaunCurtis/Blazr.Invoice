@@ -58,16 +58,16 @@ public sealed class InvoiceEntityMutor
         _mediator = mediator;
         _messageBus = messageBus;
         //Set some initial values so the mutor is in a valid state until the LoadAsync finishes
-        this.BaseEntity = InvoiceEntity.Create();
+        this.BaseEntity = InvoiceEntity.Factory.Create();
         this.InvoiceEntity = this.BaseEntity;
         this.LoadTask = this.LoadAsync(id);
     }
 
     public RecordState State => (this.IsNew, this.IsDirty) switch
     {
-        (true, _) => RecordState.NewState,
-        (false, false) => RecordState.CleanState,
-        (false, true) => RecordState.DirtyState,
+        (true, _) => RecordState.CreateAsNewState,
+        (false, false) => RecordState.CreateAsCleanState,
+        (false, true) => RecordState.CreateAsDirtyState,
     };
 
     public Result Dispatch(Func<InvoiceEntity, Result<InvoiceEntity>> dispatcher)
@@ -89,7 +89,7 @@ public sealed class InvoiceEntityMutor
     {
         if (id.IsNew)
         {
-            this.Set(InvoiceEntity.Create());
+            this.Set(InvoiceEntity.Factory.Create());
             return;
         }
 
@@ -104,7 +104,7 @@ public sealed class InvoiceEntityMutor
 
     public async Task<Result> SaveAsync()
     {
-        var result = await _mediator.DispatchAsync(new InvoiceEntityCommandRequest(this.InvoiceEntity, RecordState.DirtyState, Guid.NewGuid()));
+        var result = await _mediator.DispatchAsync(new InvoiceEntityCommandRequest(this.InvoiceEntity, RecordState.CreateAsDirtyState, Guid.NewGuid()));
 
         this.LastResult = result.ToResult();
 
@@ -113,7 +113,7 @@ public sealed class InvoiceEntityMutor
 
     public async Task<Result> DeleteAsync()
     {
-        var result = await _mediator.DispatchAsync(new InvoiceEntityCommandRequest(this.InvoiceEntity, RecordState.DeletedState, Guid.NewGuid()));
+        var result = await _mediator.DispatchAsync(new InvoiceEntityCommandRequest(this.InvoiceEntity, RecordState.CreateAsDeletedState, Guid.NewGuid()));
 
         result.Match(success: value => this.BaseEntity = this.InvoiceEntity);
 
@@ -152,7 +152,7 @@ public sealed class InvoiceEntityMutor
 
     private void SetAsNew()
     {
-        this.InvoiceEntity = InvoiceEntity.Create();
+        this.InvoiceEntity = InvoiceEntity.Factory.Create();
         this.BaseEntity = this.InvoiceEntity;
     }
 }

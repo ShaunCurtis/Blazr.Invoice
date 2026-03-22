@@ -63,7 +63,7 @@ public partial class InvoiceTests
 
         Assert.True(entityResult.HasSucceeded);
 
-        return entityResult.Write(InvoiceEntity.Create());
+        return entityResult.Write(InvoiceEntity.Factory.Create());
     }
 
     private async Task<InvoiceEntity> GetASampleDirtyEntityAsync(IMediatorBroker mediator)
@@ -78,6 +78,6 @@ public partial class InvoiceTests
 
         Assert.True(entityResult.HasSucceeded);
 
-        return entityResult.Write(InvoiceEntity.Create());
+        return entityResult.Write(InvoiceEntity.Factory.Create());
     }
 }

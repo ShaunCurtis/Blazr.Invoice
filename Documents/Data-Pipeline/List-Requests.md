@@ -12,7 +12,7 @@ Lists present the greatest challenges in data retrieval.
 
 Why can't you just do:
 
-```
+```csharp
 var list = await dbContext.Set<TRecord>().ToListAsync();
 ```
 
@@ -28,24 +28,27 @@ Consider the following:
 
 Building these requirments into the design, we can define a struct like this for the data pipleine server side backend:
 
-```
-public readonly record struct ListQueryRequest<TRecord>
+```csharp
+public record ListQueryRequest<TRecord>
 {
     public int StartIndex { get; init; }
     public int PageSize { get; init; }
-    public CancellationToken Cancellation { get; init; }
     public Expression<Func<TRecord, bool>>? FilterExpression { get; init; }
     public Expression<Func<TRecord, object>>? SortExpression { get; init; }
     public bool SortDescending { get; init; } = true;
+    public CancellationToken Cancellation { get; init; }
 
     public ListQueryRequest()
     {
         StartIndex = 0;
         PageSize = 1000;
-        Cancellation = new();
         FilterExpression = null;
         SortExpression = null;
+        Cancellation = new();
     }
+    
+    public static ListQueryRequest<TRecord> CreateWithDefaultValues(CancellationToken? cancellationToken = null)
+        => new ListQueryRequest<TRecord>() { Cancellation = cancellationToken ?? new() };
 }
 ```
 
@@ -74,9 +77,17 @@ public record BaseListRequest
 Each request is record specific.  The *Customer* list request looks like this:
 
 ```csharp
-public record CustomerListRequest
-    : BaseListRequest, IRequest<Result<ListResult<DmoCustomer>>>
-{ }
+public record CustomerListRequest : BaseListRequest, IRequest<Result<ListItemsProvider<DmoCustomer>>>
+{
+    public static Result<CustomerListRequest> FromGridState(GridState<DmoCustomer> state)
+        => ResultT.Read<CustomerListRequest>(new CustomerListRequest()
+        {
+            PageSize = state.PageSize,
+            StartIndex = state.StartIndex,
+            SortColumn = state.SortField,
+            SortDescending = state.SortDescending
+        });
+}
 ```
 
 Requests may contain additional information such as filter values.
@@ -103,17 +114,19 @@ public sealed class CustomerListHandler : IRequestHandler<CustomerListRequest, R
     private readonly IDbContextFactory<InMemoryInvoiceTestDbContext> _factory;
 
     public CustomerListHandler(IDbContextFactory<InMemoryInvoiceTestDbContext> factory)
-    {
-        _factory = factory;
-    }
+        => _factory = factory;
 
     public async Task<Result<ListItemsProvider<DmoCustomer>>> HandleAsync(CustomerListRequest request, CancellationToken cancellationToken)
     {
-        var dbContext = _factory.CreateDbContext();
+        using var dbContext = _factory.CreateDbContext();
 
-        IEnumerable<DmoCustomer> forecasts = Enumerable.Empty<DmoCustomer>();
+        return await dbContext
+            .GetItemsFromDatastoreAsync<DvoCustomer>(GetListRequest(request, cancellationToken))
+            .MapAsync(MapToDomainEntitiyListProvider);
+    }
 
-        var query = new ListQueryRequest<DvoCustomer>()
+    private ListQueryRequest<DvoCustomer> GetListRequest(CustomerListRequest request, CancellationToken cancellationToken)
+        => new ListQueryRequest<DvoCustomer>()
         {
             PageSize = request.PageSize,
             StartIndex = request.StartIndex,
@@ -123,21 +136,18 @@ public sealed class CustomerListHandler : IRequestHandler<CustomerListRequest, R
             Cancellation = cancellationToken
         };
 
-        var result = await dbContext.GetItemsAsync<DvoCustomer>(query);
-
-        if (!result.HasSucceeded(out ListItemsProvider<DvoCustomer>? listResult))
-            return result.ConvertFail<ListItemsProvider<DmoCustomer>>();
-
-        var list = listResult.Items.Select(item => item.ToDmo());
-
-        return Result<ListItemsProvider<DmoCustomer>>.Success( new(list, listResult.TotalCount));
-    }
+    private static ListItemsProvider<DmoCustomer> MapToDomainEntitiyListProvider(ListItemsProvider<DvoCustomer> provider)
+        => new ListItemsProvider<DmoCustomer>(
+            Items: provider.Items.Select(item => item.MapToDmo),
+            TotalCount: provider.TotalCount);
 
     private Expression<Func<DvoCustomer, object>> GetSorter(string? field)
         => field switch
         {
-            AppDictionary.Customer.CustomerName => (Item) => Item.CustomerName,
-            _ => (item) => item.CustomerID
+            "Id" => (Item) => Item.CustomerID,
+            "ID" => (Item) => Item.CustomerID,
+            "Name" => (Item) => Item.CustomerName ?? "No Customer Name Set",
+            _ => (item) => item.CustomerID // Default Sort by ID
         };
 
     // No Filter Defined
@@ -160,65 +170,87 @@ This is wrapped in a `Result` object returnd by Mediator that contains the list 
 
 ### CQS DBContext Extensions
 
-The extension methods are defined in a static `public static class CQSEFBroker<TDbContext> where TDbContext : DbContext
-` class.
+`GetItemsFromDatastoreAsync` is an extension method on `DbContext`.
 
-The method builds a `IQueryable` object frtom the request to execute against the `DBContext`.  Once to retrieve the total number of rows and then a second time with the paging applied.
-
-```csharp
-    public static async ValueTask<Result<ListItemsProvider<TRecord>>> GetItemsAsync<TRecord>(TDbContext dbContext, ListQueryRequest<TRecord> request)
-        where TRecord : class
-    {
-        int totalRecordCount;
-
-        // Turn off tracking.  We're only querying, no changes
-        dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-
-        // Get the IQueryable DbSet for TRecord
-        IQueryable<TRecord> query = dbContext.Set<TRecord>();
-
-        // If we have a filter defined, apply the predicate delegate to the IQueryable instance
-        if (request.FilterExpression is not null)
-            query = query.Where(request.FilterExpression).AsQueryable();
-
-        // Get the total record count after applying the filters
-        totalRecordCount = query is IAsyncEnumerable<TRecord>
-            ? await query.CountAsync(request.Cancellation).ConfigureAwait(ConfigureAwaitOptions.None)
-            : query.Count();
-
-        // If we have a sorter, apply the sorter to the IQueryable instance
-        if (request.SortExpression is not null)
-        {
-            query = request.SortDescending
-                ? query.OrderByDescending(request.SortExpression)
-                : query.OrderBy(request.SortExpression);
-        }
-
-        // Apply paging to the filtered and sorted IQueryable
-        if (request.PageSize > 0)
-            query = query
-                .Skip(request.StartIndex)
-                .Take(request.PageSize);
-
-        // Finally materialize the list from the data source
-        var list = query is IAsyncEnumerable<TRecord>
-            ? await query.ToListAsync().ConfigureAwait(ConfigureAwaitOptions.None)
-            : query.ToList();
-
-        return Result<ListItemsProvider<TRecord>>.Success(new(list, totalRecordCount));
-    }
-```
-
-The actual extension method is definedian a `DbContextExtensions` class:
+The method builds a `IQueryable` object from the request to execute against the `DBContext`.  Once to retrieve the total number of rows and then a second time with the paging applied.
 
 ```csharp
-    public static async ValueTask<Result<ListItemsProvider<TRecord>>> GetItemsAsync<TRecord>(this DbContext dbContext, ListQueryRequest<TRecord> request)
+public async Task<Result<ListItemsProvider<TRecord>>> GetItemsFromDatastoreAsync<TRecord>(ListQueryRequest<TRecord> request)
     where TRecord : class
+{
+    int totalRecordCount;
+
+    // Turn off tracking.  We're only querying, no changes
+    dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+    // Get the IQueryable DbSet for TRecord
+    IQueryable<TRecord> query = dbContext.Set<TRecord>();
+
+    // If we have a filter defined, apply the predicate delegate to the IQueryable instance
+    if (request.FilterExpression is not null)
+        query = query.Where(request.FilterExpression).AsQueryable();
+
+    // Get the total record count after applying the filters
+    totalRecordCount = query is IAsyncEnumerable<TRecord>
+        ? await query.CountAsync(request.Cancellation).ConfigureAwait(ConfigureAwaitOptions.None)
+        : query.Count();
+
+    // If we have a sorter, apply the sorter to the IQueryable instance
+    if (request.SortExpression is not null)
     {
-        return await CQSEFBroker<DbContext>.GetItemsAsync(dbContext, request);
+        query = request.SortDescending
+            ? query.OrderByDescending(request.SortExpression)
+            : query.OrderBy(request.SortExpression);
     }
+
+    // Apply paging to the filtered and sorted IQueryable
+    if (request.PageSize > 0)
+        query = query
+            .Skip(request.StartIndex)
+            .Take(request.PageSize);
+
+    // Finally materialize the list from the data source
+    var list = query is IAsyncEnumerable<TRecord>
+        ? await query.ToListAsync().ConfigureAwait(ConfigureAwaitOptions.None)
+        : query.ToList();
+
+    return ResultT.Read(new ListItemsProvider<TRecord>(list, totalRecordCount));
+}
 ```
 
 ## Service Registration
 
-No objects are manually registered.  Everything is handled by through the Mediator implementation.
+No objects are manually registered.  Everything is handled by the Mediator implementation.
+
+## Request in Action
+
+Here's a test that retrieves paged data:
+
+```csharp
+    [Theory]
+    [InlineData(0, 10)]
+    [InlineData(0, 20)]
+    [InlineData(5, 10)]
+    public async Task GetCustomerGrid(int startIndex, int pageSize)
+    {
+        var provider = GetServiceProvider();
+        var mediator = provider.GetRequiredService<IMediatorBroker>()!;
+
+        // Get the total expected count and the first record of the page
+        var testCount = _testDataProvider.Customers.Count();
+        var testFirstRecord = _testDataProvider.Customers.Skip(startIndex).First();
+
+        var customerListResult = await mediator.DispatchAsync(new CustomerListRequest()
+        {
+            PageSize = pageSize,
+            StartIndex = startIndex,
+            SortColumn = null,
+            SortDescending = false
+        });
+        Assert.IsType<SuccessResult<ListItemsProvider<DmoCustomer>>>(customerListResult);
+        var listResult = ((SuccessResult<ListItemsProvider<DmoCustomer>>)customerListResult).Value;
+
+        Assert.Equal(testCount, listResult.TotalCount);
+        Assert.Equal(pageSize, listResult.Items.Count());
+    }
+```

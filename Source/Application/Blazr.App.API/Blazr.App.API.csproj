@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Libraries\Blazr.Diode.EntityFramework\Blazr.Diode.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\..\Libraries\Blazr.Diode\Blazr.Diode.csproj" />
+    <ProjectReference Include="..\Blazr.App\Blazr.App.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-# Factories, Extnesions and Internal
+# Factories, Extensions and Internal
 
 Why do you need them?
 

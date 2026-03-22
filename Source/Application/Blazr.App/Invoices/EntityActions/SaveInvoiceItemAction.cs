@@ -22,12 +22,12 @@ public record SaveInvoiceItemAction
     private static Result<InvoiceEntity> Add(InvoiceEntity entity, DmoInvoiceItem invoiceItem)
         => entity.InvoiceItems.Add(invoiceItem)
         .ToResult
-        .Map(items => InvoiceEntity.Load(entity.InvoiceRecord, items));
+        .Map(items => InvoiceEntity.Mutate(entity.InvoiceRecord, items));
 
     private static Result<InvoiceEntity> Update(InvoiceEntity entity, DmoInvoiceItem invoiceItem)
         => entity.GetInvoiceItem(invoiceItem.Id)
             .Map(item => entity.InvoiceItems.Replace(item, invoiceItem))
-            .Map(items => InvoiceEntity.Load(entity.InvoiceRecord, items));
+            .Map(items => InvoiceEntity.Mutate(entity.InvoiceRecord, items));
 
     public static SaveInvoiceItemAction Create(DmoInvoiceItem invoiceItem)
         => new SaveInvoiceItemAction(invoiceItem);

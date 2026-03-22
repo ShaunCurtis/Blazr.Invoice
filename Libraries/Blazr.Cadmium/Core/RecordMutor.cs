@@ -24,9 +24,9 @@ public abstract class RecordMutor<TRecord>
 
     public RecordState State => (this.IsNew, this.IsDirty) switch
     {
-        (true, _) => RecordState.NewState,
-        (false, false) =>RecordState.CleanState,
-        (false, true) => RecordState.DirtyState,
+        (true, _) => RecordState.CreateAsNewState,
+        (false, false) =>RecordState.CreateAsCleanState,
+        (false, true) => RecordState.CreateAsDirtyState,
     };
 
     protected abstract void SetFields();

@@ -20,19 +20,19 @@ public partial class CustomerTests
         var provider = GetServiceProvider();
         var mediator = provider.GetRequiredService<IMediatorBroker>()!;
 
+        // Create a new customer record.  Note the IsNew flag is set in the record
         var newCustomer = DmoCustomer.NewCustomer() with { Name = new("Alaskan") };
 
-        var customerAddResult = await mediator.DispatchAsync(CustomerCommandRequest.Create(newCustomer, RecordState.NewState));
+        // newCustomer has the isNew flag set in the record so we need to fix that to make a comparison
+        var compareCustomer = newCustomer with { Id = CustomerId.Load(newCustomer.Id.Value) };
 
+        var customerAddResult = await mediator.DispatchAsync(CustomerCommandRequest.Create(newCustomer, RecordState.CreateAsNewState));
         Assert.IsType<SuccessResult<CustomerId>>(customerAddResult);
 
         var customerResult = await mediator.DispatchAsync(new CustomerRecordRequest(newCustomer.Id));
+        Assert.IsType<SuccessResult<DmoCustomer>>(customerResult);
 
         // check it matches the test record
-
-        // NewCustomer has the isNew flag set in the record so we need to fix that to make a compare
-        var customer = newCustomer with { Id = CustomerId.Load(newCustomer.Id.Value) };
-        Assert.True(customerResult.HasSucceeded);
-        Assert.Equivalent(customer, customerResult.Write(DmoCustomer.NewCustomer()));
+        Assert.Equivalent(compareCustomer, ((SuccessResult<DmoCustomer>)customerResult).Value);
     }
 }

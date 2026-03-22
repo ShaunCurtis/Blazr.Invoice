@@ -15,8 +15,15 @@ public static class InvoiceEntityActionExtensions
                 exceptionMessage: $"The record with id {id} does not exist in the Invoice Items");
 
         public InvoiceEntity ApplyEntityRules()
-            => InvoiceEntity.Load(
-                invoice: @this.InvoiceRecord with { TotalAmount = new(@this.InvoiceItems.Sum(item => item.Amount.Value)) },
+            => InvoiceEntity.Factory.Load(
+                invoice: CalculateTotal(@this),
                 invoiceItems: @this.InvoiceItems);
+
+        private DmoInvoice CalculateTotal()
+        {
+          return  @this.InvoiceItems.Any()
+                ? @this.InvoiceRecord with { TotalAmount = new(@this.InvoiceItems.Sum(item => item.Amount.Value)) }
+                : @this.InvoiceRecord with { TotalAmount = Money.Default };
+        }
     }
 }

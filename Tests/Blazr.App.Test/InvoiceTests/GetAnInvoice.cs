@@ -31,10 +31,10 @@ public partial class InvoiceTests
         var controlInvoiceItems = _testDataProvider.GetInvoiceItems(controlId).ToList();
 
         var entityResult = await mediator.DispatchAsync(new InvoiceEntityRequest(controlId));
+        Assert.IsType<SuccessResult<InvoiceEntity>>(entityResult);
 
-        var entity = entityResult.Write(InvoiceEntity.Create());
+        var entity = ((SuccessResult<InvoiceEntity>)entityResult).Value;
 
-        Assert.True(entityResult.HasSucceeded);
         Assert.Equal(controlInvoiceItems.Count, entity.InvoiceItems.Count);
         Assert.Contains(entity.InvoiceItems.First(), controlInvoiceItems);
     }

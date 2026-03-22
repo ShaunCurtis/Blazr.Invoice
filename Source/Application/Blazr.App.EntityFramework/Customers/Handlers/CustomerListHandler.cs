@@ -20,7 +20,7 @@ public sealed class CustomerListHandler : IRequestHandler<CustomerListRequest, R
         using var dbContext = _factory.CreateDbContext();
 
         return await dbContext
-            .GetItemsAsync<DvoCustomer>(GetListRequest(request, cancellationToken))
+            .GetItemsFromDatastoreAsync<DvoCustomer>(GetListRequest(request, cancellationToken))
             .MapAsync(MapToDomainEntitiyListProvider);
     }
 

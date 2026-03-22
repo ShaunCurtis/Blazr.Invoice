@@ -45,11 +45,11 @@ public partial class InvoiceTests
 
         // Get the Invoice Entity from the Data Store
         var entityResult = await mediator.DispatchAsync(new InvoiceEntityRequest(Id));
-        Assert.True(entityResult.HasSucceeded);
+        Assert.IsType<SuccessResult<InvoiceEntity>>(entityResult);
 
         // Get the Mutor Entities
         var updatedEntity = entityMutor.InvoiceEntity;
-        var dbEntity = entityResult.Write(InvoiceEntity.Create());
+        var dbEntity = entityResult.Write(InvoiceEntity.Factory.Create());
 
         // Check the stored data is the same as the edited entity
         Assert.Equal(updatedEntity, dbEntity);

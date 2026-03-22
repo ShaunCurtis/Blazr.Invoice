@@ -29,12 +29,19 @@ public sealed record InvoiceEntity : IEquatable<InvoiceEntity>
     public override int GetHashCode()
         => base.GetHashCode();
 
-    public static InvoiceEntity Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems)
-        => new InvoiceEntity(invoice, invoiceItems);
+    public static InvoiceEntity Mutate(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems)
+        => InvoiceEntity.Factory.Load(invoice, invoiceItems)
+            .ApplyEntityRules();
 
-    public static InvoiceEntity Create() =>
-        new InvoiceEntity(DmoInvoice.CreateNew(), Enumerable.Empty<DmoInvoiceItem>());
+    public static class Factory
+    {
+        public static InvoiceEntity Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems)
+            => new InvoiceEntity(invoice, invoiceItems);
 
-    public static InvoiceEntity Create(DmoInvoice invoice) =>
-        new InvoiceEntity(invoice, Enumerable.Empty<DmoInvoiceItem>());
+        public static InvoiceEntity Create() =>
+            new InvoiceEntity(DmoInvoice.CreateNew(), Enumerable.Empty<DmoInvoiceItem>());
+
+        public static InvoiceEntity Create(DmoInvoice invoice) =>
+            new InvoiceEntity(invoice, Enumerable.Empty<DmoInvoiceItem>());
+    }
 }

@@ -36,7 +36,7 @@ public sealed class InvoiceTestDataProvider
         var invoice = this._invoices.Skip(Random.Shared.Next(_invoices.Count)).First();
         var customer = this._customers.First(item => item.CustomerID == invoice.CustomerID).MapToFko;
         var invoiceItems = this._invoiceItems.Where(item => item.InvoiceID == invoice.InvoiceID).Select(item => item.MapToDvo.MapToDmo);
-        return InvoiceEntity.Load(new DmoInvoice
+        return InvoiceEntity.Factory.Load(new DmoInvoice
         {
             Id = InvoiceId.Load(invoice.InvoiceID),
             Customer = customer,

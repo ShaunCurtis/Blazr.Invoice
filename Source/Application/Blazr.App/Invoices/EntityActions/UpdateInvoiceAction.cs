@@ -13,7 +13,7 @@ public record UpdateInvoiceAction
         => _invoice = invoice;
 
     public Result<InvoiceEntity> ExecuteAction(InvoiceEntity entity)
-        => InvoiceEntity.Load(_invoice, entity.InvoiceItems).ToResult;
+        => InvoiceEntity.Mutate(_invoice, entity.InvoiceItems).ToResult;
 
     public static UpdateInvoiceAction Create(DmoInvoice invoice)
             => new UpdateInvoiceAction(invoice);

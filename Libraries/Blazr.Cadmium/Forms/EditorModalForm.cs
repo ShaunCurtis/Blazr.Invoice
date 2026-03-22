@@ -37,8 +37,8 @@ public abstract class EditorModalForm<TRecord, TRecordMutor, TKey>
     protected bool Loaded;
 
     protected RecordState State => this.Uid.IsNew
-            ? RecordState.NewState
-            : RecordState.CleanState;
+            ? RecordState.CreateAsNewState
+            : RecordState.CreateAsCleanState;
 
     protected async override Task OnInitializedAsync()
     {
@@ -75,7 +75,7 @@ public abstract class EditorModalForm<TRecord, TRecordMutor, TKey>
         if (!await ConfirmAsync())
             return;
 
-        var result = await this.UIConnector.RecordCommandAsync(this.EditMutor.Record, RecordState.DeletedState);
+        var result = await this.UIConnector.RecordCommandAsync(this.EditMutor.Record, RecordState.CreateAsDeletedState);
 
         this.LastResult = result.ToResult();
 

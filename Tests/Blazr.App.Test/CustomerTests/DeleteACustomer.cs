@@ -23,7 +23,7 @@ public partial class CustomerTests
         var controlRecord = _testDataProvider.GetTestCustomer();
         var controlId = controlRecord.Id;
 
-        var customerAddResult = await mediator.DispatchAsync(CustomerCommandRequest.Create(controlRecord, RecordState.DeletedState));
+        var customerAddResult = await mediator.DispatchAsync(CustomerCommandRequest.Create(controlRecord, RecordState.CreateAsDeletedState));
 
         Assert.True(customerAddResult.HasSucceeded);
 

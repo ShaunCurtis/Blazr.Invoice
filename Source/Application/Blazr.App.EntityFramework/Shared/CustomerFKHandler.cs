@@ -21,8 +21,8 @@ public record CustomerFKHandler : IRequestHandler<CustomerFKRequest, Result<IEnu
         using var dbContext = await _factory.CreateDbContextAsync();
 
         return await dbContext
-            .GetItemsAsync<FkCustomer>(ListQueryRequest<FkCustomer>
-                .Create(cancellationToken))
+            .GetItemsFromDatastoreAsync<FkCustomer>(ListQueryRequest<FkCustomer>
+                .CreateWithDefaultValues(cancellationToken))
             .BindAsync(provider => ResultT
                 .Read(provider.Items.Select(item => item.Map)));
     }

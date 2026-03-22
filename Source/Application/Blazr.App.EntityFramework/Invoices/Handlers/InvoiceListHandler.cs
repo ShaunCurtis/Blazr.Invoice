@@ -29,7 +29,7 @@ public sealed class InvoiceListHandler : IRequestHandler<InvoiceListRequest, Res
             Cancellation = cancellationToken
         };
 
-        return await dbContext.GetItemsAsync<DvoInvoice>(query)
+        return await dbContext.GetItemsFromDatastoreAsync<DvoInvoice>(query)
            .MapAsync((provider) => new ListItemsProvider<DmoInvoice>(
                         Items: provider.Items.Select(item => item.MapToDmo),
                         TotalCount: provider.TotalCount)

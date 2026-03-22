@@ -63,5 +63,13 @@ internal static class InvoiceMapExtensions
             Amount = item.Amount,
             Description = item.Description,
         };
+
+        public DmoInvoiceItem MapToDmo => new DmoInvoiceItem
+        {
+            Id = InvoiceItemId.Load(item.InvoiceItemID),
+            InvoiceId = InvoiceId.Load(item.InvoiceID),
+            Amount = new(item.Amount),
+            Description = new(item.Description),
+        };
     }
 }

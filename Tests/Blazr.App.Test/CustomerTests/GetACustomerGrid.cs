@@ -25,8 +25,7 @@ public partial class CustomerTests
 
         // Get the total expected count and the first record of the page
         var testCount = _testDataProvider.Customers.Count();
-        var testFirstItem = _testDataProvider.Customers.Skip(startIndex).First();
-        var testFirstRecord = this.AsDmoCustomer(testFirstItem);
+        var testFirstRecord = _testDataProvider.Customers.Skip(startIndex).First();
 
         var customerListResult = await mediator.DispatchAsync(new CustomerListRequest()
         {

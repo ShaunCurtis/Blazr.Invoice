@@ -75,7 +75,7 @@ public partial class InvoiceTests
 
         Assert.True(entityResult.HasSucceeded);
 
-        var dbEntity = entityResult.Write(InvoiceEntityFactory.Create());
+        var dbEntity = entityResult.Write(InvoiceEntity.Create());
 
         // Check the stored data is tthe same as the edited entity
         Assert.Equal(updatedEntity, dbEntity);

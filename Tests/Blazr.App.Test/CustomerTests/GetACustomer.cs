@@ -21,8 +21,7 @@ public partial class CustomerTests
         var mediator = provider.GetRequiredService<IMediatorBroker>()!;
 
         // Get the test item and it's Id from the Test Provider
-        var controlItem = _testDataProvider.Customers.Skip(Random.Shared.Next(10)).First();
-        var controlRecord = this.AsDmoCustomer(controlItem);
+        var controlRecord = _testDataProvider.GetTestCustomer();
         var controlId = controlRecord.Id;
 
         var customerResult = await mediator.DispatchAsync(new CustomerRecordRequest(controlId));

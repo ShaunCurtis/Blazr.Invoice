@@ -27,7 +27,7 @@ Now consider the downside:
 
 Even though it's extemely basic consider state.  Is `Guid.Empty` a valid state for CustomerId? You need to write defensive code all over the place to constantly check it's validity. 
 
-> Forget restricting the number of data objects is good practice.  It isn't.
+> Forget restricting the number of data objects as good practice.  It's not.  It contributes to poor practices.
 
 ### The New Customer 
 
@@ -172,39 +172,66 @@ public readonly record struct Temperature
 
 In the demo, EF Core is restricted to the *Infrastructure* domain.  The application implements CQS so has different query and command pipelines.
 
-Query objects are *Data View Objects* - *Dvo*s implement a `Map` function which build a `DmoInvoice` object from the *Dvo*.  *Dvo* objects use data types that match the data store objects. 
+Query objects are *Data View Objects* - *Dvo*.  They use data types that match the data store objects. 
 
 ```csharp
-public sealed record DvoCustomer
+internal sealed record DvoCustomer
 {
     [Key] public Guid CustomerID { get; init; } = Guid.Empty;
     public string? CustomerName { get; set; }
-
-    public static DmoCustomer Map(DvoCustomer item)
-        => new()
-        {
-            Id = CustomerId.Load(item.CustomerID),
-            Name = new (item.CustomerName ?? Title.DefaultValue)
-        };
 }
 ```
 
-Command objects are *Database Objects* - *Dbo*.  They implement a static `Map` function to build a `Dbo` from a `Dmo`.
+Command objects are *Database Objects* - *Dbo*.
 
 ```csharp
-public sealed record DboCustomer
+internal sealed record DboCustomer
 {
     [Key] public Guid CustomerID { get; init; } = Guid.Empty;
     public string CustomerName { get; init; } = string.Empty;
+}
+```
 
-    public static DboCustomer Map(DmoCustomer item)
-        => new()
+Mappings are implemented in extension classes:
+
+```csharp
+internal static class CustomerMapExtensions
+{
+    extension(DmoCustomer item)
+    {
+        public DboCustomer MapToDbo => new DboCustomer()
         {
             CustomerID = item.Id.Value,
             CustomerName = item.Name.Value
         };
+    }
+
+    extension(DboCustomer item)
+    {
+        public DmoCustomer MapToDmo => new DmoCustomer()
+        {
+            Id = CustomerId.Load(item.CustomerID),
+            Name = new(item.CustomerName ?? Title.DefaultValue)
+        };
+
+        public FkoCustomer MapToFko => new FkoCustomer(
+            Id: CustomerId.Load(item.CustomerID),
+            Name: new(item.CustomerName ?? Title.DefaultValue)
+        );
+    }
+
+    extension(DvoCustomer item)
+    {
+        public DmoCustomer MapToDmo => new DmoCustomer()
+        {
+            Id = CustomerId.Load(item.CustomerID),
+            Name = new(item.CustomerName ?? Title.DefaultValue)
+        };
+    }
 }
 ```
+
+Note that all the objects are sealed and all the objects and extensions are `internal`.  Restricted to the infrastructure project.
 
 ## The UI
 

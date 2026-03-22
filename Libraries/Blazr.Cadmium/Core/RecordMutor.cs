@@ -10,11 +10,17 @@ namespace Blazr.Cadmium.Core;
 public abstract class RecordMutor<TRecord>
     where TRecord : class
 {
-    public TRecord BaseRecord { get; protected set; } = default!;
+    public TRecord BaseRecord { get; protected set; }
     public bool IsDirty => !this.Record.Equals(BaseRecord);
     public virtual bool IsNew { get; }
     public virtual TRecord Record { get; } = default!;
     public abstract void Reset();
+
+    protected RecordMutor(TRecord record)
+    {
+        this.BaseRecord = record;
+        this.SetFields();
+    }
 
     public RecordState State => (this.IsNew, this.IsDirty) switch
     {
@@ -22,4 +28,6 @@ public abstract class RecordMutor<TRecord>
         (false, false) =>RecordState.CleanState,
         (false, true) => RecordState.DirtyState,
     };
+
+    protected abstract void SetFields();
 }

@@ -2,30 +2,52 @@
 
 > **This set of documentation is in-the-making.  Some are rough-and-ready complete, others are still being written when I get time.**
 
-Blazr.Invoice is a demonstration project showcasing a set of patterns and methodologies you can use to build data centric applications.
+Blazr.Invoice is a demonstration project showcasing a set of patterns and methodologies for building data centric applications.
 
 1. *Functional Core/Imperative I/O*
-1. *Vertically Sliced Minimalist Clean Design* - Three domains: Core, Infratructure and UI.  Vertically sliced, meaning separation of concerns is done by feature, not by technical layer.  Minimalist, meaning the minimum domain projects.
-1. *CQS* - Command/Query separation is applied to the data pipeline.
-1. *Mediator* - The Mediator pattern is used to decouple CQS pipeline from the Core and UI.
-1. *Simple Message Bus* - A simple message bus implementation [Blazr.Gallium] provides event notification.
-1. *Immutability* - Everything is immutable by default.
+1. *Vertically Sliced Minimalist Clean Design*
+1. *CQS*
+1. *Mediator*
+1. *Message Bus* 
+1. *Immutable and Sealed*
+
 
 It's built on two fundimental coding principles:
 
-## Functional Core/Imperative I/O  
+## Functional Core/Imperative I/O
 
-Clean Design boils down to two fundimental layers: 
+The core domain is coding in the functionl style.  An example to illustrate this:
 
-1. The core domain containing the domain models and application logic, and
-2. The I/O layer that deals with Databases, User interaction though a UI, API,  mailing services,...  
+```csharp
+public Result<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id)
+    => ResultT.Read(
+        value: @this.InvoiceItems.SingleOrDefault(_item => _item.Id == id),
+        exceptionMessage: $"The record with id {id} does not exist in the Invoice Items");
+```
 
-The core is built on the Functional Programming paradigm, the I/O on a mixture of Imperative and Functional programming.
+The method encapsulates getting an invoice item from the invoice entity. `Result<T>` is Monad with two states: success and failure.
 
-Functional programming in C# comes down to two core principles:
+## Vertically Sliced Minimalist Clean Design
 
-1. Immutable data
-2. Pure Functions
+Three application domains: Core, Infratructure and UI.  
 
-I'll explore this in the docmentation articles.
+Vertically sliced: separation of concerns is by feature, not by technical layer.  Each domain has *Customer* and *Invoice* primary folders.  There's no dependancies between the two.  The customer object used in the *Invoice* feature is defined in the *Shared* feature folder.  
+
+Minimalist, meaning the minimum domain projects.
+
+## CQS
+
+The Command/Query separation pattern is applied to the data pipeline.
+
+## Mediator
+
+The Mediator pattern is used to decouple CQS pipeline from the Core and UI.
+
+## Simple Message Bus
+
+A simple message bus implementation [Blazr.Gallium] provides event notification.
+
+## Immutable and Sealed
+
+Everything is immutable and sealed by default.
 

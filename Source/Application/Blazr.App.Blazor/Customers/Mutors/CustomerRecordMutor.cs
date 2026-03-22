@@ -11,12 +11,9 @@ public sealed class CustomerRecordMutor : RecordMutor<DmoCustomer>, IRecordMutor
     public override bool IsNew => BaseRecord.Id.IsNew;
 
     private CustomerRecordMutor(DmoCustomer record)
-    {
-        this.BaseRecord = record;
-        this.SetFields();
-    }
+        : base(record) { }
 
-    private void SetFields()
+    protected override void SetFields()
     {
         this.Name = this.BaseRecord.Name.Value;
     }

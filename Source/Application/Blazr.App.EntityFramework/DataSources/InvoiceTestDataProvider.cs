@@ -54,12 +54,6 @@ public sealed class InvoiceTestDataProvider
     public IEnumerable<DmoInvoiceItem> GetInvoiceItems(InvoiceId id)
         => this.InvoiceItems.Where(item => item.InvoiceID == id.Value).Select(item => item.MapToDvo.MapToDmo);
 
-    internal FkoCustomer AsFkoCustomer(DboCustomer customer)
-        => new FkoCustomer(
-             CustomerId.Load(customer.CustomerID),
-             new(customer.CustomerName)
-        );
-
     public InvoiceTestDataProvider()
     {
         this.Loader();

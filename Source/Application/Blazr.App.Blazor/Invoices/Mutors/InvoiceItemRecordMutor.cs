@@ -11,12 +11,9 @@ public sealed class InvoiceItemRecordMutor : RecordMutor<DmoInvoiceItem>, IRecor
     [TrackState] public decimal Amount { get; set; }
 
     private InvoiceItemRecordMutor(DmoInvoiceItem record)
-    {
-        this.BaseRecord = record;
-        this.SetFields();
-    }
+        : base(record) { }
 
-    private void SetFields()
+    protected override void SetFields()
     {
         this.Description = this.BaseRecord.Description.Value;
         this.Amount = this.BaseRecord.Amount.Value;

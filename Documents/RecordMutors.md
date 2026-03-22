@@ -1,10 +1,12 @@
 # Record Mutors
 
-> **Mutor** is my word to describe a set of patterns for implementing the mutaton of immutable objects.
+> A **Record Mutor** is a pattern for implementing mutaton of immutable record objects.
 
-Record Mutors are classes that provide a read/write *view* over an immutable record.  Thw mutor maintains the editable fields as mutable properties, and provides methods to load from and save to the immutable record.  It maintains a copy of the original record and thus provides state information such as `IsDirty` and `IsNew`.  A copy of the current record is obtained from the `Record` property.  Mutors can only be created though two *static* methods: `Load` and `Create`.  Mutors are typically used as the `model` for an edit form.
+Record Mutors are classes with mutable data properties.  A Record Mutor is loaded from it's immutable record and provides a mutated copy of the record as output.  It's stateful: it maintains a copy of the original record and has `IsDirty` and `IsNew` properties.
 
-The mutors in the solution use the `[TrackState]` custom attribute to tell the `EditStateTracker` in the Blazor `EditForm` to track the individual property state..
+The principle use of Record Mutors is as the `model` for edit forms.
+
+Note: The mutors in the solution use the `[TrackState]` custom attribute to tell the `EditStateTracker` in the Blazor `EditForm` to track the individual property state.
 
 ## The Record Mutor
 
@@ -22,24 +24,47 @@ The UI needs access to read/write fields representing the editable data in the r
 
 This is where we use the *Mutor* pattern.  
 
+First an Interface: this is used in boilerplate generic Form classes.
 
-First an abstract base class:
+```csharp
+public interface IRecordMutor<TRecord>
+    where TRecord : class
+{
+    public TRecord BaseRecord { get; }
+    public bool IsDirty { get; }
+    public bool IsNew { get; }
+    public TRecord Record { get; }
+    public void Reset();
+    public RecordState State { get; }
+}
+```
+
+An abstract base class to implement common boilerplate code:
 
 ```csharp
 public abstract class RecordMutor<TRecord>
     where TRecord : class
 {
-    public TRecord BaseRecord { get; protected set; } = default!;
+    public TRecord BaseRecord { get; protected set; }
     public bool IsDirty => !this.Record.Equals(BaseRecord);
-    public bool IsNew { get; protected set; }
+    public virtual bool IsNew { get; }
     public virtual TRecord Record { get; } = default!;
+    public abstract void Reset();
 
-    public EditState State => (this.IsNew, this.IsDirty) switch
+    protected RecordMutor(TRecord record)
     {
-        (true, _) => EditState.New,
-        (false, false) => EditState.Clean,
-        (false, true) => EditState.Dirty,
+        this.BaseRecord = record;
+        this.SetFields();
+    }
+
+    public RecordState State => (this.IsNew, this.IsDirty) switch
+    {
+        (true, _) => RecordState.NewState,
+        (false, false) =>RecordState.CleanState,
+        (false, true) => RecordState.DirtyState,
     };
+
+    protected abstract void SetFields();
 }
 ```
 
@@ -49,14 +74,12 @@ And the Customer record UI mutor:
 public sealed class CustomerRecordMutor : RecordMutor<DmoCustomer>, IRecordMutor<DmoCustomer>
 {
     [TrackState] public string? Name { get; set; }
+    public override bool IsNew => BaseRecord.Id.IsNew;
 
     private CustomerRecordMutor(DmoCustomer record)
-    {
-        this.BaseRecord = record;
-        this.SetFields();
-    }
+        : base(record) { }
 
-    private void SetFields()
+    protected override void SetFields()
     {
         this.Name = this.BaseRecord.Name.Value;
     }
@@ -66,14 +89,14 @@ public sealed class CustomerRecordMutor : RecordMutor<DmoCustomer>, IRecordMutor
         Name = new(this.Name ?? "No Name Set")
     };
 
-    public void Reset()
+    public override void Reset()
         => this.SetFields();
 
     public static CustomerRecordMutor Load(DmoCustomer record)
         => new CustomerRecordMutor(record);
 
-    public static CustomerRecordMutor Create()
-        => new CustomerRecordMutor(DmoCustomer.CreateNew()) { IsNew = true };
+    public static CustomerRecordMutor NewMutor()
+        => new CustomerRecordMutor(DmoCustomer.NewCustomer());
 }
 ```
 
@@ -94,42 +117,41 @@ In Blazor the `CustomerRecordMutor` instance is the `model` for the `EditContext
 We can emulate the UI process in a simple test.  See the inline commentary for details.
 
 ```csharp
-    [Fact]
-    public async Task UpdateACustomer()
-    {
-        // Get a fully stocked DI container
-        var provider = GetServiceProvider();
-        var mediator = provider.GetRequiredService<IMediatorBroker>()!;
+[Fact]
+public async Task UpdateACustomer()
+{
+    // Get a fully stocked DI container
+    var provider = GetServiceProvider();
+    var mediator = provider.GetRequiredService<IMediatorBroker>()!;
 
-        // Get the test item and it's Id from the Test Provider
-        var controlItem = _testDataProvider.Customers.Skip(Random.Shared.Next(2)).First();
-        var controlRecord = this.AsDmoCustomer(controlItem);
-        var controlId = controlRecord.Id;
+    // Get the test item and it's Id from the Test Provider
+    var controlRecord = _testDataProvider.GetTestCustomer();
+    var controlId = controlRecord.Id;
 
-        // Get the record from the data pipeline
-        var customerResult = await mediator.DispatchAsync(new CustomerRecordRequest(controlId));
-        Assert.True(customerResult.HasValue);
+    // Get the record from the data pipeline
+    var customerResult = await mediator.DispatchAsync(new CustomerRecordRequest(controlId));
+    Assert.True(customerResult.HasSucceeded);
 
-        // Load the mutor
-        var mutor = CustomerRecordMutor.Load(customerResult.Value!);
+    // Load the mutor
+    var mutor = CustomerRecordMutor.Load(customerResult.Write(DmoCustomer.NewCustomer()));
 
-        // emulate a UI Edit
-        mutor.Name = $"{mutor.Name} - Update";
+    // emulate a UI Edit
+    mutor.Name = $"{mutor.Name} - Update";
 
-        //emulate the Validation process 
-        var validator = new CustomerRecordMutorValidator();
-        var validateResult = validator.Validate(mutor);
-        var editedRecord = mutor.Record;
-        Assert.True(validateResult.IsValid);
+    //emulate the Validation process 
+    var validator = new CustomerRecordMutorValidator();
+    var validateResult = validator.Validate(mutor);
+    var editedRecord = mutor.Record;
+    Assert.True(validateResult.IsValid);
 
-        // Emulate the save button
-        var customerUpdateResult = await mediator.DispatchAsync(CustomerCommandRequest.Create(mutor.Record, mutor.State));
+    // Emulate the save button
+    var customerUpdateResult = await mediator.DispatchAsync(CustomerCommandRequest.Create(mutor.Record, mutor.State));
 
-        // Get the new record from the data pipeine
-        customerResult = await mediator.DispatchAsync(new CustomerRecordRequest(controlId));
+    // Get the new record from the data pipeine
+    customerResult = await mediator.DispatchAsync(new CustomerRecordRequest(controlId));
 
-        // check it matches the test record
-        Assert.False(customerResult.HasException);
-        Assert.Equivalent(editedRecord, customerResult.Value);
-    }
+    // check it matches the test record
+    Assert.True(customerResult.HasSucceeded);
+    Assert.Equivalent(editedRecord, customerResult.Write(DmoCustomer.NewCustomer()));
+}
 ```

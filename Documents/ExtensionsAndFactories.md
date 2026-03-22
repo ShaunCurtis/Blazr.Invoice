@@ -1,4 +1,4 @@
-# Extensions and Factories
+# Factories, Extnesions and Internal
 
 Why do you need them?
 
@@ -9,7 +9,7 @@ Let's look at the `InvoiceEntity` and `InvoiceEntityMutor` to demonstrate their 
 Creating an `InvoiceEntityMutor` is a two step process:
 
 1. Create the object.
-2. Asynchronously load the `InvoiceEntity` from the data pipeline [and reportand deal with problems].
+2. Asynchronously load the `InvoiceEntity` from the data pipeline [and report and deal with problems].
 
 You can't use `new`.  It's purely synchronous.
 
@@ -18,18 +18,20 @@ Let's look at the `InvoiceEntityMutor` new method:
 ```csharp
     public InvoiceEntityMutor(IMediatorBroker mediator, IMessageBus messageBus, InvoiceId id)
     {
+        // Get some services
         _mediator = mediator;
         _messageBus = messageBus;
-        this.BaseEntity = InvoiceEntityFactory.Create();
+        //Set some initial values so the mutor is in a valid state until the LoadAsync finishes
+        this.BaseEntity = InvoiceEntity.Create();
         this.InvoiceEntity = this.BaseEntity;
+        // Load the Invoice Entity
         this.LoadTask = this.LoadAsync(id);
     }
 ```
 
-It's looks like a *DI* constructor, but how do you provide `id`.
+It's looks like a *DI* constructor, but how do you provide `id`?
 
-The answer is a factory.  Here's the `InvoiceMutorFactory` and the `GetInvoiceEntityMutorAsync` method.
-
+The answer is a factory.  Here's the `InvoiceMutorFactory`.
 
 ```csharp
 public sealed class InvoiceMutorFactory
@@ -37,7 +39,9 @@ public sealed class InvoiceMutorFactory
     private IServiceProvider _serviceProvider;
 
     public InvoiceMutorFactory(IServiceProvider serviceProvider)
-        => _serviceProvider = serviceProvider;
+    {
+        _serviceProvider = serviceProvider;
+    }
 
     public async Task<InvoiceEntityMutor> GetInvoiceEntityMutorAsync(InvoiceId id)
     {
@@ -45,57 +49,56 @@ public sealed class InvoiceMutorFactory
         await mutor.LoadTask;
         return mutor;
     }
-}
-```
 
-It uses the `ActivatorUtilities` utility to create an instance of `InvoiceEntityMutor` within the DI context, and then awaits the `LoadTask`.
-
-## Extensions
-
-Extensions provide a way to add functionity to an existing object.  They also conversely provide a mechanism to provide extra functionality where it's needed, and hide it from where it's not.
-
-Let's look at `InvoiceEntity`.
-
-
-```csharp
-public sealed record InvoiceEntity
-{
-    public DmoInvoice InvoiceRecord { get; private init; }
-    public ImmutableList<DmoInvoiceItem> InvoiceItems { get; private init; }
-
-    private InvoiceEntity(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceInvoiceItems)
+    public async Task<InvoiceEntityMutor> CreateInvoiceEntityMutorAsync()
     {
-        this.InvoiceRecord = invoice;
-        this.InvoiceItems = invoiceInvoiceItems.ToImmutableList();
-    }
-     
-    internal static InvoiceEntity Load(DmoInvoice invoice, IEnumerable<DmoInvoiceItem> invoiceItems) 
-        => new InvoiceEntity(invoice, invoiceItems);
-}
-```
-
-Externally to **Blazr.App, such as from the UI code, it's a very simple object.  You can view it's data.  You can't even create an instancedirectly: the creation process is internal to the *Blazr.App* project/assembly.
-
-However, within *Blazr.App*, the following extension methods are implemented. 
-
-```csharp
-internal static class InvoiceEntityExtensions
-{
-    extension(InvoiceEntity @this)
-    {
-        internal Return<InvoiceEntity> ToReturnT;
-        internal bool IsDirty(InvoiceEntity control);
-        internal Return<InvoiceEntity> AddInvoiceItem(DmoInvoiceItem item);
-        internal Return<InvoiceEntity> DeleteInvoiceItem(DmoInvoiceItem record);
-        internal Return<InvoiceEntity> ReplaceInvoiceItem(DmoInvoiceItem record);
-        internal Return<InvoiceEntity> ReplaceInvoice(DmoInvoice record);
-        internal Return<DmoInvoiceItem> GetInvoiceItem(InvoiceItemId id);
-
-        private Return<DmoInvoiceItem> GetInvoiceItem(DmoInvoiceItem item);
-        private Return<InvoiceEntity> Mutate(DmoInvoice invoice);
-        private Return<InvoiceEntity> Mutate(IEnumerable<DmoInvoiceItem> invoiceItems);
+        var mutor = ActivatorUtilities.CreateInstance<InvoiceEntityMutor>(_serviceProvider, new object[] { InvoiceId.NewId });
+        await mutor.LoadTask;
+        return mutor;
     }
 }
 ```
 
-And used by the aggregate mutuation processes to update the entity mutor.
+This is a *DI* Service.  `GetInvoiceEntityMutorAsync` is the factory method to construct an `InvoiceEntityMutor`.  It uses the `ActivatorUtilities` utility to create an instance of `InvoiceEntityMutor` within the DI context, provides the id as an additional parameter and then awaits the `LoadTask`.
+
+## Extensions and Internal
+
+Extensions provide a mechanism to add extra functionality where it's needed, and hide it from where it's not.
+
+Consider `DboCustomer`.  It's the DTO that maps to the Customer database table record.
+
+It's a DTO so:
+
+1. It has no functionality.  
+1. It's declared `internal` so it's use is confined to the *Infrastructure Domain* project.
+1. It's declared `sealed` because there's no reason for inheritance
+
+```csharp
+internal sealed record DboCustomer : ICommandEntity
+{
+    [Key] public Guid CustomerID { get; init; } = Guid.Empty;
+    public string CustomerName { get; init; } = string.Empty;
+}
+```
+
+However, it's also the most convenient place to hang *mappers* so we can write something like this:
+
+```csharp
+var customers = provider.Items.Select(item => item.MapToDmo)
+```
+
+So we can add an extension method to `DboCustomer` like this:
+
+```csharp
+internal static class CustomerMapExtensions
+{
+    extension(DboCustomer item)
+    {
+        public DmoCustomer MapToDmo => new DmoCustomer()
+        {
+            Id = CustomerId.Load(item.CustomerID),
+            Name = new(item.CustomerName ?? Title.DefaultValue)
+        };
+    }
+}
+```

@@ -5,11 +5,10 @@
 /// ============================================================
 
 using Blazr.App.Core;
-using Blazr.App.Core.Invoices;
 using Blazr.App.Presentation;
 using Blazr.Diode.Mediator;
-using Microsoft.Extensions.DependencyInjection;
 using Blazr.Manganese;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazr.Test;
 

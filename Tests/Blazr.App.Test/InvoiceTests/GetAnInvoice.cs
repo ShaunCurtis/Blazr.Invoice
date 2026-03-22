@@ -5,7 +5,6 @@
 /// ============================================================
 
 using Blazr.App.Core;
-using Blazr.App.Core.Invoices;
 using Blazr.Diode.Mediator;
 using Blazr.Manganese;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +33,7 @@ public partial class InvoiceTests
         var entityResult = await mediator.DispatchAsync(new InvoiceEntityRequest(controlId));
 
         var entity = entityResult.Write(InvoiceEntity.Create());
-        
+
         Assert.True(entityResult.HasSucceeded);
         Assert.Equal(controlInvoiceItems.Count, entity.InvoiceItems.Count);
         Assert.Contains(entity.InvoiceItems.First(), controlInvoiceItems);

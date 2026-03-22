@@ -5,7 +5,6 @@
 /// ============================================================
 
 using Blazr.App.Core;
-using Blazr.App.Core.Invoices;
 using Blazr.App.Presentation;
 using Blazr.Diode.Mediator;
 using Blazr.Manganese;
@@ -53,11 +52,11 @@ public partial class InvoiceTests
 
         Assert.False(entityResult.HasNotSucceeded);
 
-        var dbEntity = entityResult.Write(InvoiceEntityFactory.Create());
+        var dbEntity = entityResult.Write(InvoiceEntity.Create());
 
         // Check the stored data is the same as the edited entity
         Assert.Equivalent(updatedEntity, dbEntity);
 
         Assert.Equal(dbEntity.InvoiceRecord.TotalAmount.Value, dbEntity.InvoiceItems.Sum(item => item.Amount.Value));
-    }
+    }   
 }

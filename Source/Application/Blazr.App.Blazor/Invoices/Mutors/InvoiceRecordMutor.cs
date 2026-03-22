@@ -21,12 +21,9 @@ public sealed class InvoiceRecordMutor : RecordMutor<DmoInvoice>, IRecordMutor<D
     }
 
     private InvoiceRecordMutor(DmoInvoice record)
-    {
-        this.BaseRecord = record;
-        this.SetFields();
-    }
+        : base(record) { }
 
-    private void SetFields()
+    protected override void SetFields()
     {
         this.Date = this.BaseRecord.Date.Value;
         this.CustomerId = this.BaseRecord.Customer.Id.Value;

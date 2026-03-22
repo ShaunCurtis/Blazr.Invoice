@@ -5,7 +5,6 @@
 /// ============================================================
 
 using Blazr.App.Core;
-using Blazr.App.Core.Invoices;
 using Blazr.App.Presentation;
 using Blazr.Diode.Mediator;
 using Blazr.Manganese;
@@ -54,7 +53,7 @@ public partial class InvoiceTests
 
         Assert.True(entityResult.HasSucceeded);
 
-        var dbEntity = entityResult.Write(InvoiceEntityFactory.Create());
+        var dbEntity = entityResult.Write(InvoiceEntity.Create());
 
         // Check the stored data is tthe same as the edited entity
         Assert.Equivalent(updatedEntity, dbEntity);

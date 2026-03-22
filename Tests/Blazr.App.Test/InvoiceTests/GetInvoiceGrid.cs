@@ -5,7 +5,6 @@
 /// ============================================================
 
 using Blazr.App.Core;
-using Blazr.App.Core.Invoices;
 using Blazr.Diode;
 using Blazr.Diode.Mediator;
 using Blazr.Manganese;

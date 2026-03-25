@@ -3,9 +3,7 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Microsoft.AspNetCore.Builder;
-
-namespace Blazr.App.API;
+namespace Blazr.App.Server.API;
 
 public static class AppAPIServices
 {

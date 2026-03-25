@@ -3,8 +3,8 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Blazr.App.API;
 using Blazr.App.EntityFramework;
+using Blazr.App.Server.API;
 using Blazr.App.Wasm.Server;
 
 var builder = WebApplication.CreateBuilder(args);

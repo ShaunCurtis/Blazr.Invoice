@@ -6,10 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="BoolT\**" />
-    <EmbeddedResource Remove="BoolT\**" />
-    <None Remove="BoolT\**" />
-  </ItemGroup>
-
 </Project>

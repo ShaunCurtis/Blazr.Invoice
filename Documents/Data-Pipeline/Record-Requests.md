@@ -1,43 +1,8 @@
 # Item Requests
 
-Generically we can define a request for a single item like this:
+Item requests may seem easy, but how do you know what the entity identity data type is?
 
-```csharp
-ItemResult GetItemAsync(ItemRequest request);
-```
-
-## The CQS Handler
-
-We can define a generic CQS handler like this:
-
-```
-public static async ValueTask<Result<TRecord>> GetRecordAsync<TRecord>(TDbContext dbContext, RecordQueryRequest<TRecord> request)
-    where TRecord : class
-{
-    dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-
-    var record = await dbContext.Set<TRecord>()
-        .FirstOrDefaultAsync(request.FindExpression)
-        .ConfigureAwait(ConfigureAwaitOptions.None);
-
-    if (record is null)
-        return Result<TRecord>.Fail(new RecordQueryException($"No record retrieved with the Key provided"));
-
-    return Result<TRecord>.Success(record);
-}
-```
-
-And attach it to the DBContext as an extension method:
-
-```csharp
-    public static async ValueTask<Result<TRecord>> GetRecordAsync<TRecord>(this DbContext dbContext, RecordQueryRequest<TRecord> request)
-        where TRecord : class
-    {
-        return await CQSEFBroker<DbContext>.GetRecordAsync(dbContext, request);
-    }
-```
-
-The CQS request:
+To abstract that problem away we can define a request as follows:
 
 ```csharp
 public record RecordQueryRequest<TRecord>(
@@ -46,34 +11,115 @@ public record RecordQueryRequest<TRecord>(
 );
 ```
 
+## The CQS Handler
+
+We can define a generic CQS handler extension to `DbContext` like this to handle the provided expression:
+
+```csharp
+extension (DbContext dbContext)
+{
+    public async Task<Result<TRecord>> GetRecordFromDatastoreAsync<TRecord>(RecordQueryRequest<TRecord> request)
+        where TRecord : class
+    {
+        dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+        var record = await dbContext.Set<TRecord>()
+            .FirstOrDefaultAsync(request.FindExpression)
+            .ConfigureAwait(ConfigureAwaitOptions.None);
+
+        if (record is null)
+            return ResultT.Fail<TRecord>($"No record retrieved with the Key provided");
+
+        return ResultT.Read(record);
+    }
+}
+```
+
 ## The Mediator Request
 
-All we need is the record Id.  Here's the Customer Record Request:
+So, how do we code this into the front end?
+
+Here's the Customer Record Request:
 
 ```csharp
-public readonly record struct CustomerRecordRequest(CustomerId Id) : IRequest<Result<DmoCustomer>>;
-```
-
-Which is used by the delegate defined in the CustomerEntityProvider:
-
-```csharp
-public Func<CustomerId,  Task<Result<DmoCustomer>>> RecordRequest
-    => (id) => _mediator.DispatchAsync(new CustomerRecordRequest(id));
-```
-
-And invoked from the generic `ReadUIBroker`:   
-
-```csharp
-private async ValueTask GetRecordItemAsync(TKey id)
+public readonly record struct CustomerRecordRequest(CustomerId Id) 
+    : IRequest<Result<DmoCustomer>>
 {
-    _key = id;
+    public static CustomerRecordRequest Create(CustomerId Id)
+        => new(Id);
+}
+```
 
-    // Call the RecordRequest on the record specific EntityProvider to get the record
-    var result = await _entityProvider.RecordRequest.Invoke(id);
+And then the EntityFramework Mediator Handlertakes the provided Id and creates the query expression.
 
-    LastResult = result;
+```csharp
+public sealed class CustomerRecordHandler : IRequestHandler<CustomerRecordRequest, Result<DmoCustomer>>
+{
+    private IDbContextFactory<InMemoryInvoiceTestDbContext> _factory;
 
-    if (result.HasSucceeded(out TRecord? record))
-        this.Item = record ?? _entityProvider.NewRecord;
+    public CustomerRecordHandler(IDbContextFactory<InMemoryInvoiceTestDbContext> dbContextFactory)
+        => _factory = dbContextFactory;
+
+    public async Task<Result<DmoCustomer>> HandleAsync(CustomerRecordRequest request, CancellationToken cancellationToken)
+    {
+        using var dbContext = _factory.CreateDbContext();
+
+        return await dbContext
+            .GetRecordFromDatastoreAsync<DvoCustomer>(new RecordQueryRequest<DvoCustomer>(item => item.CustomerID == request.Id.Value))
+            .MapAsync(item => item.MapToDmo);
+    }
+}
+```
+
+The Mediator Handler and the CQS handler are all back end.  The UI or front end API passes a `CustomerRecordRequest` to the configured Mediator Handler.
+
+
+In an API context the client handler would look like this:
+
+```csharp
+public sealed class CustomerAPIRecordHandler : IRequestHandler<CustomerRecordRequest, Result<DmoCustomer>>
+{
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public CustomerAPIRecordHandler(IHttpClientFactory httpClientFactory)
+        => _httpClientFactory = httpClientFactory;
+
+    public async Task<Result<DmoCustomer>> HandleAsync(CustomerRecordRequest request, CancellationToken cancellationToken)
+    {
+        using var http = _httpClientFactory.CreateClient(AppDictionary.Common.AppHttpClient);
+
+        var httpResult = await http.PostAsJsonAsync<CustomerRecordRequest>(AppDictionary.Customer.CustomerRecordApiUrl, request, cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.None);
+
+        if (!httpResult.IsSuccessStatusCode)
+            return ResultT.Fail<DmoCustomer>($"The server returned a status code of : {httpResult.StatusCode}");
+
+        var listResult = await httpResult.Content.ReadFromJsonAsync<Result<DmoCustomer>>()
+            .ConfigureAwait(ConfigureAwaitOptions.None);
+
+        return listResult ?? ResultT.Fail<DmoCustomer>($"The result was null");
+    }
+}
+```
+
+And the server-side API endpoint:
+
+```csharp
+public static class CustomerApiEndpoints
+{
+    internal static void AddCustomerApiEndpoints(this WebApplication app)
+    {
+        app.MapPost(AppDictionary.Customer.CustomerRecordApiUrl, GetRecordAsync);
+    }
+
+    internal static async Task<IResult> GetRecordAsync(
+        CustomerRecordRequest request,
+        IMediatorBroker mediator,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.DispatchAsync(request, cancellationToken);
+
+        return Results.Ok(result);
+    }
 }
 ```

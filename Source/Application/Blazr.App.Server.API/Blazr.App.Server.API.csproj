@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\Libraries\Blazr.Cadmium\Blazr.Cadmium.csproj" />
+		<ProjectReference Include="..\..\..\Libraries\Blazr.Diode\Blazr.Diode.csproj" />
+		<ProjectReference Include="..\..\..\Libraries\Blazr.Manganese\Blazr.Manganese.csproj" />
+		<ProjectReference Include="..\Blazr.App\Blazr.App.csproj" />
+	</ItemGroup>
+
+</Project>

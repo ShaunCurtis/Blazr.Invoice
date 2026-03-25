@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Application\Blazr.App.EntityFramework\Blazr.App.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\Application\Blazr.App.Server.API\Blazr.App.Server.API.csproj" />
+    <ProjectReference Include="..\..\Application\Blazr.App\Blazr.App.csproj" />
+    <ProjectReference Include="..\Blazr.App.Wasm.Client\Blazr.App.Wasm.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.5" />
+  </ItemGroup>
+
+</Project>

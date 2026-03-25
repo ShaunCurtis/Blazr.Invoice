@@ -11,9 +11,9 @@ using System.Reflection;
 
 namespace Blazr.App.Infrastructure.Server;
 
-public static class ApplicationServerServices
+public static class AppServices
 {
-    public static void AddAppServices(this IServiceCollection services)
+    public static void AddBlazorServerAppServices(this IServiceCollection services)
     {
         services.AddAppEFServices();
         services.AddAppBlazorServerServices();

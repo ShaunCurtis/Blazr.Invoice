@@ -7,6 +7,7 @@
 using Blazr.App.Core;
 using Blazr.App.EntityFramework;
 using Blazr.App.Infrastructure;
+using Blazr.App.Blazor;
 using Blazr.Cadmium.Presentation;
 using Blazr.Diode.Mediator;
 using Blazr.Gallium;
@@ -30,7 +31,7 @@ public partial class CustomerTests
 
         // Add Blazor Mediator Service
         services.AddMediator(new Assembly[] {
-                typeof(Blazr.App.EntityFramework.AppEFServerServices).Assembly
+                typeof(Blazr.App.EntityFramework.AppEntityFrameworkServices).Assembly
         });
 
         // Add the Gallium Message Bus Server services
@@ -39,8 +40,8 @@ public partial class CustomerTests
         // InMemory Scoped State Store 
         services.AddScoped<ScopedStateProvider>();
 
-        services.AddAppEFServices();
-        services.AddAppBlazorServerServices();
+        services.AddAppEntityFrameworkServices();
+        services.AddAppBlazorServices();
         services.AddLogging(builder => builder.AddDebug());
 
         var provider = services.BuildServiceProvider();

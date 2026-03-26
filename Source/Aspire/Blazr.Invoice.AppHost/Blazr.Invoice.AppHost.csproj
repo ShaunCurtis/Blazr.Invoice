@@ -1,0 +1,16 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>72ffb033-9f05-489a-9f67-19f2786a839f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Deployments\Blazr.App.Server\Blazr.App.Server.csproj" />
+    <ProjectReference Include="..\..\Deployments\Blazr.App.Wasm.Server\Blazr.App.Wasm.Server.csproj" />
+  </ItemGroup>
+
+</Project>

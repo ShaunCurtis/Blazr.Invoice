@@ -12,13 +12,18 @@ public static class AppDictionary
         public const string AppHttpClient = "AppHttpClient";
     }
 
+    public static class Shared
+    {
+        public const string CustomerFkApiUrl = "api/fk/customer";
+    }
+
     public static class Customer
     {
         public const string CustomerId = "Id";
         public const string CustomerID = "CustomerID";
         public const string CustomerName = "Name";
 
-        public const string CustomerListApiUrl = "api/customer/liat";
+        public const string CustomerListApiUrl = "api/customer/list";
         public const string CustomerRecordApiUrl = "api/customer/record";
         public const string CustomerCommandApiUrl = "api/customer/Command";
 

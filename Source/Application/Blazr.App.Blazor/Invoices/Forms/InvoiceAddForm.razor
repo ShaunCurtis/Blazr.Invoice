@@ -94,7 +94,7 @@
         LastResult = result.ToResult();
 
         _customerList = result
-            .Write(Enumerable.Empty<FkoCustomer>())
+            .Write(new List<FkoCustomer>())
             .ToList();
 
         _loading = false;

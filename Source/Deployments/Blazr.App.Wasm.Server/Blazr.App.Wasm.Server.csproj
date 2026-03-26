@@ -11,6 +11,7 @@
     <ProjectReference Include="..\..\Application\Blazr.App.EntityFramework\Blazr.App.EntityFramework.csproj" />
     <ProjectReference Include="..\..\Application\Blazr.App.Server.API\Blazr.App.Server.API.csproj" />
     <ProjectReference Include="..\..\Application\Blazr.App\Blazr.App.csproj" />
+    <ProjectReference Include="..\..\Aspire\Blazr.Invoice.ServiceDefaults\Blazr.Invoice.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Blazr.App.Wasm.Client\Blazr.App.Wasm.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.5" />
   </ItemGroup>

@@ -10,5 +10,6 @@ public static class AppAPIServices
     public static void AddAppAPIEndpoints(this WebApplication app)
     {
         app.AddCustomerApiEndpoints();
+        app.AddFKApiEndpoints();
     }
 }

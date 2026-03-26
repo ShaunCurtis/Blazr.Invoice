@@ -4,24 +4,22 @@
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
 using Blazored.Toast;
-using Blazr.App.EntityFramework;
+using Blazr.App.Blazor;
 using Blazr.Diode.Mediator;
 using Blazr.Gallium;
 using System.Reflection;
 
-namespace Blazr.App.Infrastructure.Server;
+namespace Blazr.App.Wasm.Client;
 
-public static class AppServices
+public static class BlazorWASMAppServices
 {
-    public static void AddBlazorServerAppServices(this IServiceCollection services)
+    public static void AddBlazorWasmAppServices(this IServiceCollection services)
     {
-        services.AddAppEFServices();
-        services.AddAppBlazorServerServices();
+        services.AddAppBlazorServices();
 
         // Add Blazor Mediator Service
-        services.AddMediator(new Assembly[] {
-                typeof(Blazr.App.EntityFramework.AppEFServerServices).Assembly
-        });
+        var assemblies = new Assembly[] { typeof(Blazr.App.API.CustomerAPIListHandler).Assembly };
+        services.AddMediator(assemblies);
 
         // Add the Gallium Message Bus Server services
         services.AddScoped<IMessageBus, MessageBus>();
@@ -33,6 +31,6 @@ public static class AppServices
         services.AddBlazoredToast();
 
         // Add the QuickGrid Entity Framework Adapter
-        services.AddQuickGridEntityFrameworkAdapter();
+        //services.AddQuickGridEntityFrameworkAdapter();
     }
 }

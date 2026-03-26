@@ -39,15 +39,14 @@ else
 
 app.Services.AddInvoiceTestData();
 
-
 app.UseHttpsRedirection();
-
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<Blazr.App.Wasm.Server.Components.App>()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Blazr.App.Wasm.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(Blazr.App.Wasm.Client._Imports).Assembly)
+    .AddAdditionalAssemblies(typeof(Blazr.App.UI.CustomerEditForm).Assembly);
 
 app.Run();

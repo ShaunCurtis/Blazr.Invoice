@@ -7,9 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazr.App.EntityFramework;
 
-public static class AppEFServerServices
+public static class AppEntityFrameworkServices
 {
-    public static void AddAppEFServices(this IServiceCollection services)
+    public static void AddAppEntityFrameworkServices(this IServiceCollection services)
     {
         // Add the InMemory Database
         services.AddDbContextFactory<InMemoryInvoiceTestDbContext>(options

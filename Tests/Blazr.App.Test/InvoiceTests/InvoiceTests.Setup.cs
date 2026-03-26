@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System.Reflection;
 namespace Blazr.Test;
 
+using Blazr.App.Blazor;
 using Blazr.Manganese;
 
 public partial class InvoiceTests
@@ -29,7 +30,7 @@ public partial class InvoiceTests
 
         // Add Blazor Mediator Service
         services.AddMediator(new Assembly[] {
-                typeof(Blazr.App.EntityFramework.AppEFServerServices).Assembly
+                typeof(Blazr.App.EntityFramework.AppEntityFrameworkServices).Assembly
         });
 
         // Add the Gallium Message Bus Server services
@@ -38,8 +39,8 @@ public partial class InvoiceTests
         // InMemory Scoped State Store 
         services.AddScoped<ScopedStateProvider>();
 
-        services.AddAppEFServices();
-        services.AddAppBlazorServerServices();
+        services.AddAppEntityFrameworkServices();
+        services.AddAppBlazorServices();
         services.AddLogging(builder => builder.AddDebug());
 
         var provider = services.BuildServiceProvider();

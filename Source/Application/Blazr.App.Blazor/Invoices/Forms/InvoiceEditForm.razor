@@ -81,7 +81,7 @@
         this.EditContext = new(EditMutor);
 
         _customerList = (await this.FKProvider.GetCustomerFKAsync())
-            .Write(Enumerable.Empty<FkoCustomer>())
+            .Write(new List<FkoCustomer>())
             .ToList();
 
         _loading = false;

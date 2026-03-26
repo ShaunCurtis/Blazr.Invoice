@@ -5,11 +5,11 @@
 using Blazored.Toast;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Blazr.App.EntityFramework;
+namespace Blazr.App.Blazor;
 
 public static partial class AppBlazorServerServices
 {
-    public static void AddAppBlazorServerServices(this IServiceCollection services)
+    public static void AddAppBlazorServices(this IServiceCollection services)
     {
         // Add the Blazored Toast services
         services.AddBlazoredToast();
@@ -18,6 +18,4 @@ public static partial class AppBlazorServerServices
         services.AddCustomerServices();
         services.AddInvoiceServices();
     }
-
-
 }

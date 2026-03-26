@@ -3,10 +3,7 @@
 /// License: Use And Donate
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
-using Blazr.Diode.Mediator;
-using Blazr.Manganese;
-
-namespace Blazr.App.EntityFramework;
+namespace Blazr.App.API;
 
 /// <summary>
 /// Mediator Handler for executing record requests to get a Customer Entity in an API Context
